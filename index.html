@@ -1,4 +1,4 @@
-<!doctype html><html lang="sr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Martinov Design</title><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#333F50"><link rel="icon" href="icons/favicon-64.png"><link rel="apple-touch-icon" href="icons/apple-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Martinov"><style>#login{position:fixed;inset:0;z-index:300;background:#F4F1EC;display:flex;align-items:center;justify-content:center;padding:24px;font-family:"Figtree",system-ui,sans-serif;color:#232B36}
+<!doctype html><html lang="sr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Martinov Design</title><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#333F50"><link rel="icon" href="icons/m-favicon-64.png"><link rel="apple-touch-icon" href="icons/m-apple-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Martinov"><style>#login{position:fixed;inset:0;z-index:300;background:#F4F1EC;display:flex;align-items:center;justify-content:center;padding:24px;font-family:"Figtree",system-ui,sans-serif;color:#232B36}
 @media (prefers-color-scheme: dark){#login{background:#171B21;color:#E7E3DC}}
 #login .lbox{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;max-width:340px}
 #login img{border-radius:18px;box-shadow:0 10px 30px rgba(35,43,54,.18)}
@@ -23,10 +23,12 @@
 .gdb{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}.gdb button{font:600 14px "Figtree",system-ui,sans-serif;border-radius:10px;padding:10px 16px;min-height:42px;cursor:pointer;border:1px solid #E2DCD2;background:#fff;color:#232B36}
 .gdb .gdy{background:#333F50;border-color:#333F50;color:#fff}
 @media (prefers-color-scheme: dark){.gdbox{background:#1F252D;color:#E7E3DC}.gdbox p{color:#9AA2AD}.gdbox .gdn{background:#252C35}.gdb button{background:#1F252D;color:#E7E3DC;border-color:#323A45}}
+.pkey{font:600 14px "IBM Plex Mono",monospace;background:#F4F1EC;border-radius:8px;padding:8px 10px;word-break:break-all;user-select:all}
+@media (prefers-color-scheme: dark){.pkey{background:#252C35}}
 </style><script>window.__MT_PWA=true;
 window.__MT_LIBS={h2c:'lib/html2canvas.min.js',pdf:'lib/jspdf.umd.min.js',pdfjs:'lib/pdf.min.js',pdfjsw:'lib/pdf.worker.min.js',xlsx:'lib/xlsx.full.min.js'};
 (function(){var res;var p=new Promise(function(r){res=r});window.__fbResolve=function(f){res(f)};window.claude={use:function(n){return p.then(function(f){return f(n)})}}})();
-</script></head><body><div id="login" data-s="wait"><div class="lbox"><img src="icons/icon-192.png" alt="" width="76" height="76"><h1>Martinov Design</h1><p id="loginMsg">Učitavam…</p>
+</script></head><body><div id="login" data-s="wait"><div class="lbox"><img src="icons/m-icon-192.png" alt="" width="76" height="76"><h1>Martinov Design</h1><p id="loginMsg">Učitavam…</p>
 <button type="button" class="btn pri" id="loginBtn">Prijavi se Google nalogom</button><button type="button" class="btn" id="loginOut">Odjavi se i probaj drugi nalog</button>
 <small>Pristup imaju samo Manuel i porodica.</small></div></div>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1976,7 +1978,7 @@ function xput(col,id,d){X[col].set(id,d);write(col+'/'+id,{k:'set',d:clone(d)});
 function xpatch(col,id,patch){const cur=X[col].get(id);if(!cur){xput(col,id,patch);return}const n=Object.assign({},cur,patch);X[col].set(id,n);write(col+'/'+id,{k:'patch',d:clone(patch),full:()=>clone(X[col].get(id))});onData()}
 function xdel(col,id){X[col].delete(id);write(col+'/'+id,{k:'del'});onData()}
 let xTimer=null;
-function onXData(col){clearTimeout(xTimer);xTimer=setTimeout(()=>{if(col==='clients'||col==='docs')syncClients();checkProposals()},400);onData()}
+function onXData(col){clearTimeout(xTimer);xTimer=setTimeout(()=>{if(col==='clients'||col==='docs')syncClients();checkProposals();if(typeof podTick==='function')podTick()},400);onData()}
 
 /* ---------- levi meni ---------- */
 function navBtn(label,cur,onClick,iconNode,count,badge){
@@ -3026,6 +3028,8 @@ function appDlg(){
     b.appendChild(fld('Šta je novo',v));
     if(installEv){const i=el('button','btn pri','Instaliraj aplikaciju');i.type='button';i.addEventListener('click',async()=>{const e=installEv;installEv=null;closeDlg();try{e.prompt();await e.userChoice}catch(x){}});b.appendChild(i)}
     else b.appendChild(el('div','note','Instalacija: u Chrome-u ⋮ → „Instaliraj aplikaciju“ (na telefonu „Dodaj na početni ekran“ → Instaliraj). Na iPhone-u: Safari → Podeli → „Dodaj na početni ekran“.'));
+    {const pk=el('div','kcard');pk.appendChild(el('b',null,'Jutarnji podsetnik'));pk.appendChild(el('span','mute','Ključ koji Claude robot koristi da svako jutro pročita otvorene zadatke i kupovinu (samo čitanje).'));
+      const kk=el('code','pkey',podKey||'…');pk.appendChild(kk);const cp=el('button','chip plain','Kopiraj ključ');cp.type='button';cp.disabled=!podKey;cp.addEventListener('click',()=>copyText(podKey,'Ključ kopiran'));pk.appendChild(cp);b.appendChild(fld('Podsetnik',pk))}
     const im=el('button','btn','Prebaci podatke iz Claude aplikacije');im.type='button';im.addEventListener('click',()=>{closeDlg();importDlg()});b.appendChild(fld('Podaci',im,'Učitaj fajl koji si sačuvao u staroj aplikaciji (Martinov Tabele u Claude-u → „Izvoz za novu aplikaciju“).'));
   });
 }
@@ -3047,6 +3051,19 @@ function importDlg(auto){
   });
 }
 (async()=>{try{const u=await window.claude.use('db');if(!u||!window.__mtHasData)return;const h=await window.__mtHasData();if(h===false)setTimeout(()=>importDlg(true),600)}catch(e){}})();
+/* ================= JUTARNJI PODSETNIK: kratak spisak koji Claude robot čita svako jutro =================
+   Spisak (otvoreni zadaci i kupovina) stoji na tajnoj adresi u bazi. Adresu zna samo onaj kome je daš. */
+let podKey=null,podLast='',podT=null;
+function podRnd(){const a=new Uint8Array(20);crypto.getRandomValues(a);return Array.from(a,b=>'abcdefghijkmnpqrstuvwxyz23456789'[b%32]).join('')}
+(async()=>{try{const d=await window.claude.use('db');if(!d)return;const ref=d.doc('app_meta/podsetnik');
+  ref.onSnapshot(s=>{const k=s.exists&&s.data()&&s.data().key;if(k){podKey=k;podTick()}else if(!readonly&&((navigator.onLine&&!s.metadata.fromCache)||window.__MT_TEST)){ref.set({key:podRnd(),at:Date.now()})}},()=>{})}catch(e){}})();
+function podData(){
+  const tasks=[...X.tasks.values()].filter(t=>t&&!t.done).map(t=>{const st=(Array.isArray(t.steps)?t.steps:[]).find(x=>x&&!x.d);return{title:String(t.title||''),due:String(t.due||''),hot:!!t.hot,next:st?String(st.t||''):''}});
+  const shop=[...X.shopping.values()].filter(x=>x&&!x.bought).map(x=>({name:String(x.name||''),qty:x.qty==null?'':x.qty,unit:String(x.unit||''),store:String(x.store||''),hot:!!x.hot,for:String(x.for||'')}));
+  tasks.sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);shop.sort((a,b)=>a.store.localeCompare(b.store,'sr'));return{tasks,shop}}
+function podTick(){clearTimeout(podT);podT=setTimeout(()=>{if(!podKey||!db||readonly||!XL.has('tasks')||!XL.has('shopping'))return;
+  const d=podData();const h=JSON.stringify(d);if(h===podLast)return;podLast=h;
+  db.doc('podsetnik/'+podKey).set({json:h,at:Date.now(),app:'https://manuelmartinov-spec.github.io/martinov-app/'})},1500)}
 
 /* ================= ALATI: filter, sortiranje, grupe, polja ================= */
 function fieldOpts(t,pred){return t.fields.filter(pred||(()=>true)).map(f=>[f.id,TYPES[f.type].i+'  '+f.name])}
@@ -3248,7 +3265,7 @@ render();
   for(const c of ['docs','clients','auto','events','tasks','shopping','settings'])subX(c);
 })();
 })();
-</script><script type="module" src="fb.js?v=1.1.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.1.1"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}
