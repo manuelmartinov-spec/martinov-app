@@ -306,7 +306,7 @@ a.btn{display:inline-block;text-decoration:none;color:var(--fg)}
   <section id="v-clients" hidden>
     <h1>Kupci</h1>
     <p class="sub">Sačuvani kupci se nude dok kucate ime na dokumentu. Svaki kupac dobija svoj folder na Google Drive-u (Martinov Design – Kupci) čim prvi put kliknete „Sačuvaj kupca“ ili „Sačuvaj PDF na Drive“ – tamo možete da ubacite i crteže.</p>
-    <p class="sub"><a id="rootLink" href="#" target="_blank" rel="noopener">Otvori glavni folder „Martinov Design – Kupci“</a></p>
+    <p class="sub"><a id="rootLink" href="#" onclick="if(typeof S!=='undefined'&&S.driveRoot){this.href='https://drive.google.com/drive/folders/'+S.driveRoot}" target="_blank" rel="noopener">Otvori glavni folder „Martinov Design – Kupci“</a></p>
     <div class="tblw"><table class="list"><thead><tr><th>Naziv</th><th>Vrsta</th><th>Adresa</th><th>PIB / MB</th><th>Telefon</th><th>Dokumenata</th><th></th></tr></thead><tbody id="clientsBody"></tbody></table>
     <div class="empty" id="clientsEmpty" hidden>Još nema sačuvanih kupaca. Na dokumentu kliknite <b>Sačuvaj kupca u listu</b>.</div></div>
   </section>
@@ -660,7 +660,7 @@ async function makePdf(){
 /* ---------- Google Drive: folder kupca ---------- */
 let GD='Google Drive';let MCP=null,FILEARGS=false;
 const folderUrl=id=>'https://drive.google.com/drive/folders/'+id;
-const gdErr=e=>({needs_reauth:'Google Drive treba ponovo povezati (claude.ai → Podešavanja → Konektori).',server_not_connected:'Dodajte Google Drive u claude.ai → Podešavanja → Konektori.',not_in_manifest:'Google Drive nije dozvoljen za ovu stranicu – dozvolite ga u meniju stranice.',approval_required:'Potrebno je vaše odobrenje za Google Drive – kliknite ponovo i dozvolite.'}[e?.code]||('Google Drive nije sačuvao fajl ('+(e?.code||'greška')+(e?.message?': '+String(e.message).slice(0,120):'')+').'));
+const gdErr=e=>({needs_reauth:'Google Drive treba ponovo povezati – klikni dugme ponovo.',server_not_connected:'Google Drive nije povezan.',declined:'Google Drive nije povezan – klikni ponovo kad budeš hteo.',drive_api_off:'Google Drive API nije uključen u Firebase projektu – javi Claude-u.',forbidden:'Google Drive nije dozvolio pristup tom folderu.',unavailable:'Nema interneta – PDF nije poslat na Drive.',not_in_manifest:'Google Drive nije dozvoljen za ovu stranicu – dozvolite ga u meniju stranice.',approval_required:'Potrebno je vaše odobrenje za Google Drive – kliknite ponovo i dozvolite.'}[e?.code]||('Google Drive nije sačuvao fajl ('+(e?.code||'greška')+(e?.message?': '+String(e.message).slice(0,120):'')+').'));
 async function gd(tool,input){if(!MCP)throw{code:'server_not_connected'};const r=await MCP.callTool(GD,tool,input,{cache:false});return r.payload||{}}
 async function clientFolder(cl){
   const name=(cl.name||'').trim();if(!name)throw{code:'no_client'};

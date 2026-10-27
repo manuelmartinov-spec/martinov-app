@@ -1,5 +1,5 @@
 /* Martinov aplikacija — rad bez interneta i samo-ažuriranje */
-const V='1.0.0';
+const V='1.1.0';
 const SHELL='mt-shell-'+V, RUN='mt-run-v1';
 const CORE=['./','index.html','fb.js','config.js','manifest.webmanifest','version.json','lib/firebase-app.js','lib/firebase-auth.js','lib/firebase-firestore.js','apps/fakture.html','apps/zadaci.html','apps/troskovi.html','icons/icon-192.png','icons/icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(SHELL).then(c=>c.addAll(CORE.map(u=>new Request(u,{cache:'reload'})))))});

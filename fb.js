@@ -2,7 +2,7 @@
    Daje isti interfejs kao Claude (window.claude.use), pa ostatak aplikacije radi bez izmena. */
 import {initializeApp} from './lib/firebase-app.js';
 import {initializeFirestore,getFirestore,persistentLocalCache,persistentMultipleTabManager,doc,collection,getDoc,getDocFromCache,getDocsFromCache,getDocs,setDoc,updateDoc,deleteDoc,onSnapshot,writeBatch,FieldPath} from './lib/firebase-firestore.js';
-import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from './lib/firebase-auth.js';
+import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut,reauthenticateWithPopup} from './lib/firebase-auth.js';
 import {FIREBASE_CONFIG} from './config.js';
 
 const T=window.__MT_TEST||null;          /* samo za lokalni test */
@@ -120,6 +120,53 @@ window.__mtImport=async(pkg,progress)=>{
 window.__mtHasData=async()=>{try{const c=await getDocsFromCache(collection(fs,'tables'));if(!c.empty)return true}catch(e){}
   if(!navigator.onLine||(T&&!T.online))return null;try{const s=await timeout(getDocs(collection(fs,'tables')),8000);return!s.empty}catch(e){return null}};
 
+/* ---------- Google Drive (Fakture: folder kupca i PDF) ---------- */
+const DRIVE_SCOPE='https://www.googleapis.com/auth/drive';
+let dTok=null,dExp=0,dAsk=null;
+try{const x=JSON.parse(sessionStorage.getItem('mt.dtok')||'null');if(x&&x.e>Date.now()+60000){dTok=x.t;dExp=x.e}}catch(e){}
+if(T&&T.driveToken){dTok=T.driveToken;dExp=Date.now()+3600000}
+function keepTok(t){dTok=t;dExp=Date.now()+55*60000;try{sessionStorage.setItem('mt.dtok',JSON.stringify({t,e:dExp}))}catch(e){}}
+function dropTok(){dTok=null;dExp=0;try{sessionStorage.removeItem('mt.dtok')}catch(e){}}
+async function popupToken(){
+  const u=auth.currentUser;if(!u)throw{code:'needs_reauth',message:'nisi prijavljen'};
+  const p=new GoogleAuthProvider();p.addScope(DRIVE_SCOPE);p.setCustomParameters({login_hint:u.email||''});
+  const r=await reauthenticateWithPopup(u,p);const c=GoogleAuthProvider.credentialFromResult(r);
+  if(!c||!c.accessToken)throw{code:'needs_reauth',message:'Google nije dao dozvolu'};keepTok(c.accessToken);return c.accessToken}
+function driveAsk(){
+  if(dAsk)return dAsk;
+  dAsk=new Promise((res,rej)=>{
+    const w=document.createElement('div');w.className='gdask';
+    w.innerHTML='<div class="gdbox" role="dialog" aria-modal="true" aria-label="Poveži Google Drive"><b>Poveži Google Drive</b><p>Fakture čuvaju PDF i prave folder kupca na tvom Google Drive-u. Za to treba tvoja dozvola, jednom po satu rada.</p><p class="gdn">Otvoriće se Google prozor: izaberi svoj nalog i klikni <b>Dozvoli</b>. Ako piše da aplikacija nije proverena, klikni <b>Napredno</b> → <b>Idi na martinov-app</b> (to je tvoja aplikacija).</p><p class="gdm"></p><div class="gdb"><button type="button" class="gdy">Poveži Google Drive</button><button type="button" class="gdx">Ne sada</button></div></div>';
+    document.body.appendChild(w);const m=w.querySelector('.gdm');
+    const done=(ok,v)=>{w.remove();dAsk=null;ok?res(v):rej(v)};
+    w.querySelector('.gdx').onclick=()=>done(false,{code:'declined'});
+    w.querySelector('.gdy').onclick=async ev=>{const b=ev.currentTarget;b.disabled=true;b.textContent='Čekam Google…';m.textContent='';
+      try{done(true,await popupToken())}catch(e){const c=String((e&&e.code)||'');b.disabled=false;b.textContent='Pokušaj ponovo';
+        m.textContent=/popup-blocked/.test(c)?'Pregledač je blokirao Google prozor. Dozvoli iskačuće prozore za ovu stranicu pa klikni ponovo.':/popup-closed|cancelled/.test(c)?'Google prozor je zatvoren pre kraja.':/user-mismatch/.test(c)?'Izaberi isti nalog kojim si prijavljen u aplikaciju.':'Nije uspelo'+(c?' ('+c.replace('auth/','')+')':'')+'.'}};
+  });return dAsk}
+async function driveToken(){if(dTok&&dExp>Date.now()+30000)return dTok;return driveAsk()}
+async function gfetch(url,opt){
+  const go=async t=>fetch(url,Object.assign({},opt||{},{headers:Object.assign({},(opt&&opt.headers)||{},{Authorization:'Bearer '+t})}));
+  let r;try{r=await go(await driveToken())}catch(e){if(e&&e.code)throw e;throw{code:'unavailable',message:'nema interneta'}}
+  if(r.status===401){dropTok();r=await go(await driveToken())}
+  if(!r.ok){let msg='';try{const j=await r.json();msg=(j.error&&j.error.message)||''}catch(e){}
+    if(r.status===401)dropTok();
+    throw{code:r.status===403&&/has not been used|is disabled|accessNotConfigured/i.test(msg)?'drive_api_off':r.status===403?'forbidden':r.status===404?'not_found':'tool_error',message:msg||('HTTP '+r.status)}}
+  return r.json()}
+function qConv(q){return'('+String(q||'').replace(/\btitle\b/g,'name').replace(/parentId\s*=\s*'([^']+)'/g,"'$1' in parents")+') and trashed = false'}
+const DAPI='https://www.googleapis.com/drive/v3/files',UAPI='https://www.googleapis.com/upload/drive/v3/files';
+const mcpApi={
+  async listTools(){return{servers:[{server:'Google Drive',kind:'connector',tools:['search_files','create_file']}],fileArgs:false}},
+  async callTool(server,tool,input){input=input||{};
+    if(tool==='search_files'){const j=await gfetch(DAPI+'?q='+encodeURIComponent(qConv(input.query))+'&pageSize='+(input.pageSize||20)+'&fields=files(id,name,mimeType,parents)&supportsAllDrives=true&includeItemsFromAllDrives=true');
+      return{payload:{files:(j.files||[]).map(f=>({id:f.id,title:f.name,mimeType:f.mimeType,parentId:(f.parents||[])[0]||''}))}}}
+    if(tool==='create_file'){const meta={name:input.title||'fajl'};if(input.contentMimeType)meta.mimeType=input.contentMimeType;if(input.parentId)meta.parents=[input.parentId];
+      if(!input.base64Content){const j=await gfetch(DAPI+'?fields=id,name&supportsAllDrives=true',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(meta)});return{payload:{id:j.id,title:j.name}}}
+      const bd='mt'+Date.now().toString(36);const body=new Blob(['--'+bd+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+bd+'\r\nContent-Type: '+(input.contentMimeType||'application/octet-stream')+'\r\n\r\n',unb64(input.base64Content),'\r\n--'+bd+'--'],{type:'multipart/related; boundary='+bd});
+      const j=await gfetch(UAPI+'?uploadType=multipart&fields=id,name&supportsAllDrives=true',{method:'POST',body});return{payload:{id:j.id,title:j.name}}}
+    throw{code:'tool_error',message:'Nepoznata radnja: '+tool}}
+};
+
 /* ---------- prijava ---------- */
 const gate=document.getElementById('login');const gmsg=document.getElementById('loginMsg');
 function showGate(state,text){if(!gate)return;gate.hidden=state==='ok';gate.dataset.s=state;if(gmsg)gmsg.textContent=text||''}
@@ -134,7 +181,7 @@ document.getElementById('loginOut')&&document.getElementById('loginOut').addEven
 getRedirectResult(auth).catch(()=>{});
 
 let ready;const readyP=new Promise(r=>{ready=r});
-const API={db:dbApi,user:userApi,assets:assetsApi,downloads:downloadsApi};
+const API={db:dbApi,user:userApi,assets:assetsApi,downloads:downloadsApi,mcp:mcpApi};
 window.__fbUse=n=>readyP.then(()=>API[n]||null);
 if(window.__fbResolve)window.__fbResolve(window.__fbUse);
 

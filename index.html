@@ -16,6 +16,13 @@
 .vlog{display:flex;flex-direction:column;gap:6px;margin-top:4px;max-height:220px;overflow:auto}
 .vlog div{display:flex;flex-direction:column;gap:1px;font-size:13px}.vlog b{font:600 12px "IBM Plex Mono",monospace}
 .pbar{height:8px;border-radius:99px;background:#E2DCD2;overflow:hidden}.pbar i{display:block;height:100%;width:0;background:#333F50;transition:width .2s}
+.gdask{position:fixed;inset:0;z-index:400;background:rgba(20,24,30,.5);display:flex;align-items:center;justify-content:center;padding:20px;font-family:"Figtree",system-ui,sans-serif}
+.gdbox{background:#fff;color:#232B36;border-radius:16px;max-width:420px;width:100%;padding:20px 20px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.gdbox>b{font-size:18px}.gdbox p{margin:0;font-size:14px;line-height:1.5;color:#55606C}.gdbox .gdn{font-size:13px;background:#F4F1EC;border-radius:10px;padding:10px 12px}
+.gdbox .gdm{color:#B0412E;font-weight:600;min-height:0}.gdbox .gdm:empty{display:none}
+.gdb{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}.gdb button{font:600 14px "Figtree",system-ui,sans-serif;border-radius:10px;padding:10px 16px;min-height:42px;cursor:pointer;border:1px solid #E2DCD2;background:#fff;color:#232B36}
+.gdb .gdy{background:#333F50;border-color:#333F50;color:#fff}
+@media (prefers-color-scheme: dark){.gdbox{background:#1F252D;color:#E7E3DC}.gdbox p{color:#9AA2AD}.gdbox .gdn{background:#252C35}.gdb button{background:#1F252D;color:#E7E3DC;border-color:#323A45}}
 </style><script>window.__MT_PWA=true;
 window.__MT_LIBS={h2c:'lib/html2canvas.min.js',pdf:'lib/jspdf.umd.min.js',pdfjs:'lib/pdf.min.js',pdfjsw:'lib/pdf.worker.min.js',xlsx:'lib/xlsx.full.min.js'};
 (function(){var res;var p=new Promise(function(r){res=r});window.__fbResolve=function(f){res(f)};window.claude={use:function(n){return p.then(function(f){return f(n)})}}})();
@@ -3241,7 +3248,7 @@ render();
   for(const c of ['docs','clients','auto','events','tasks','shopping','settings'])subX(c);
 })();
 })();
-</script><script type="module" src="fb.js?v=1.0.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.1.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}
