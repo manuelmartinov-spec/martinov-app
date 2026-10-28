@@ -1,0 +1,1297 @@
+<!doctype html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Martinov PDF</title>
+<style>
+/* Layout: radni sto — gore fajl i izvoz, levo alati, pored sličice stranica, desno podešavanja alata, u sredini list.
+   Boje su iz Martinov Design računa: tamnoplava i peščana. */
+:root{
+  --bg:#eceae6; --surface:#ffffff; --panel:#f7f6f3; --line:#dedad3; --line2:#cfc9bf;
+  --fg:#1f2530; --muted:#6b6f78; --navy:#313c4e; --navy-2:#454f62; --sand:#d3c1a0; --sand-soft:#f1eadc;
+  --hover:#efe9de; --sel:#2563eb; --guide:#e0218a; --danger:#c0392b;
+  --shadow:0 1px 2px rgba(20,24,32,.06),0 4px 14px rgba(20,24,32,.08);
+  --font:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif; --mono:"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15181d; --surface:#1d2128; --panel:#1a1e24; --line:#2b313a; --line2:#39404b; --fg:#e8e6e1; --muted:#9aa0aa;
+  --navy:#c9b38c; --navy-2:#d8c6a3; --sand:#c9b38c; --sand-soft:#2b2720; --hover:#262b33; --sel:#5b8def; color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15181d; --surface:#1d2128; --panel:#1a1e24; --line:#2b313a; --line2:#39404b; --fg:#e8e6e1; --muted:#9aa0aa;
+  --navy:#c9b38c; --navy-2:#d8c6a3; --sand:#c9b38c; --sand-soft:#2b2720; --hover:#262b33; --sel:#5b8def; color-scheme:dark}
+:root{--on-navy:#ffffff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--on-navy:#15181d}}
+:root[data-theme="dark"]{--on-navy:#15181d}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:13.5px/1.4 var(--font);display:flex;flex-direction:column;overflow:hidden}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--sel);outline-offset:1px}
+button:disabled{opacity:.35;cursor:default}
+#top{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:9px;margin-right:10px}
+.logo b{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--navy);color:var(--on-navy);font-size:13px;letter-spacing:.02em}
+.logo span{font-weight:600;font-size:14px}
+.logo small{display:block;color:var(--muted);font-size:11.5px;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 11px;border-radius:8px;color:var(--fg);white-space:nowrap}
+.tb:hover:not(:disabled){background:var(--hover)}
+.tb.icon{width:34px;padding:0;justify-content:center}
+.tb.primary{background:var(--navy);color:var(--on-navy);font-weight:600;padding:0 14px}
+.tb.primary:hover{background:var(--navy-2)}
+.sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+.grow{flex:1}
+.search{display:flex;align-items:center;gap:4px;height:34px;padding:0 6px 0 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);min-width:0}
+.search input{border:0;background:transparent;color:var(--fg);font:inherit;width:170px;outline:none}
+.search .cnt{font:12px var(--mono);color:var(--muted);min-width:44px;text-align:right}
+.zoom{display:flex;align-items:center;gap:2px}
+.zoom span{font:12px var(--mono);min-width:46px;text-align:center;color:var(--muted)}
+.menu{position:relative}
+.dd{position:absolute;right:0;top:40px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px;min-width:270px;z-index:20}
+.dd button{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:8px;text-align:left}
+.dd button:hover{background:var(--hover)}
+.dd button small{display:block;color:var(--muted);font-size:11.5px}
+main{flex:1;display:flex;min-height:0}
+#rail{width:64px;flex:none;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:6px 0;overflow-y:auto;overflow-x:visible}
+#rail .grp{display:flex;flex-direction:column;gap:1px;padding:3px 0;border-bottom:1px solid var(--line);width:100%;align-items:center}
+#rail .grp:last-child{border-bottom:0}
+.tool{width:50px;height:41px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted)}
+.tool small{font-size:9.5px;line-height:1}
+.tool:hover{background:var(--hover);color:var(--fg)}
+.tool.on{background:var(--navy);color:var(--on-navy)}
+#tip{position:fixed;background:var(--fg);color:var(--bg);padding:5px 9px;border-radius:6px;font-size:12px;white-space:nowrap;z-index:70;pointer-events:none}
+#pages{width:178px;flex:none;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:9px 8px 6px 12px;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+#pageOps{display:flex;flex-wrap:wrap;gap:1px;padding:0 6px 8px;border-bottom:1px solid var(--line)}
+#pageOps .tb{height:30px;width:30px}
+#thumbs{flex:1;overflow:auto;padding:10px 8px 20px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.th{cursor:pointer;border-radius:8px;padding:6px;text-align:center;width:146px;border:2px solid transparent}
+.th:hover{background:var(--hover)}
+.th.cur{border-color:var(--navy)}
+.th.picked{background:var(--sand-soft)}
+.th.drop{box-shadow:0 -3px 0 var(--sel)}
+.th .tw{display:flex;align-items:center;justify-content:center;height:150px}
+.th canvas{box-shadow:0 1px 4px rgba(0,0,0,.25);background:#fff;max-width:126px;max-height:150px}
+.th .n{font:11.5px var(--mono);color:var(--muted);margin-top:4px}
+#view{flex:1;overflow:auto;padding:24px;display:flex;flex-direction:column;align-items:center;gap:22px;position:relative}
+.pg{position:relative;flex:none;box-shadow:0 2px 10px rgba(0,0,0,.18);border-radius:2px}
+.pg.cur{box-shadow:0 0 0 2px var(--sand),0 2px 10px rgba(0,0,0,.18)}
+.inner{position:absolute;left:50%;top:50%;background:#fff;transform-origin:center}
+.inner canvas{position:absolute;inset:0;width:100%;height:100%}
+.layer,.flayer{position:absolute;inset:0;overflow:hidden}
+.flayer{pointer-events:none}
+.flayer>*{pointer-events:auto}
+.layer svg.vec{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.an{position:absolute}
+.an.sel{outline:2px dashed var(--sel);outline-offset:2px}
+.an.text{white-space:pre;line-height:1.2;font-family:"DejaVu Sans",Arial,sans-serif;min-width:6px;min-height:1em;outline:none}
+.an.bold{font-weight:bold}
+.an.text[contenteditable=true],.an.note[contenteditable=true]{outline:2px solid var(--sel);cursor:text}
+.an.text[contenteditable=true]{background:rgba(255,255,255,.55)}
+.an.note{background:#fff3a6;border:1px solid #d9c24a;box-shadow:0 2px 6px rgba(0,0,0,.18);padding:4px 6px;white-space:pre-wrap;word-break:break-word;font-family:"DejaVu Sans",Arial,sans-serif;color:#333;overflow:hidden;line-height:1.25}
+.an img{width:100%;height:100%;display:block;pointer-events:none}
+.handle{position:absolute;width:12px;height:12px;background:#fff;border:2px solid var(--sel);border-radius:3px;z-index:4;transform:translate(-50%,-50%)}
+.handle.c{cursor:nwse-resize}.handle.e{cursor:move;border-radius:50%}
+.mover{position:absolute;width:24px;height:24px;border-radius:50%;background:var(--sel);display:flex;align-items:center;justify-content:center;cursor:move;box-shadow:0 1px 4px rgba(0,0,0,.35);z-index:5;user-select:none;touch-action:none}
+.mover svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.guide{position:absolute;pointer-events:none;z-index:4}
+.guide.v{top:0;bottom:0;width:0;border-left:1px dashed var(--guide)}
+.guide.h{left:0;right:0;height:0;border-top:1px dashed var(--guide)}
+.hov{position:absolute;border:1.5px dashed var(--sel);background:rgba(37,99,235,.07);pointer-events:none;border-radius:2px}
+.hit{position:absolute;background:rgba(255,170,0,.35);pointer-events:none;border-radius:2px}
+.hit.cur{background:rgba(255,120,0,.5);box-shadow:0 0 0 2px rgba(255,120,0,.85)}
+.deco{position:absolute;pointer-events:none;color:rgba(0,0,0,.72);font-family:"DejaVu Sans",Arial,sans-serif;white-space:nowrap;line-height:1}
+.cropdim{position:absolute;background:rgba(20,24,32,.45);pointer-events:none}
+.cropbox{position:absolute;border:1.5px dashed #fff;outline:1px dashed #000;pointer-events:none}
+.ff{position:absolute;border:0;background:rgba(37,99,235,.09);outline:1px solid rgba(37,99,235,.35);font-family:"DejaVu Sans",Arial,sans-serif;color:#000;padding:0 2px;margin:0}
+.ff:focus{background:rgba(37,99,235,.16);outline:2px solid var(--sel)}
+.tool-select .an{cursor:move}
+.tool-text .layer,.tool-edit .layer,.tool-note .layer{cursor:text}
+.tool-pen .layer,.tool-hl .layer,.tool-white .layer,.tool-box .layer,.tool-ellipse .layer,.tool-line .layer,.tool-arrow .layer,.tool-measure .layer,.tool-area .layer,.tool-redact .layer,.tool-crop .layer{cursor:crosshair}
+.tool-img .layer,.tool-sign .layer,.tool-stamp .layer{cursor:copy}
+#props{width:272px;flex:none;background:var(--surface);border-left:1px solid var(--line);overflow-y:auto;padding:16px 16px 30px}
+#props h3{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:16px 0 8px;font-weight:600}
+#props .tt{font-size:16px;font-weight:600;margin:0 0 4px;color:var(--fg);text-transform:none;letter-spacing:0}
+#props p{margin:0 0 10px;color:var(--muted);font-size:12.5px}
+.sw{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.sw button{width:24px;height:24px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line2)}
+.sw button.on{box-shadow:0 0 0 2px var(--sel)}
+.sw input[type=color]{width:28px;height:28px;border:0;padding:0;background:none;cursor:pointer}
+.row{display:flex;align-items:center;gap:8px;margin:8px 0}
+.row label{font-size:12.5px;color:var(--muted);min-width:64px}
+.row input[type=range]{flex:1;accent-color:var(--navy);min-width:0}
+.num{width:64px;height:30px;border:1px solid var(--line2);border-radius:7px;background:var(--panel);color:var(--fg);font:12.5px var(--mono);padding:0 6px}
+.inp{width:100%;height:32px;border:1px solid var(--line2);border-radius:7px;background:var(--panel);color:var(--fg);font:inherit;padding:0 9px;min-width:0}
+select.inp{padding:0 6px}
+.chk{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:13px;cursor:pointer}
+.chk input{accent-color:var(--navy);width:16px;height:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);color:var(--fg);font-weight:500}
+.btn:hover{background:var(--hover)}
+.btn.w{width:100%}
+.btn.dark{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
+.btn.red{color:var(--danger)}
+.toggle{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px}
+.toggle button{flex:1;height:28px;border-radius:6px;font-size:12.5px;padding:0 8px}
+.toggle button.on{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.14);font-weight:600}
+.lib{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lib .it{position:relative;border:1px solid var(--line);border-radius:8px;background:#fff;height:62px;display:grid;place-items:center;cursor:pointer;padding:4px}
+.lib .it img{max-width:100%;max-height:52px}
+.lib .it.on{outline:2px solid var(--sel)}
+.lib .it .x{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:12px;line-height:20px;display:none}
+.lib .it:hover .x{display:block}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
+.kbd{font:11.5px var(--mono);border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--muted)}
+details{border-top:1px solid var(--line);margin-top:14px;padding-top:6px}
+summary{cursor:pointer;font-weight:600;padding:6px 0;list-style:none;display:flex;align-items:center;justify-content:space-between}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--muted);font-weight:400;font-size:16px}
+details[open] summary::after{content:"–"}
+#empty{margin:auto;text-align:center;max-width:540px;padding:44px 32px;border:2px dashed var(--line2);border-radius:18px;background:var(--surface)}
+#empty .big{width:64px;height:64px;border-radius:16px;background:var(--sand-soft);display:grid;place-items:center;margin:0 auto 14px;color:var(--navy)}
+#empty .big svg{width:30px;height:30px}
+#empty h2{margin:0 0 6px;font-size:20px}
+#empty p{color:var(--muted);margin:6px 0}
+#empty .feat{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:16px 0 18px}
+#empty .feat span{font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:3px 10px;color:var(--muted)}
+#status{font:12px var(--mono);color:var(--muted);padding:5px 14px;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;white-space:nowrap;overflow:hidden}
+#stR{overflow:hidden;text-overflow:ellipsis}
+#toast{position:fixed;left:50%;bottom:44px;transform:translateX(-50%) translateY(8px);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;z-index:60;box-shadow:var(--shadow);max-width:80vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#modal{position:fixed;inset:0;background:rgba(15,18,24,.45);display:grid;place-items:center;z-index:50}
+#modal .card{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);width:min(640px,94vw);max-height:90vh;overflow:auto;padding:20px 22px}
+#modal h2{margin:0 0 4px;font-size:18px}
+#modal p{color:var(--muted);margin:0 0 12px}
+#modal .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+#pad{width:100%;height:220px;border:1px dashed var(--line2);border-radius:12px;background:#fff;touch-action:none;cursor:crosshair;display:block}
+body.dragging #view{outline:3px dashed var(--sand);outline-offset:-12px}
+#printArea{display:none}
+@media print{
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block}
+  #printArea img{width:100%;page-break-after:always;display:block}
+  html,body{height:auto;overflow:visible;background:#fff}
+}
+@media (max-width:1100px){#props{width:232px}}
+@media (max-width:860px){#pages,#props{display:none}.search input{width:100px}}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+
+/* ===== Martinov aplikacija: dodaci i prikaz na telefonu ===== */
+#bBack,#bCtx,#bShare,#bSrch,#fab,#propsH,#rail .gdone{display:none}
+html.inapp #bBack{display:inline-flex}
+html.hasctx #bCtx{display:inline-flex}
+html.canshare #bShare{display:inline-flex}
+#ctxL{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+#ctxL:empty{display:none}
+.opts{display:grid;gap:2px;margin-top:6px}
+.opts button{display:flex;align-items:center;gap:12px;width:100%;padding:10px 10px;border-radius:10px;text-align:left;color:var(--fg)}
+.opts button:hover{background:var(--hover)}
+.opts button .i{flex:none;width:20px;height:20px}
+.opts button small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+.opts button.old{opacity:.62}
+.ajl{max-height:min(52vh,420px);overflow:auto;margin-top:10px}
+.layer [data-k],.layer .an{touch-action:none}
+body:not(.tool-select) .layer{touch-action:none}
+@media (max-width:760px){
+  html,body{overscroll-behavior:none}
+  #top{flex-wrap:nowrap;gap:2px;padding:6px 6px;overflow-x:auto;scrollbar-width:none}
+  #top::-webkit-scrollbar{display:none}
+  #top .logo{margin-right:2px;min-width:0;flex:1 1 auto;overflow:hidden;gap:6px}
+  #top .logo b,#top .logo span{display:none}
+  #top .logo>div{min-width:0}
+  #top .logo small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;color:var(--fg)}
+  #ctxL{display:none}
+  #top .grow,#top .sep,#bAdd,#bTheme,#bPrint,#bFit,#bZi,#bZo,#zl,#bCtx{display:none!important}
+  html:not(.medit) #bUndo,html:not(.medit) #bRedo{display:none}
+  #bMore,#bShare{font-size:0;gap:0;padding:0 9px}
+  #bShare span{display:none}
+  #bSave{padding:0 11px}
+  #bSrch{display:inline-flex}
+  #top .search{display:none;position:fixed;left:6px;right:6px;top:50px;z-index:30;background:var(--surface);box-shadow:var(--shadow);height:42px}
+  html.srch #top .search{display:flex}
+  #top .search input{width:auto!important;flex:1;font-size:16px}
+  .dd{position:fixed;left:8px;right:8px;top:50px;min-width:0}
+  main{overflow:hidden;position:relative}
+  #view{padding:8px 8px 90px;gap:10px;touch-action:pan-x pan-y}
+  html.medit #view{padding-bottom:calc(var(--railH,66px) + 120px)}
+  #status{display:none}
+  #rail{display:none}
+  html.medit #rail{display:flex;position:fixed;left:0;right:0;bottom:0;width:auto;flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:0;border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));z-index:25;align-items:stretch;scrollbar-width:none}
+  html.medit #rail::-webkit-scrollbar{display:none}
+  html.medit #rail .grp{flex-direction:row;width:auto;border-bottom:0;border-right:1px solid var(--line);padding:0 3px;flex:none}
+  html.medit #rail .grp:last-child{border-right:0}
+  html.medit #rail .tool{width:54px;height:48px}
+  #props{display:none}
+  html.medit #props{display:block;position:fixed;left:0;right:0;bottom:var(--railH,66px);width:auto;max-height:42vh;border-left:0;border-top:1px solid var(--line);z-index:24;padding:0 16px 14px;box-shadow:0 -6px 18px rgba(0,0,0,.12);border-radius:14px 14px 0 0;overflow-y:auto}
+  html.medit:not(.pOpen) #props{max-height:30px;overflow:hidden}
+  #propsH{display:block;position:sticky;top:0;width:calc(100% + 32px);margin:0 -16px 2px;height:30px;background:var(--surface);z-index:2}
+  #propsH i{display:block;width:44px;height:5px;border-radius:3px;background:var(--line2);margin:0 auto}
+  #fab{display:flex;position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:26;width:54px;height:54px;border-radius:50%;background:var(--navy);color:var(--on-navy);align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.28)}
+  #fab .i{width:24px;height:24px}
+  html.medit #fab{display:none}
+  html.medit #rail .gdone{display:flex;position:sticky;left:-4px;z-index:2;background:var(--surface);margin-left:-4px;padding-left:4px}
+  html.medit #rail .gdone .tool{color:var(--on-navy);background:var(--navy);border-radius:12px}
+  body:not(:has(.pg)) #fab{display:none}
+  #modal{align-items:end}
+  #modal .card{width:100vw;max-width:none;border-radius:16px 16px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom,0px));max-height:86vh}
+  #toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .acts .btn{height:40px}
+}
+@media (min-width:761px) and (max-width:1500px){
+  #bOpen,#bAdd,#bPrint,#bMore,#bShare{font-size:0;gap:0;padding:0 9px}
+  #top .search input{width:150px}
+}
+</style>
+</head>
+<body class="tool-select">
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-open" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-addfile" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
+    <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+    <symbol id="i-select" viewBox="0 0 24 24"><path d="m5 3 14 8-6 1.5L10 19z"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M5 4h14a1 1 0 0 1 1 1v10l-5 5H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M15 20v-5h5M8 9h8M8 13h5"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M3 21c3-1 5-3 7-6l7.5-7.5a2.1 2.1 0 0 0-3-3L7 12c-3 2-5 4-6 7"/></symbol>
+    <symbol id="i-hl" viewBox="0 0 24 24"><path d="m9 11-6 6v3h6l3-3"/><path d="m22 6-4-4-9 9 4 4z"/></symbol>
+    <symbol id="i-line" viewBox="0 0 24 24"><path d="M5 19 19 5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5M10 5h9v9"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1.5"/></symbol>
+    <symbol id="i-ellipse" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9" ry="7"/></symbol>
+    <symbol id="i-white" viewBox="0 0 24 24"><path d="M19 20H8.5l-4.2-4.3a1.5 1.5 0 0 1 0-2.1L13.6 4.3a1.5 1.5 0 0 1 2.1 0l4 4a1.5 1.5 0 0 1 0 2.1L11 19"/><path d="m9 9 6 6"/></symbol>
+    <symbol id="i-redact" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="1" fill="currentColor"/><path d="M3 5h12M3 19h15"/></symbol>
+    <symbol id="i-sign" viewBox="0 0 24 24"><path d="M3 17c3 0 4-8 6-8s0 8 3 8 3-4 5-4 2 3 4 3"/><path d="M3 21h18"/></symbol>
+    <symbol id="i-stamp" viewBox="0 0 24 24"><path d="M9 3h6l-1 7h3a2 2 0 0 1 2 2v3H5v-3a2 2 0 0 1 2-2h3z"/><path d="M5 19h14"/></symbol>
+    <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/></symbol>
+    <symbol id="i-area" viewBox="0 0 24 24"><path d="M4 18 7 5l10 3 3 9z"/></symbol>
+    <symbol id="i-crop" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></symbol>
+    <symbol id="i-rotl" viewBox="0 0 24 24"><path d="M3 4v6h6"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L3 10"/></symbol>
+    <symbol id="i-rotr" viewBox="0 0 24 24"><path d="M21 4v6h-6"/><path d="M20.5 15a9 9 0 1 1-2.1-9.4L21 10"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></symbol>
+    <symbol id="i-page" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+    <symbol id="i-split" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M12 3v18"/></symbol>
+    <symbol id="i-photo" viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h2l2-2h4l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="i-zip" viewBox="0 0 24 24"><path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M12 3v8M9 8l3 3 3-3M8 16h8"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+    <symbol id="i-bold" viewBox="0 0 24 24"><path d="M7 4h6a4 4 0 0 1 0 8H7zM7 12h7a4 4 0 0 1 0 8H7z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-move" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+  </defs>
+</svg>
+
+<header id="top">
+  <div class="logo"><b>MD</b><div><span>Martinov PDF</span><small id="fname">Nijedan fajl nije otvoren</small></div></div>
+  <button class="tb" id="bOpen" title="Otvori PDF ili slike (Ctrl+O)"><svg class="i"><use href="#i-open"/></svg>Otvori</button>
+  <button class="tb" id="bAdd" title="Dodaj PDF ili slike na kraj – spajanje"><svg class="i"><use href="#i-addfile"/></svg>Dodaj</button>
+  <div class="sep"></div>
+  <button class="tb icon" id="bUndo" title="Poništi (Ctrl+Z)"><svg class="i"><use href="#i-undo"/></svg></button>
+  <button class="tb icon" id="bRedo" title="Vrati (Ctrl+Y)"><svg class="i"><use href="#i-redo"/></svg></button>
+  <div class="sep"></div>
+  <div class="search"><svg class="i" style="color:var(--muted)"><use href="#i-search"/></svg><input id="q" placeholder="Pretraži tekst (Ctrl+F)" autocomplete="off"><span class="cnt" id="qc"></span>
+    <button class="tb icon" id="qPrev" title="Prethodni (Shift+Enter)" style="height:26px;width:26px"><svg class="i"><use href="#i-up"/></svg></button>
+    <button class="tb icon" id="qNext" title="Sledeći (Enter)" style="height:26px;width:26px"><svg class="i"><use href="#i-down"/></svg></button></div>
+  <div class="grow"></div>
+  <div class="zoom">
+    <button class="tb icon" id="bZo" title="Umanji (Ctrl –)"><svg class="i"><use href="#i-minus"/></svg></button><span id="zl">100%</span>
+    <button class="tb icon" id="bZi" title="Uvećaj (Ctrl +)"><svg class="i"><use href="#i-plus"/></svg></button>
+    <button class="tb icon" id="bFit" title="Po širini"><svg class="i"><use href="#i-fit"/></svg></button>
+  </div>
+  <div class="sep"></div>
+  <button class="tb icon" id="bTheme" title="Svetla / tamna tema"><svg class="i"><use href="#i-moon"/></svg></button>
+  <button class="tb" id="bPrint" title="Štampaj (Ctrl+P)"><svg class="i"><use href="#i-print"/></svg>Štampaj</button>
+  <div class="menu">
+    <button class="tb" id="bMore" title="Izvoz"><svg class="i"><use href="#i-more"/></svg>Izvoz</button>
+    <div class="dd" id="dd" hidden>
+      <button data-act="savesel"><svg class="i"><use href="#i-page"/></svg><span>Sačuvaj označene stranice<small>Samo stranice označene u koloni Stranice</small></span></button>
+      <button data-act="split"><svg class="i"><use href="#i-split"/></svg><span>Podeli PDF<small>Svaka stranica posebno ili po opsezima</small></span></button>
+      <button data-act="images"><svg class="i"><use href="#i-photo"/></svg><span>Sačuvaj kao slike<small>PNG ili JPG – za Viber i sajt</small></span></button>
+      <button data-act="compress"><svg class="i"><use href="#i-zip"/></svg><span>Smanji veličinu<small>Manji fajl za slanje mejlom</small></span></button>
+    </div>
+  </div>
+  <button class="tb primary" id="bSave" title="Sačuvaj PDF (Ctrl+S)"><svg class="i"><use href="#i-save"/></svg>Sačuvaj</button>
+</header>
+
+<main>
+  <nav id="rail">
+    <div class="grp">
+      <button class="tool on" data-tool="select" data-tip="Izaberi i pomeri · V"><svg class="i"><use href="#i-select"/></svg><small>Izaberi</small></button>
+      <button class="tool" data-tool="edit" data-tip="Izmeni postojeći tekst · E"><svg class="i"><use href="#i-edit"/></svg><small>Izmeni</small></button>
+      <button class="tool" data-tool="text" data-tip="Dodaj tekst · T"><svg class="i"><use href="#i-text"/></svg><small>Tekst</small></button>
+      <button class="tool" data-tool="note" data-tip="Žuta beleška · K"><svg class="i"><use href="#i-note"/></svg><small>Beleška</small></button>
+    </div>
+    <div class="grp">
+      <button class="tool" data-tool="pen" data-tip="Olovka · P"><svg class="i"><use href="#i-pen"/></svg><small>Olovka</small></button>
+      <button class="tool" data-tool="hl" data-tip="Marker · H"><svg class="i"><use href="#i-hl"/></svg><small>Marker</small></button>
+      <button class="tool" data-tool="line" data-tip="Linija · L"><svg class="i"><use href="#i-line"/></svg><small>Linija</small></button>
+      <button class="tool" data-tool="arrow" data-tip="Strelica · A"><svg class="i"><use href="#i-arrow"/></svg><small>Strelica</small></button>
+      <button class="tool" data-tool="box" data-tip="Pravougaonik · R"><svg class="i"><use href="#i-box"/></svg><small>Okvir</small></button>
+      <button class="tool" data-tool="ellipse" data-tip="Krug / elipsa · O"><svg class="i"><use href="#i-ellipse"/></svg><small>Krug</small></button>
+    </div>
+    <div class="grp">
+      <button class="tool" data-tool="sign" data-tip="Potpis · S"><svg class="i"><use href="#i-sign"/></svg><small>Potpis</small></button>
+      <button class="tool" data-tool="stamp" data-tip="Pečat – PLAĆENO, AVANS… · G"><svg class="i"><use href="#i-stamp"/></svg><small>Pečat</small></button>
+      <button class="tool" data-tool="img" data-tip="Slika ili logo · I"><svg class="i"><use href="#i-img"/></svg><small>Slika</small></button>
+    </div>
+    <div class="grp">
+      <button class="tool" data-tool="white" data-tip="Pokrij belim · W"><svg class="i"><use href="#i-white"/></svg><small>Pokrij</small></button>
+      <button class="tool" data-tool="redact" data-tip="Trajno ukloni podatke · X"><svg class="i"><use href="#i-redact"/></svg><small>Ukloni</small></button>
+      <button class="tool" data-tool="crop" data-tip="Iseci stranicu · C"><svg class="i"><use href="#i-crop"/></svg><small>Iseci</small></button>
+    </div>
+    <div class="grp">
+      <button class="tool" data-tool="measure" data-tip="Meri dužinu · M"><svg class="i"><use href="#i-ruler"/></svg><small>Dužina</small></button>
+      <button class="tool" data-tool="area" data-tip="Meri površinu · U"><svg class="i"><use href="#i-area"/></svg><small>Površina</small></button>
+    </div>
+  </nav>
+  <aside id="pages">
+    <div class="ph"><span>Stranice</span><span id="pcount"></span></div>
+    <div id="pageOps">
+      <button class="tb icon" id="pRotL" title="Rotiraj levo"><svg class="i"><use href="#i-rotl"/></svg></button>
+      <button class="tb icon" id="pRotR" title="Rotiraj desno"><svg class="i"><use href="#i-rotr"/></svg></button>
+      <button class="tb icon" id="pUp" title="Pomeri gore"><svg class="i"><use href="#i-up"/></svg></button>
+      <button class="tb icon" id="pDown" title="Pomeri dole"><svg class="i"><use href="#i-down"/></svg></button>
+      <button class="tb icon" id="pDup" title="Dupliraj stranicu"><svg class="i"><use href="#i-copy"/></svg></button>
+      <button class="tb icon" id="pBlank" title="Dodaj praznu A4 posle trenutne"><svg class="i"><use href="#i-page"/></svg></button>
+      <button class="tb icon" id="pDel" title="Obriši stranicu" style="color:var(--danger)"><svg class="i"><use href="#i-trash"/></svg></button>
+    </div>
+    <div id="thumbs"></div>
+  </aside>
+  <section id="view">
+    <div id="empty">
+      <div class="big"><svg class="i"><use href="#i-doc"/></svg></div>
+      <h2>Prevuci PDF ovde</h2>
+      <p>ili klikni <b>Otvori</b>. Možeš da otvoriš i slike (JPG, PNG) – postaju PDF.</p>
+      <div class="feat"><span>Izmena teksta</span><span>Potpis</span><span>Pečati</span><span>Merenje na crtežu</span><span>Spajanje i deljenje</span><span>Obrasci</span><span>Trajno uklanjanje</span><span>Brojevi strana</span><span>Smanjenje veličine</span></div>
+      <button class="btn dark" id="bOpen2"><svg class="i"><use href="#i-open"/></svg>Otvori fajl</button>
+      <p style="font-size:12px;margin-top:14px">Original se nikad ne menja – uvek se pravi nova kopija. Radi i bez interneta.</p>
+    </div>
+  </section>
+  <aside id="props"></aside>
+</main>
+<div id="status"><span id="stL">Spremno</span><span id="stR"></span></div>
+<div id="toast"></div>
+<div id="tip" hidden></div>
+<div id="modal" hidden><div class="card" id="mcard"></div></div>
+<div id="printArea"></div>
+<input type="file" id="fOpen" accept="application/pdf,.pdf,image/png,image/jpeg" multiple hidden>
+<input type="file" id="fAdd" accept="application/pdf,.pdf,image/png,image/jpeg" multiple hidden>
+<input type="file" id="fImg" accept="image/png,image/jpeg" hidden>
+<input type="file" id="fSig" accept="image/png,image/jpeg" hidden>
+<script>const PDF_WORKER='lib/pdf.worker.min.js',FONT_R='lib/fonts/DejaVuSans.ttf',FONT_B='lib/fonts/DejaVuSans-Bold.ttf';</script>
+<script src="lib/pdf.min.js"></script>
+<script src="lib/pdf-lib.min.js"></script>
+<script src="lib/fontkit.umd.min.js"></script>
+<script>
+"use strict";
+pdfjsLib.GlobalWorkerOptions.workerSrc=new URL(PDF_WORKER,document.baseURI).href;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const view=$('#view'), thumbs=$('#thumbs');
+const ico=n=>`<svg class="i"><use href="#i-${n}"/></svg>`;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const A4={w:595.28,h:841.89};
+let docs=[], pages=[], cur=0, picked=new Set(), zoom=0, tool='select', sel=null, hist=[], fut=[], baseName='dokument', uid=1, pending=null;
+let style={c:'#d32f2f',s:14,b:false};
+let deco={pn:false,pnFmt:'Strana {n} od {N}',pnPos:'bc',wm:false,wmText:'NACRT',wmOp:.15,hdr:'',ftr:''};
+let meas={ratio:1};
+let formVals={};
+const store={get(k,d){try{const v=localStorage.getItem('mpdf_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('mpdf_'+k,JSON.stringify(v));return true}catch(e){return false}}};
+
+function toast(t,ms){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),ms||2800)}
+function status(){
+  $('#fname').textContent=pages.length?`${baseName}.pdf · ${pages.length} str.`:'Nijedan fajl nije otvoren';
+  $('#stL').textContent=pages.length?`Stranica ${cur+1} / ${pages.length}`+(picked.size>1?` · označeno ${picked.size}`:'')+(meas.ratio!==1?` · razmera 1:${+meas.ratio.toFixed(3)}`:''):'Spremno';
+  $('#zl').textContent=Math.round(zoom*100)+'%';$('#pcount').textContent=pages.length||'';
+  $('#bUndo').disabled=!hist.length;$('#bRedo').disabled=!fut.length;
+}
+const S=()=>JSON.stringify({pages:pages.map(p=>({...p,pj:undefined,lines:undefined})),deco,meas});
+function snap(){hist.push(S());if(hist.length>80)hist.shift();fut=[];status()}
+function restore(js){const o=JSON.parse(js);const m=new Map(pages.map(p=>[p.id,p]));pages=o.pages.map(p=>({...p,pj:m.get(p.id)&&m.get(p.id).pj,lines:m.get(p.id)&&m.get(p.id).lines}));deco=o.deco;meas=o.meas;sel=null;if(cur>=pages.length)cur=Math.max(0,pages.length-1);rebuild();props()}
+function undo(){if(!hist.length)return toast('Nema šta da se poništi');fut.push(S());restore(hist.pop())}
+function redo(){if(!fut.length)return;hist.push(S());restore(fut.pop())}
+
+/* ================= otvaranje ================= */
+function isImg(f){return /image\/(png|jpe?g)/i.test(f.type)||/\.(png|jpe?g)$/i.test(f.name)}
+function readURL(f){return new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)})}
+function loadImg(src){return new Promise((r,j)=>{const im=new Image();im.onload=()=>r(im);im.onerror=j;im.src=src})}
+async function loadFiles(files,append){
+  const list=[...files].filter(f=>isImg(f)||/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name));
+  if(!list.length)return toast('Ovaj fajl nije PDF ni slika');
+  if(!append){docs=[];pages=[];hist=[];fut=[];picked.clear();cur=0;sel=null;formVals={};hits=[];baseName=list[0].name.replace(/\.(pdf|png|jpe?g)$/i,'');zoom=0}
+  else snap();
+  for(const f of list){
+    if(isImg(f)){
+      const src=await readURL(f);const im=await loadImg(src);const land=im.width>im.height;const W=land?A4.h:A4.w,H=land?A4.w:A4.h;
+      const m=18,sc=Math.min((W-2*m)/im.width,(H-2*m)/im.height);const w=im.width*sc,h=im.height*sc;
+      pages.push({id:uid++,d:-1,n:0,rot:0,w:W,h:H,an:[],bg:{src,png:/png/i.test(f.type)||/\.png$/i.test(f.name),x:(W-w)/2,y:(H-h)/2,w,h}});continue;
+    }
+    const buf=new Uint8Array(await f.arrayBuffer());let pdf;
+    try{pdf=await pdfjsLib.getDocument({data:buf.slice()}).promise}catch(e){toast('Ne mogu da otvorim: '+f.name);continue}
+    const di=docs.push({name:f.name,bytes:buf,pdf,fields:[]})-1;
+    for(let n=1;n<=pdf.numPages;n++){const pg=await pdf.getPage(n);const vp=pg.getViewport({scale:1});pages.push({id:uid++,d:di,n,rot:0,w:vp.width,h:vp.height,an:[],pj:pg})}
+    readFields(di);
+  }
+  rebuild();props();
+  toast(append?'Dodato na kraj':'Otvoreno: '+list[0].name);
+}
+async function readFields(di){
+  try{const D=docs[di];const doc=await PDFLib.PDFDocument.load(D.bytes,{ignoreEncryption:true});const fs=doc.getForm().getFields();if(!fs.length)return;
+    const pr=doc.getPages().map((pp,ix)=>{const A=pp.node.Annots();return{ix,annots:A?A.asArray().map(r=>r.toString()):[]}});
+    for(const f of fs){
+      const type=f instanceof PDFLib.PDFTextField?'text':f instanceof PDFLib.PDFCheckBox?'check':f instanceof PDFLib.PDFDropdown?'drop':null;if(!type)continue;
+      const fld={name:f.getName(),type,opts:type==='drop'?f.getOptions():null,val:type==='text'?(f.getText()||''):type==='check'?f.isChecked():(f.getSelected()[0]||''),w:[]};
+      for(const wd of f.acroField.getWidgets()){const ref=doc.context.getObjectRef(wd.dict);const r=wd.getRectangle();const pgi=pr.find(p=>ref&&p.annots.includes(ref.toString()));if(pgi)fld.w.push({n:pgi.ix+1,r:[r.x,r.y,r.x+r.width,r.y+r.height]})}
+      D.fields.push(fld);formVals[`${di}|${fld.name}`]=fld.val;
+    }
+    if(D.fields.length){pages.forEach((p,i)=>{if(p.d===di)drawForms(i)});props();toast(`Ovaj PDF je obrazac – ${D.fields.length} polja. Klikni u plavo polje i kucaj.`,4500)}
+  }catch(e){}
+}
+$('#bOpen').onclick=$('#bOpen2').onclick=()=>$('#fOpen').click();
+$('#bAdd').onclick=()=>$('#fAdd').click();
+$('#fOpen').onchange=e=>{loadFiles(e.target.files,false);e.target.value=''};
+$('#fAdd').onchange=e=>{loadFiles(e.target.files,pages.length>0);e.target.value=''};
+document.addEventListener('dragover',e=>{if(e.dataTransfer.types.includes('Files')){e.preventDefault();document.body.classList.add('dragging')}});
+document.addEventListener('dragleave',e=>{if(!e.relatedTarget)document.body.classList.remove('dragging')});
+document.addEventListener('drop',e=>{document.body.classList.remove('dragging');if(!e.dataTransfer.files.length)return;e.preventDefault();loadFiles(e.dataTransfer.files,pages.length>0)});
+
+/* ================= prikaz ================= */
+function dims(p){const r=p.rot%180!==0;return{W:(r?p.h:p.w)*zoom,H:(r?p.w:p.h)*zoom}}
+function fitZoom(){const p=pages[cur]||pages[0];if(!p)return 1;const w=p.rot%180?p.h:p.w;return Math.max(.2,Math.min(4,(view.clientWidth-(innerWidth<=760?16:60))/w))}
+const pgEl=i=>view.querySelector(`.pg[data-i="${i}"]`);
+let io;
+function rebuild(){
+  if(!zoom)zoom=fitZoom();
+  view.innerHTML='';thumbs.innerHTML='';
+  if(!pages.length){view.innerHTML=`<div id="empty"><div class="big">${ico('doc')}</div><h2>Nema stranica</h2><p>Otvori ili prevuci PDF.</p></div>`;status();return}
+  io&&io.disconnect();
+  io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)renderPage(+e.target.dataset.i)}),{root:view,rootMargin:'800px'});
+  pages.forEach((p,i)=>{
+    const {W,H}=dims(p);
+    const pg=document.createElement('div');pg.className='pg'+(i===cur?' cur':'');pg.dataset.i=i;pg.style.width=W+'px';pg.style.height=H+'px';
+    const inner=document.createElement('div');inner.className='inner';inner.style.width=p.w*zoom+'px';inner.style.height=p.h*zoom+'px';inner.style.transform=`translate(-50%,-50%) rotate(${p.rot}deg)`;
+    inner.innerHTML='<canvas></canvas><div class="layer"></div><div class="flayer"></div>';
+    pg.appendChild(inner);view.appendChild(pg);io.observe(pg);
+    drawLayer(i);drawForms(i);
+    const L=inner.querySelector('.layer');L.addEventListener('pointerdown',e=>onDown(e,i));L.addEventListener('dblclick',e=>onDbl(e,i));
+    const th=document.createElement('div');th.className='th'+(i===cur?' cur':'')+(picked.has(i)?' picked':'');th.draggable=true;th.dataset.i=i;
+    th.innerHTML=`<div class="tw"><canvas style="transform:rotate(${p.rot}deg)"></canvas></div><div class="n">${i+1}${p.d<0&&!p.bg?' · prazna':''}</div>`;
+    th.onclick=e=>pickThumb(i,e);
+    th.ondragstart=e=>{e.dataTransfer.setData('text/plain',String(i));e.dataTransfer.effectAllowed='move'};
+    th.ondragover=e=>{e.preventDefault();e.stopPropagation();th.classList.add('drop')};
+    th.ondragleave=()=>th.classList.remove('drop');
+    th.ondrop=e=>{e.preventDefault();e.stopPropagation();th.classList.remove('drop');const from=+e.dataTransfer.getData('text/plain');if(!isNaN(from)&&from!==i)movePage(from,i)};
+    thumbs.appendChild(th);renderThumb(p,th.querySelector('canvas'));
+  });
+  status();
+}
+async function paintBase(p,ctx,s){
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+  if(p.d>=0){try{await p.pj.render({canvasContext:ctx,viewport:p.pj.getViewport({scale:s})}).promise}catch(e){}}
+  if(p.bg){try{const im=await loadImg(p.bg.src);ctx.drawImage(im,p.bg.x*s,p.bg.y*s,p.bg.w*s,p.bg.h*s)}catch(e){}}
+}
+async function renderPage(i){
+  const p=pages[i],pg=pgEl(i);if(!p||!pg)return;const cv=pg.querySelector('canvas');const key=p.id+'@'+zoom;if(cv.dataset.k===key)return;cv.dataset.k=key;
+  const s=zoom*(window.devicePixelRatio||1);cv.width=Math.round(p.w*s);cv.height=Math.round(p.h*s);await paintBase(p,cv.getContext('2d'),s);
+}
+async function renderThumb(p,tc){const s=Math.min(126/p.w,150/p.h);tc.width=Math.round(p.w*s);tc.height=Math.round(p.h*s);await paintBase(p,tc.getContext('2d'),s);if(p.rot%180){tc.style.maxWidth='150px';tc.style.maxHeight='126px'}}
+function setCur(i,scroll){
+  cur=i;$$('.pg').forEach(e=>e.classList.toggle('cur',+e.dataset.i===i));
+  $$('.th').forEach(e=>{const k=+e.dataset.i;e.classList.toggle('cur',k===i);e.classList.toggle('picked',picked.has(k))});
+  if(scroll){const pg=pgEl(i);pg&&pg.scrollIntoView({block:'start',behavior:'smooth'})}
+  status();if(tool==='crop')props();
+}
+let lastPick=0;
+function pickThumb(i,e){
+  if(e.shiftKey){const a=Math.min(lastPick,i),b=Math.max(lastPick,i);for(let k=a;k<=b;k++)picked.add(k)}
+  else if(e.ctrlKey||e.metaKey){picked.has(i)?picked.delete(i):picked.add(i)}
+  else{picked.clear();picked.add(i)}
+  lastPick=i;setCur(i,true);
+}
+view.addEventListener('scroll',()=>{
+  const mid=view.getBoundingClientRect().top+view.clientHeight/3;let best=cur;
+  $$('.pg').forEach(pg=>{const r=pg.getBoundingClientRect();if(r.top<=mid&&r.bottom>=mid)best=+pg.dataset.i});
+  if(best!==cur){cur=best;$$('.th').forEach(e=>e.classList.toggle('cur',+e.dataset.i===cur));$$('.pg').forEach(e=>e.classList.toggle('cur',+e.dataset.i===cur));status()}
+},{passive:true});
+
+/* ================= stranice ================= */
+function targets(){return picked.size>1?[...picked].sort((a,b)=>a-b):[cur]}
+function rotate(d){if(!pages.length)return;snap();targets().forEach(i=>pages[i].rot=(pages[i].rot+d+360)%360);rebuild();setCur(cur,true)}
+$('#pRotL').onclick=()=>rotate(-90);$('#pRotR').onclick=()=>rotate(90);
+$('#pDel').onclick=()=>{if(!pages.length)return;const t=targets();if(t.length>=pages.length)return toast('Ne može se obrisati poslednja stranica');snap();pages=pages.filter((p,i)=>!t.includes(i));picked.clear();cur=Math.min(t[0],pages.length-1);sel=null;rebuild();setCur(cur,true);toast(t.length>1?`Obrisano ${t.length} stranica`:'Stranica obrisana')};
+function movePage(from,to){snap();const [p]=pages.splice(from,1);pages.splice(to,0,p);picked.clear();cur=to;sel=null;rebuild();setCur(cur,true)}
+$('#pUp').onclick=()=>{if(cur>0)movePage(cur,cur-1)};
+$('#pDown').onclick=()=>{if(cur<pages.length-1)movePage(cur,cur+1)};
+$('#pDup').onclick=()=>{if(!pages.length)return;snap();const p=pages[cur];pages.splice(cur+1,0,{...p,id:uid++,an:JSON.parse(JSON.stringify(p.an)),lines:p.lines});cur++;rebuild();setCur(cur,true)};
+$('#pBlank').onclick=()=>{snap();const at=pages.length?cur+1:0;pages.splice(at,0,{id:uid++,d:-1,n:0,rot:0,w:A4.w,h:A4.h,an:[]});cur=at;rebuild();setCur(cur,true)};
+
+/* ================= alati ================= */
+const TOOLS={select:'Izaberi',edit:'Izmeni tekst',text:'Tekst',note:'Beleška',pen:'Olovka',hl:'Marker',line:'Linija',arrow:'Strelica',box:'Okvir',ellipse:'Krug',sign:'Potpis',stamp:'Pečat',img:'Slika',white:'Pokrij belim',redact:'Trajno ukloni',crop:'Iseci stranicu',measure:'Meri dužinu',area:'Meri površinu'};
+const KEYS={v:'select',e:'edit',t:'text',k:'note',p:'pen',h:'hl',l:'line',a:'arrow',r:'box',o:'ellipse',s:'sign',g:'stamp',i:'img',w:'white',x:'redact',c:'crop',m:'measure',u:'area'};
+const HINT={select:'Klikni da izabereš, prevuci da pomeriš. Poravnava se sa tekstom (Alt = slobodno). Dupli klik na tekst = izmena.',edit:'Pređi preko teksta u PDF-u i klikni – tekst postaje izmenjiv, isti font i boja. Escape = gotovo.',text:'Klikni gde treba tekst, pa kucaj.',note:'Klikni gde ide žuta beleška, pa kucaj.',pen:'Drži taster i crtaj.',hl:'Prevuci preko teksta koji ističeš.',line:'Prevuci za liniju. Shift = vodoravno, uspravno ili 45°.',arrow:'Prevuci od početka ka vrhu strelice. Shift = prave linije.',box:'Prevuci za pravougaonik.',ellipse:'Prevuci za elipsu. Shift = krug.',sign:'Izaberi potpis ispod, pa klikni na stranicu.',stamp:'Izaberi pečat ispod, pa klikni na stranicu.',img:'Izaberi sliku, pa klikni na stranicu.',white:'Prevuci preko dela koji sakrivaš.',redact:'Prevuci preko podataka koje treba trajno obrisati.',crop:'Prevuci okvir – ostaje samo deo unutar njega.',measure:'Prevuci od tačke do tačke. Shift = prave linije.',area:'Klikći uglove oblika. Dupli klik ili Enter = kraj, Esc = otkaži.'};
+function setTool(t){
+  if(t==='img'&&!(pending&&pending.kind==='img')){pending=null;$('#fImg').click();return}
+  if(t!==tool&&areaDraft)cancelArea();
+  if(t!==tool&&sel)deselect(true);
+  tool=t;document.body.className='tool-'+t;
+  $$('#rail .tool').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
+  $('#stR').textContent=HINT[t]||'';
+  if(t==='sign'){const s=store.get('sigs',[]);pending=s.length?{src:s[sigSel=Math.min(sigSel,s.length-1)],png:true,kind:'sig'}:null}
+  else if(t==='stamp')setStamp(stampSel);
+  else if(t!=='img')pending=null;
+  props();
+}
+$$('#rail .tool').forEach(b=>{b.onclick=()=>setTool(b.dataset.tool);
+  b.onmouseenter=()=>{const t=$('#tip');t.textContent=b.dataset.tip;const r=b.getBoundingClientRect();t.style.left=r.right+8+'px';t.style.top=r.top+r.height/2-13+'px';t.hidden=false};
+  b.onmouseleave=()=>$('#tip').hidden=true});
+$('#fImg').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const src=await readURL(f);pending={src,png:/png/i.test(f.type),kind:'img'};setTool('img')};
+
+function pt(e,i){
+  const p=pages[i];const r=pgEl(i).getBoundingClientRect();
+  const dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const a=-p.rot*Math.PI/180;
+  const ux=dx*Math.cos(a)-dy*Math.sin(a),uy=dx*Math.sin(a)+dy*Math.cos(a);
+  return{x:(ux+p.w*zoom/2)/zoom,y:(uy+p.h*zoom/2)/zoom};
+}
+function shiftSnap(s,q,e){if(!e.shiftKey)return q;const dx=q.x-s.x,dy=q.y-s.y;const ang=Math.round(Math.atan2(dy,dx)/(Math.PI/4))*(Math.PI/4);const L=Math.hypot(dx,dy);return{x:s.x+L*Math.cos(ang),y:s.y+L*Math.sin(ang)}}
+
+/* ---------- merenje ---------- */
+function lenMM(pts){return pts*25.4/72*meas.ratio}
+const dec=(v,d)=>v.toFixed(d).replace('.',',');
+function fmtLen(mm){if(mm>=1000)return dec(mm/1000,3)+' m';if(mm>=100)return dec(mm/10,1)+' cm';return dec(mm,1)+' mm'}
+function fmtArea(mm2){if(mm2>=1e6)return dec(mm2/1e6,3)+' m²';if(mm2>=100)return dec(mm2/100,1)+' cm²';return dec(mm2,1)+' mm²'}
+function polyArea(pts){let s=0;for(let i=0;i<pts.length;i++){const a=pts[i],b=pts[(i+1)%pts.length];s+=a[0]*b[1]-b[0]*a[1]}return Math.abs(s/2)}
+function measLabel(a){if(a.t==='measure')return fmtLen(lenMM(Math.hypot(a.x2-a.x1,a.y2-a.y1)));const k=25.4/72*meas.ratio;return fmtArea(polyArea(a.pts)*k*k)}
+
+/* ---------- crtanje sloja ---------- */
+const NS='http://www.w3.org/2000/svg';
+function sv(tag,at,par){const e=document.createElementNS(NS,tag);for(const k in at)e.setAttribute(k,at[k]);par&&par.appendChild(e);return e}
+function arrowHead(x1,y1,x2,y2,w){const L=Math.max(6,w*4),ang=Math.atan2(y2-y1,x2-x1),a1=ang+Math.PI*0.85,a2=ang-Math.PI*0.85;return[[x2,y2],[x2+L*Math.cos(a1),y2+L*Math.sin(a1)],[x2+L*Math.cos(a2),y2+L*Math.sin(a2)]]}
+function dimGeom(a){const dx=a.x2-a.x1,dy=a.y2-a.y1,L=Math.hypot(dx,dy)||1;return{nx:-dy/L,ny:dx/L,t:5,ang:Math.atan2(dy,dx)*180/Math.PI,mx:(a.x1+a.x2)/2,my:(a.y1+a.y2)/2}}
+function bbox(a){
+  if(a.pts){const xs=a.pts.map(q=>q[0]),ys=a.pts.map(q=>q[1]);return{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)}}
+  if('x1' in a)return{x:Math.min(a.x1,a.x2),y:Math.min(a.y1,a.y2),w:Math.abs(a.x2-a.x1),h:Math.abs(a.y2-a.y1)};
+  return{x:a.x,y:a.y,w:a.w||0,h:a.h||0};
+}
+const VEC=['pen','line','arrow','ellipse','measure','area'];
+function drawLayer(i){
+  const p=pages[i],pg=pgEl(i);if(!pg)return;const L=pg.querySelector('.layer');L.innerHTML='';const z=zoom;
+  const svg=sv('svg',{class:'vec',viewBox:`0 0 ${p.w} ${p.h}`,preserveAspectRatio:'none'});L.appendChild(svg);
+  p.an.forEach((a,k)=>{
+    const isSel=sel&&sel.i===i&&sel.k===k;
+    if(VEC.includes(a.t)){
+      const g=sv('g',{'data-k':k},svg);const lw=a.t==='ellipse'?a.lw:a.w;const st={fill:'none',stroke:a.c,'stroke-width':lw,'stroke-linecap':'round','stroke-linejoin':'round'};
+      if(isSel)st['stroke-dasharray']=`${Math.max(2,lw*3)} ${Math.max(2,lw*2)}`;
+      let shape;
+      if(a.t==='pen')shape=sv('polyline',{points:a.pts.map(q=>q.join(',')).join(' '),...st},g);
+      if(a.t==='line'||a.t==='arrow'){shape=sv('line',{x1:a.x1,y1:a.y1,x2:a.x2,y2:a.y2,...st},g);if(a.t==='arrow')sv('polygon',{points:arrowHead(a.x1,a.y1,a.x2,a.y2,a.w).map(q=>q.join(',')).join(' '),fill:a.c,stroke:a.c,'stroke-width':a.w*.5,'stroke-linejoin':'round'},g)}
+      if(a.t==='ellipse')shape=sv('ellipse',{cx:a.x+a.w/2,cy:a.y+a.h/2,rx:Math.max(.1,a.w/2),ry:Math.max(.1,a.h/2),...st},g);
+      if(a.t==='measure'){const d=dimGeom(a);shape=sv('line',{x1:a.x1,y1:a.y1,x2:a.x2,y2:a.y2,...st},g);
+        sv('line',{x1:a.x1+d.nx*d.t,y1:a.y1+d.ny*d.t,x2:a.x1-d.nx*d.t,y2:a.y1-d.ny*d.t,...st},g);sv('line',{x1:a.x2+d.nx*d.t,y1:a.y2+d.ny*d.t,x2:a.x2-d.nx*d.t,y2:a.y2-d.ny*d.t,...st},g);
+        let ang=d.ang;if(ang>90)ang-=180;if(ang<-90)ang+=180;const fs=Math.max(7,a.w*5);
+        sv('text',{x:d.mx,y:d.my-3,'font-size':fs,'text-anchor':'middle',fill:a.c,'font-family':'DejaVu Sans, Arial',transform:`rotate(${ang} ${d.mx} ${d.my})`,'paint-order':'stroke',stroke:'#fff','stroke-width':fs*.25},g).textContent=measLabel(a)}
+      if(a.t==='area'){shape=sv('polygon',{points:a.pts.map(q=>q.join(',')).join(' '),...st,fill:a.c,'fill-opacity':.12},g);const b=bbox(a);const fs=Math.max(8,a.w*5);
+        sv('text',{x:b.x+b.w/2,y:b.y+b.h/2,'font-size':fs,'text-anchor':'middle','dominant-baseline':'middle',fill:a.c,'font-family':'DejaVu Sans, Arial','paint-order':'stroke',stroke:'#fff','stroke-width':fs*.25},g).textContent=measLabel(a)}
+      const hitEl=shape.cloneNode();hitEl.setAttribute('stroke','transparent');hitEl.setAttribute('stroke-width',Math.max(lw,10/z));hitEl.removeAttribute('stroke-dasharray');
+      hitEl.setAttribute('fill',a.t==='area'?'transparent':'none');hitEl.style.pointerEvents=a.t==='area'?'all':'stroke';g.appendChild(hitEl);
+      return;
+    }
+    if(a.t==='edit'){const cv=document.createElement('div');cv.className='an cover';cv.dataset.k=k;Object.assign(cv.style,{left:a.bx*z+'px',top:a.by*z+'px',width:a.bw*z+'px',height:a.bh*z+'px',background:a.bgc||'#fff'});L.appendChild(cv)}
+    const d=document.createElement('div');d.dataset.k=k;
+    d.className='an '+(a.t==='edit'?'text':a.t)+(a.b?' bold':'')+(isSel?' sel':'');d.style.left=a.x*z+'px';d.style.top=a.y*z+'px';
+    if(a.t==='text'||a.t==='edit'){d.textContent=a.v;d.style.fontSize=a.s*z+'px';d.style.color=a.c;if(a.fam)d.style.fontFamily=`"${a.fam}","DejaVu Sans",Arial,sans-serif`;if(a.lh)d.style.lineHeight=a.lh;bindEdit(d,i,k)}
+    else if(a.t==='note'){d.textContent=a.v;Object.assign(d.style,{width:a.w*z+'px',height:a.h*z+'px',fontSize:a.s*z+'px'});bindEdit(d,i,k)}
+    else{d.style.width=a.w*z+'px';d.style.height=a.h*z+'px';
+      if(a.t==='rect'){if(a.mode==='hl')d.style.background=hexA(a.c||'#ffe600',.4);else if(a.mode==='white')d.style.background='#fff';else if(a.mode==='redact'){d.style.background='#111';d.style.boxShadow='0 0 0 1px #e74c3c'}else d.style.border=`${Math.max(1,a.w2*z)}px solid ${a.c}`}
+      if(a.t==='img'){const im=document.createElement('img');im.src=a.src;d.appendChild(im)}}
+    L.appendChild(d);
+  });
+  if(sel&&sel.i===i&&p.an[sel.k]){const a=p.an[sel.k];
+    if('x1' in a){for(const [hx,hy,h] of [[a.x1,a.y1,'p1'],[a.x2,a.y2,'p2']]){const e=document.createElement('div');e.className='handle e';e.dataset.h=h;e.style.left=hx*z+'px';e.style.top=hy*z+'px';L.appendChild(e)}}
+    else if(['img','rect','ellipse','note'].includes(a.t)){const e=document.createElement('div');e.className='handle c';e.dataset.h='c';e.style.left=(a.x+a.w)*z+'px';e.style.top=(a.y+a.h)*z+'px';L.appendChild(e)}
+    const b=bbox(a);const m=document.createElement('div');m.className='mover';m.title='Prevuci da pomeriš';m.innerHTML='<svg viewBox="0 0 24 24"><use href="#i-move"/></svg>';
+    m.style.left=Math.max(0,b.x*z-30)+'px';m.style.top=Math.max(0,b.y*z-6)+'px';L.appendChild(m)}
+  if(p.crop){const c=p.crop;const W=p.w*z,H=p.h*z;[[0,0,W,c.y*z],[0,(c.y+c.h)*z,W,H-(c.y+c.h)*z],[0,c.y*z,c.x*z,c.h*z],[(c.x+c.w)*z,c.y*z,W-(c.x+c.w)*z,c.h*z]].forEach(([x,y,w,h])=>{const e=document.createElement('div');e.className='cropdim';Object.assign(e.style,{left:x+'px',top:y+'px',width:Math.max(0,w)+'px',height:Math.max(0,h)+'px'});L.appendChild(e)});
+    const e=document.createElement('div');e.className='cropbox';Object.assign(e.style,{left:c.x*z+'px',top:c.y*z+'px',width:c.w*z+'px',height:c.h*z+'px'});L.appendChild(e)}
+  for(const h of hits)if(h.i===i){const e=document.createElement('div');e.className='hit'+(hits[hitCur]===h?' cur':'');Object.assign(e.style,{left:h.x*z+'px',top:h.y*z+'px',width:h.w*z+'px',height:h.h*z+'px'});L.appendChild(e)}
+  decoPreview(i,L);
+  const hv=document.createElement('div');hv.className='hov';hv.hidden=true;L.appendChild(hv);
+}
+function hexA(h,a){const n=parseInt(h.slice(1),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+function bindEdit(d,i,k){
+  const p=pages[i];
+  d.addEventListener('input',()=>{if(p.an[k])p.an[k].v=d.innerText.replace(/\n$/,'')});
+  d.addEventListener('blur',()=>{d.contentEditable=false;const a=p.an[k];if(a&&a.t==='text'&&!a.v.trim()){p.an.splice(k,1);if(sel&&sel.i===i)sel=null;drawLayer(i);props()}});
+}
+function editText(d,cx,cy){if(!d)return;d.contentEditable=true;d.focus();let r=null;
+  if(cx!=null&&document.caretRangeFromPoint){const t=document.caretRangeFromPoint(cx,cy);if(t&&d.contains(t.startContainer))r=t}
+  if(!r){r=document.createRange();r.selectNodeContents(d);r.collapse(false)}const s=getSelection();s.removeAllRanges();s.addRange(r)}
+const anEl=(i,k)=>view.querySelector(`.pg[data-i="${i}"] .an:not(.cover)[data-k="${k}"]`);
+function select(i,k){const old=sel;sel=k==null?null:{i,k};if(old&&old.i!==i)drawLayer(old.i);drawLayer(i);props()}
+function deselect(quiet){if(!sel)return;const o=sel.i;sel=null;drawLayer(o);if(!quiet)props()}
+
+/* ---------- obrasci ---------- */
+function drawForms(i){
+  const p=pages[i],pg=pgEl(i);if(!pg||p.d<0)return;const F=pg.querySelector('.flayer');F.innerHTML='';const D=docs[p.d];if(!D.fields.length)return;const vp=p.pj.getViewport({scale:1});
+  for(const f of D.fields)for(const w of f.w){if(w.n!==p.n)continue;const r=vp.convertToViewportRectangle(w.r);const x=Math.min(r[0],r[2]),y=Math.min(r[1],r[3]),W=Math.abs(r[2]-r[0]),H=Math.abs(r[3]-r[1]);
+    const key=`${p.d}|${f.name}`;let el;
+    if(f.type==='check'){el=document.createElement('input');el.type='checkbox';el.checked=!!formVals[key];el.onchange=()=>{formVals[key]=el.checked}}
+    else if(f.type==='drop'){el=document.createElement('select');(f.opts||[]).forEach(o=>{const op=document.createElement('option');op.textContent=o;el.appendChild(op)});el.value=formVals[key]||'';el.onchange=()=>{formVals[key]=el.value}}
+    else{el=document.createElement(H>30?'textarea':'input');el.value=formVals[key]||'';el.oninput=()=>{formVals[key]=el.value;$$('.ff').forEach(o=>{if(o!==el&&o.dataset.f===key)o.value=el.value})};el.style.fontSize=Math.min(H*.7,12)*zoom+'px';el.style.resize='none'}
+    el.className='ff';el.dataset.f=key;el.title=f.name;Object.assign(el.style,{left:x*zoom+'px',top:y*zoom+'px',width:W*zoom+'px',height:H*zoom+'px'});F.appendChild(el)}
+}
+
+/* ---------- miš ---------- */
+let areaDraft=null,lastTap=0;
+function cancelArea(){if(!areaDraft)return;const {i}=areaDraft;pages[i].an.pop();areaDraft=null;drawLayer(i)}
+function finishArea(){if(!areaDraft)return;const {i,a}=areaDraft;areaDraft=null;
+  // poslednja tačka prati miša; dupli klik doda još jednu na isto mesto
+  while(a.pts.length>1){const l=a.pts[a.pts.length-1],q=a.pts[a.pts.length-2];if(Math.hypot(l[0]-q[0],l[1]-q[1])<2)a.pts.pop();else break}
+  if(a.pts.length<3){pages[i].an.pop();hist.pop();toast('Površina treba bar 3 tačke');drawLayer(i);return}
+  select(i,pages[i].an.length-1);toast('Površina: '+measLabel(a))}
+function drag(L,e,mv,up){L.setPointerCapture(e.pointerId);const m=ev=>mv(ev);const u=ev=>{L.removeEventListener('pointermove',m);L.removeEventListener('pointerup',u);up&&up(ev)};L.addEventListener('pointermove',m);L.addEventListener('pointerup',u)}
+function translate(a,o,dx,dy){if(a.pts)a.pts=o.pts.map(q=>[q[0]+dx,q[1]+dy]);else if('x1' in a){a.x1=o.x1+dx;a.y1=o.y1+dy;a.x2=o.x2+dx;a.y2=o.y2+dy}else{a.x=o.x+dx;a.y=o.y+dy}}
+function startMove(e,i,k){
+  const p=pages[i],L=e.currentTarget,a=p.an[k];const s0=pt(e,i);const o=JSON.parse(JSON.stringify(a));snap();let moved=false;
+  const SN=(a.pts||'x1' in a)?null:makeSnap(i,k);
+  drag(L,e,ev=>{const q=pt(ev,i);const dx=q.x-s0.x,dy=q.y-s0.y;if(Math.abs(dx)+Math.abs(dy)>.3)moved=true;translate(a,o,dx,dy);SN?SN(ev.altKey):drawLayer(i)},()=>{if(!moved)hist.pop();drawLayer(i);status()});
+}
+function place(i,s){
+  const p=pages[i];const pd=pending;
+  loadImg(pd.src).then(im=>{snap();let w=im.width,h=im.height;const max=pd.kind==='sig'?150:pd.kind==='stamp'?160:220;const m=Math.min(1,max/Math.max(w,h));w*=m;h*=m;
+    p.an.push({t:'img',x:s.x-w/2,y:s.y-h/2,w,h,src:pd.src,png:pd.png!==false});select(i,p.an.length-1);if(pd.kind==='img'){pending=null;setTool('select')}});
+}
+function onDown(e,i){
+  if(e.button!==0)return;
+  const p=pages[i],L=e.currentTarget;
+  if(e.target.closest('.mover')&&sel&&sel.i===i){const ae=document.activeElement;if(ae&&ae.isContentEditable)ae.blur();e.preventDefault();startMove(e,i,sel.k);return}
+  if(e.target.dataset.h&&sel&&sel.i===i){const a=p.an[sel.k];const h=e.target.dataset.h;snap();const o={...a};e.preventDefault();
+    drag(L,e,ev=>{let q=pt(ev,i);if(h==='p1'){q=shiftSnap({x:a.x2,y:a.y2},q,ev);a.x1=q.x;a.y1=q.y}else if(h==='p2'){q=shiftSnap({x:a.x1,y:a.y1},q,ev);a.x2=q.x;a.y2=q.y}
+      else if(a.t==='img'){const ar=o.h/o.w;a.w=Math.max(5,q.x-o.x);a.h=a.w*ar}else{a.w=Math.max(4,q.x-o.x);a.h=Math.max(4,q.y-o.y)}drawLayer(i)},()=>{drawLayer(i);props()});return}
+  if(e.target.isContentEditable)return;
+  if(cur!==i)setCur(i,false);
+  const s=pt(e,i);
+  if(tool==='select'){
+    const t=e.target.closest('[data-k]');if(!t){deselect();return}
+    const k=+t.dataset.k;const a=p.an[k];const now=Date.now();
+    if(a&&['text','edit','note'].includes(a.t)&&sel&&sel.i===i&&sel.k===k&&now-lastTap<450){lastTap=0;e.preventDefault();const cx=e.clientX,cy=e.clientY;setTimeout(()=>editText(anEl(i,k),cx,cy),0);return}
+    lastTap=now;if(!(sel&&sel.i===i&&sel.k===k))select(i,k);
+    e.preventDefault();startMove(e,i,k);return;
+  }
+  if(tool==='edit'){e.preventDefault();editExisting(e,i);return}
+  if(tool==='text'||tool==='note'){
+    const t=e.target.closest('[data-k]');if(t){const k=+t.dataset.k;const a=p.an[k];if(a&&['text','edit','note'].includes(a.t)){e.preventDefault();select(i,k);editText(anEl(i,k),e.clientX,e.clientY);return}}
+    e.preventDefault();snap();const a=tool==='text'?{t:'text',x:s.x,y:s.y-style.s*.6,s:style.s,c:style.c,b:style.b,v:''}:{t:'note',x:s.x,y:s.y,w:150,h:70,s:9,v:''};
+    p.an.push(a);const k=p.an.length-1;sel={i,k};drawLayer(i);props();setTimeout(()=>editText(anEl(i,k)),0);return;
+  }
+  if(['img','sign','stamp'].includes(tool)){e.preventDefault();if(!pending)return toast(tool==='sign'?'Prvo nacrtaj potpis u panelu desno':'Izaberi pečat u panelu desno');place(i,s);return}
+  if(tool==='area'){
+    e.preventDefault();
+    if(!areaDraft){snap();const a={t:'area',pts:[[s.x,s.y],[s.x,s.y]],c:style.c,w:Math.max(.6,style.s/10)};p.an.push(a);areaDraft={i,a};drawLayer(i);return}
+    if(areaDraft.i!==i)return;const a=areaDraft.a;const now=Date.now();const lp=a.pts[a.pts.length-2];
+    if(now-lastTap<400&&lp&&Math.hypot(lp[0]-s.x,lp[1]-s.y)<6/zoom){lastTap=0;finishArea();return}
+    lastTap=now;a.pts[a.pts.length-1]=[s.x,s.y];a.pts.push([s.x,s.y]);drawLayer(i);return;
+  }
+  if(tool==='pen'){
+    e.preventDefault();snap();const a={t:'pen',pts:[[s.x,s.y]],c:style.c,w:Math.max(.5,style.s/6)};p.an.push(a);drawLayer(i);const poly=L.querySelector('svg.vec g:last-of-type polyline');
+    drag(L,e,ev=>{const q=pt(ev,i);a.pts.push([+q.x.toFixed(2),+q.y.toFixed(2)]);poly&&poly.setAttribute('points',a.pts.map(q=>q.join(',')).join(' '))},()=>{if(a.pts.length<2)a.pts.push([s.x+.1,s.y+.1]);drawLayer(i)});return;
+  }
+  if(['line','arrow','measure'].includes(tool)){
+    e.preventDefault();snap();const a={t:tool,x1:s.x,y1:s.y,x2:s.x,y2:s.y,c:style.c,w:Math.max(.5,style.s/(tool==='measure'?14:7))};p.an.push(a);
+    drag(L,e,ev=>{const q=shiftSnap(s,pt(ev,i),ev);a.x2=q.x;a.y2=q.y;drawLayer(i)},()=>{if(Math.hypot(a.x2-a.x1,a.y2-a.y1)<2){p.an.pop();hist.pop();drawLayer(i);return}
+      select(i,p.an.length-1);if(tool==='measure'){if(calib){calib=false;askCalib(a)}else toast('Dužina: '+measLabel(a))}});return;
+  }
+  if(tool==='crop'){e.preventDefault();snap();const c={x:s.x,y:s.y,w:0,h:0};const old=p.crop;p.crop=c;
+    drag(L,e,ev=>{const q=pt(ev,i);c.x=Math.max(0,Math.min(s.x,q.x));c.y=Math.max(0,Math.min(s.y,q.y));c.w=Math.min(p.w,Math.max(s.x,q.x))-c.x;c.h=Math.min(p.h,Math.max(s.y,q.y))-c.y;drawLayer(i)},
+      ()=>{if(c.w<10||c.h<10){if(old)p.crop=old;else delete p.crop;hist.pop()}else toast('Isečeno – ukloni u panelu desno ako treba');drawLayer(i);props()});return}
+  if(['hl','white','box','ellipse','redact'].includes(tool)){
+    e.preventDefault();snap();
+    const a=tool==='ellipse'?{t:'ellipse',x:s.x,y:s.y,w:0,h:0,c:style.c,lw:Math.max(.5,style.s/7)}:{t:'rect',mode:tool,x:s.x,y:s.y,w:0,h:0,c:tool==='hl'?hlColor():style.c,w2:Math.max(.5,style.s/7)};p.an.push(a);
+    drag(L,e,ev=>{let q=pt(ev,i);if(ev.shiftKey&&tool==='ellipse'){const d=Math.max(Math.abs(q.x-s.x),Math.abs(q.y-s.y));q={x:s.x+Math.sign(q.x-s.x||1)*d,y:s.y+Math.sign(q.y-s.y||1)*d}}
+      a.x=Math.min(s.x,q.x);a.y=Math.min(s.y,q.y);a.w=Math.abs(q.x-s.x);a.h=Math.abs(q.y-s.y);drawLayer(i)},
+      ()=>{if(a.w<2||a.h<2){p.an.pop();hist.pop()}else if(tool==='redact')toast('Označeno – podaci se trajno brišu pri čuvanju');drawLayer(i)});
+  }
+}
+function hlColor(){return['#ffe600','#7CFC00','#00e5ff','#ff80ab'].includes(style.c)?style.c:'#ffe600'}
+function onDbl(e,i){
+  if(tool==='area'&&areaDraft){finishArea();return}
+  const t=e.target.closest('[data-k]');if(!t)return;const k=+t.dataset.k;const a=pages[i].an[k];
+  if(a&&['text','edit','note'].includes(a.t)){select(i,k);editText(anEl(i,k),e.clientX,e.clientY)}
+}
+view.addEventListener('pointermove',e=>{
+  if(tool==='area'&&areaDraft){const pg=e.target.closest&&e.target.closest('.pg');if(!pg||+pg.dataset.i!==areaDraft.i)return;const q=pt(e,areaDraft.i);const a=areaDraft.a;a.pts[a.pts.length-1]=[q.x,q.y];drawLayer(areaDraft.i);return}
+  if(tool==='edit')hoverEdit(e);
+});
+
+/* ---------- poravnanje ---------- */
+function anW(i,b,j){if(['img','rect','ellipse','note'].includes(b.t))return b.w;const e=anEl(i,j);return e?e.offsetWidth/zoom:0}
+function makeSnap(i,k){
+  const p=pages[i],a=p.an[k];if(!p.lines&&p.d>=0)lines(p);
+  const W=anW(i,a,k);const isT=a.t==='text'||a.t==='edit';const bl=isT?(a.asc||1.02)*a.s:0;let tg=null;
+  const T=()=>{const xs=[p.w/2],ys=[];(p.lines||[]).forEach(l=>{xs.push(l.x,l.x+l.w/2,l.x+l.w);ys.push(l.base)});
+    p.an.forEach((b,j)=>{if(j===k||b.pts||'x1' in b)return;const w2=anW(i,b,j);xs.push(b.x,b.x+w2/2,b.x+w2);if(b.t==='text'||b.t==='edit')ys.push(b.y+(b.asc||1.02)*b.s)});
+    return{xs,ys,ok:!!p.lines||p.d<0}};
+  return off=>{
+    if(!tg||!tg.ok)tg=T();const thr=6/zoom;let gx=null,gy=null;
+    if(!off){let best=thr,bd=null;for(const t of tg.xs)for(const m of [0,W/2,W]){const d=t-(a.x+m);if(Math.abs(d)<best){best=Math.abs(d);bd=d;gx=t}}if(bd!==null)a.x+=bd;
+      if(isT){let b2=thr,d2=null;for(const t of tg.ys){const d=t-(a.y+bl);if(Math.abs(d)<b2){b2=Math.abs(d);d2=d;gy=t}}if(d2!==null)a.y+=d2}}
+    drawLayer(i);const L=pgEl(i).querySelector('.layer');
+    if(gx!=null){const g=document.createElement('div');g.className='guide v';g.style.left=gx*zoom+'px';L.appendChild(g)}
+    if(gy!=null){const g=document.createElement('div');g.className='guide h';g.style.top=gy*zoom+'px';L.appendChild(g)}
+  }
+}
+
+/* ---------- postojeći tekst ---------- */
+const LF=new Map();let lfTried=false;
+async function localFonts(){if(lfTried||!('queryLocalFonts' in window))return;lfTried=true;try{const fs=await window.queryLocalFonts();fs.forEach(f=>LF.set(f.postscriptName,f))}catch(e){lfTried=false}}
+function famFor(ps){if(!ps)return '';if(/^Helvetica/.test(ps))return 'Arial';if(/^Times/.test(ps))return 'Times New Roman';if(/^Courier/.test(ps))return 'Courier New';const f=LF.get(ps);if(f)return f.family;let b=ps.split(/[-,]/)[0].replace(/(PS)?MT$/,'').replace(/PS$/,'');return b.replace(/([a-z])([A-Z])/g,'$1 $2')}
+const STD={Helvetica:'ArialMT','Helvetica-Bold':'Arial-BoldMT','Helvetica-Oblique':'Arial-ItalicMT','Helvetica-BoldOblique':'Arial-BoldItalicMT','Times-Roman':'TimesNewRomanPSMT','Times-Bold':'TimesNewRomanPS-BoldMT','Times-Italic':'TimesNewRomanPS-ItalicMT','Courier':'CourierNewPSMT','Courier-Bold':'CourierNewPS-BoldMT'};
+function psFor(a){const fn0=a.fn;if(STD[fn0]){const m=STD[a.b&&!/Bold/.test(fn0)?fn0.split('-')[0]+'-Bold':fn0]||STD[fn0];return[m]}const base=a.fn.replace(/[-,](Bold|BoldMT|Regular|Roman|BoldItalic|Italic)?(MT)?$/,'').replace(/MT$/,'');const it=/italic|oblique/i.test(a.fn);
+  if(a.b)return[...(it?[base+'-BoldItalic',base+'-BoldItalicMT']:[]),base+'-Bold',base+'-BoldMT',base+',Bold',a.fn];
+  return[...(it?[base+'-Italic',base+'-ItalicMT']:[]),a.fn.replace(/[-,]Bold(MT)?/,''),base,base+'MT',base+'-Regular',base+'PSMT'].filter((v,i,ar)=>ar.indexOf(v)===i)}
+function metrics(fam,b){const c=document.createElement('canvas').getContext('2d');c.font=`${b?'bold ':''}100px "${fam}","DejaVu Sans",Arial`;const m=c.measureText('ÁÉgjpqŠĐ');const asc=(m.fontBoundingBoxAscent||93)/100,desc=(m.fontBoundingBoxDescent||24)/100;return{asc,lh:asc+desc}}
+const pageCanvas=i=>pgEl(i).querySelector('canvas');
+function sampleColor(i,l){try{const cv=pageCanvas(i);const sc=cv.width/pages[i].w;
+  const x=Math.max(0,Math.floor(l.x*sc)),y=Math.max(0,Math.floor((l.base-l.h*.8)*sc)),w=Math.max(1,Math.min(cv.width-x,Math.ceil(l.w*sc))),h=Math.max(1,Math.min(cv.height-y,Math.ceil(l.h*sc)));
+  const d=cv.getContext('2d',{willReadFrequently:true}).getImageData(x,y,w,h).data;const cnt=new Map();for(let k=0;k<d.length;k+=4){const key=(d[k]>>3)<<10|(d[k+1]>>3)<<5|(d[k+2]>>3);cnt.set(key,(cnt.get(key)||0)+1)}
+  let bg=0,bc=-1;cnt.forEach((v,k)=>{if(v>bc){bc=v;bg=k}});const br=(bg>>10&31)*8,bgc=(bg>>5&31)*8,bb=(bg&31)*8;
+  let best=null,bd=0;for(let k=0;k<d.length;k+=4){const dd=Math.abs(d[k]-br)+Math.abs(d[k+1]-bgc)+Math.abs(d[k+2]-bb);if(dd>bd){bd=dd;best=[d[k],d[k+1],d[k+2]]}}
+  let sr=0,sg=0,sb=0,n=0;for(let k=0;k<d.length;k+=4){const key=(d[k]>>3)<<10|(d[k+1]>>3)<<5|(d[k+2]>>3);if(key===bg){sr+=d[k];sg+=d[k+1];sb+=d[k+2];n++}}
+  const H=v=>'#'+v.map(x=>Math.round(x).toString(16).padStart(2,'0')).join('');
+  return{fg:(!best||bd<60)?'#000000':H(best),bg:n?H([sr/n,sg/n,sb/n]):'#ffffff'}}catch(e){return{fg:'#000000',bg:'#ffffff'}}}
+function inkBox(i,l,bgHex){
+  const fb={x:l.x-.3,y:l.base-l.h*.8,w:l.w+.6,h:l.h*1.02};
+  try{const cv=pageCanvas(i);const sc=cv.width/pages[i].w;
+    const x0=Math.max(0,Math.floor(fb.x*sc)),y0=Math.max(0,Math.floor(fb.y*sc)),w=Math.min(cv.width-x0,Math.ceil(fb.w*sc)),h=Math.min(cv.height-y0,Math.ceil(fb.h*sc));
+    const d=cv.getContext('2d',{willReadFrequently:true}).getImageData(x0,y0,w,h).data;const n=parseInt(bgHex.slice(1),16),br=n>>16&255,bgc=n>>8&255,bb=n&255;let minx=w,maxx=-1,miny=h,maxy=-1;
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){const k=(y*w+x)*4;if(Math.abs(d[k]-br)+Math.abs(d[k+1]-bgc)+Math.abs(d[k+2]-bb)>24){if(x<minx)minx=x;if(x>maxx)maxx=x;if(y<miny)miny=y;if(y>maxy)maxy=y}}
+    if(maxx<0)return fb;const pad=Math.max(1.5,.7*sc);return{x:(x0+minx-pad)/sc,y:(y0+miny-pad)/sc,w:(maxx-minx+1+2*pad)/sc,h:(maxy-miny+1+2*pad)/sc};
+  }catch(e){return fb}}
+async function lines(p){
+  if(p.d<0)return[];if(p.lines)return p.lines;
+  const vp=p.pj.getViewport({scale:1});let tc;try{tc=await p.pj.getTextContent()}catch(e){return p.lines=[]}
+  const items=[];
+  for(const it of tc.items){
+    if(!it.str||!it.str.trim())continue;const t=pdfjsLib.Util.transform(vp.transform,it.transform);
+    if(Math.abs(t[1])>0.01*Math.abs(t[0])+.01||Math.abs(t[2])>0.01*Math.abs(t[3])+.01)continue;
+    const h=Math.hypot(t[2],t[3]);if(h<1)continue;
+    let bold=false,psn='';try{const f=p.pj.commonObjs.get(it.fontName);psn=((f&&f.name)||'').replace(/^[A-Z]{6}\+/,'');bold=/bold|black|heavy|semibold/i.test(psn)}catch(e){}
+    if(!bold){const st=tc.styles[it.fontName];bold=/bold/i.test(st&&st.fontFamily||'')}
+    items.push({x:t[4],base:t[5],h,w:Math.abs(it.width*vp.scale),s:it.str,b:bold,fn:psn});
+  }
+  items.sort((a,b)=>a.base-b.base||a.x-b.x);const out=[];
+  for(const it of items){const ln=out.find(l=>Math.abs(l.base-it.base)<it.h*.3&&Math.abs(l.h-it.h)<it.h*.3&&it.x>=l.x+l.w-it.h*.3&&it.x-(l.x+l.w)<it.h*.6&&l.fn===it.fn);
+    if(ln){const gap=it.x-(ln.x+ln.w);ln.s+=(gap>it.h*.15&&!ln.s.endsWith(' ')&&!it.s.startsWith(' ')?' ':'')+it.s;ln.w=Math.max(ln.w,it.x+it.w-ln.x);ln.b=ln.b&&it.b}else out.push({...it})}
+  out.forEach(l=>l.s=l.s.replace(/\s+$/,''));return p.lines=out.filter(l=>l.s.trim());
+}
+const hitLine=(ls,q)=>ls.find(l=>q.x>=l.x-2&&q.x<=l.x+l.w+2&&q.y>=l.base-l.h*.95&&q.y<=l.base+l.h*.3);
+async function hoverEdit(e){
+  const pg=e.target.closest&&e.target.closest('.pg');$$('.hov').forEach(h=>{if(!pg||!pg.contains(h))h.hidden=true});if(!pg)return;
+  const i=+pg.dataset.i,p=pages[i];if(!p||p.d<0)return;const ls=await lines(p);const q=pt(e,i);const l=hitLine(ls,q);const hv=pg.querySelector('.hov');if(!hv)return;
+  if(!l||e.target.closest('.an')){hv.hidden=true;return}
+  hv.hidden=false;Object.assign(hv.style,{left:(l.x-2)*zoom+'px',top:(l.base-l.h*.95-1)*zoom+'px',width:(l.w+4)*zoom+'px',height:(l.h*1.25+2)*zoom+'px'});
+}
+async function editExisting(e,i){
+  const p=pages[i];const q=pt(e,i);const cx=e.clientX,cy=e.clientY;const t=e.target.closest('[data-k]');
+  if(t){const k=+t.dataset.k;const a=p.an[k];if(a&&['edit','text','note'].includes(a.t)){select(i,k);editText(anEl(i,k),cx,cy);return}}
+  if(p.d<0)return toast('Ova stranica nema tekst iz PDF-a');
+  const l=hitLine(await lines(p),q);
+  if(!l)return toast(p.lines.length?'Ovde nema teksta – pređi mišem preko teksta pa klikni':'Na ovoj stranici nema teksta koji može da se menja (verovatno sken ili crtež)');
+  snap();await localFonts();
+  const fam=famFor(l.fn);const col=sampleColor(i,l);const m=metrics(fam,l.b);const ink=inkBox(i,l,col.bg);
+  const a={t:'edit',bx:ink.x,by:ink.y,bw:ink.w,bh:ink.h,x:l.x,y:l.base-m.asc*l.h,s:+l.h.toFixed(2),c:col.fg,bgc:col.bg,b:l.b,v:l.s,fn:l.fn,fam,asc:m.asc,lh:m.lh};
+  p.an.push(a);const k=p.an.length-1;sel={i,k};drawLayer(i);props();setTimeout(()=>editText(anEl(i,k),cx,cy),0);
+}
+
+/* ================= pretraga ================= */
+let hits=[],hitCur=-1;
+async function doSearch(){
+  const q=$('#q').value.trim().toLowerCase();hits=[];hitCur=-1;
+  if(!q){$('#qc').textContent='';pages.forEach((p,i)=>drawLayer(i));return}
+  for(let i=0;i<pages.length;i++){const ls=await lines(pages[i]);
+    for(const l of ls){const s=l.s.toLowerCase();let ix=s.indexOf(q);while(ix>=0){const f=l.w/Math.max(1,l.s.length);hits.push({i,x:l.x+ix*f,y:l.base-l.h*.85,w:Math.max(3,q.length*f),h:l.h*1.1});ix=s.indexOf(q,ix+1)}}}
+  $('#qc').textContent=hits.length?`0/${hits.length}`:'nema';pages.forEach((p,i)=>drawLayer(i));if(hits.length)gotoHit(0);
+}
+function gotoHit(n){if(!hits.length)return;hitCur=(n+hits.length)%hits.length;const h=hits[hitCur];$('#qc').textContent=`${hitCur+1}/${hits.length}`;pages.forEach((p,i)=>drawLayer(i));
+  const pg=pgEl(h.i);if(pg){const el=pg.querySelector('.hit.cur');(el||pg).scrollIntoView({block:'center',behavior:'smooth'})}setCur(h.i,false)}
+let qT;$('#q').oninput=()=>{clearTimeout(qT);qT=setTimeout(doSearch,250)};
+$('#q').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();if(!hits.length)doSearch();else gotoHit(hitCur+(e.shiftKey?-1:1))}if(e.key==='Escape'){$('#q').value='';doSearch();$('#q').blur()}};
+$('#qNext').onclick=()=>gotoHit(hitCur+1);$('#qPrev').onclick=()=>gotoHit(hitCur-1);
+
+/* ================= potpis i pečat ================= */
+let sigSel=0,stampSel=0,calib=false;
+const STAMPS=[{t:'PLAĆENO',c:'#1e7d3a'},{t:'AVANS PRIMLJEN',c:'#1e5fa8'},{t:'PRIMLJENO',c:'#1e5fa8'},{t:'ODOBRENO',c:'#1e7d3a'},{t:'NACRT',c:'#c0392b'},{t:'KOPIJA',c:'#555555'},{t:'ZA ISPLATU',c:'#c0392b'},{t:'ISPORUČENO',c:'#1e7d3a'}];
+function today(){const d=new Date();return`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}.`}
+const stampCache=new Map();
+function stampPNG(text,color,withDate,sub){
+  const key=[text,color,withDate,sub,withDate?today():''].join('|');if(stampCache.has(key))return stampCache.get(key);
+  const c=document.createElement('canvas');const ctx=c.getContext('2d');const sc=3,fs=30*sc;
+  const l2=[sub,withDate?today():''].filter(Boolean).join(' · ');ctx.font=`bold ${fs}px "DejaVu Sans",Arial`;const w1=ctx.measureText(text).width;ctx.font=`${fs*.42}px "DejaVu Sans",Arial`;const w2=l2?ctx.measureText(l2).width:0;
+  const W=Math.max(w1,w2)+fs*1.2,H=fs*(l2?1.95:1.45);c.width=W+8*sc;c.height=H+8*sc;
+  ctx.translate(4*sc,4*sc);ctx.strokeStyle=color;ctx.fillStyle=color;const r=8*sc;
+  const rr=(x,y,w,h,rad)=>{ctx.beginPath();ctx.moveTo(x+rad,y);ctx.arcTo(x+w,y,x+w,y+h,rad);ctx.arcTo(x+w,y+h,x,y+h,rad);ctx.arcTo(x,y+h,x,y,rad);ctx.arcTo(x,y,x+w,y,rad);ctx.closePath();ctx.stroke()};
+  ctx.lineWidth=2.6*sc;rr(0,0,W,H,r);ctx.lineWidth=1*sc;const g=4.2*sc;rr(g,g,W-2*g,H-2*g,r*.6);
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`bold ${fs}px "DejaVu Sans",Arial`;ctx.fillText(text,W/2,l2?H*.39:H/2+fs*.03);
+  if(l2){ctx.font=`${fs*.42}px "DejaVu Sans",Arial`;ctx.fillText(l2,W/2,H*.76)}
+  const id=ctx.getImageData(0,0,c.width,c.height);let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;for(let k=3;k<id.data.length;k+=4){if(id.data[k]&&rnd()<.06)id.data[k]*=.55}ctx.putImageData(id,0,0);
+  const u=c.toDataURL('image/png');stampCache.set(key,u);return u;
+}
+function setStamp(n){stampSel=n;const cs=store.get('stampCustom',{t:'MARTINOV DESIGN',c:'#313c4e',sub:'Veternik'});const st=n<STAMPS.length?STAMPS[n]:cs;const dt=store.get('stampDate',true);pending={src:stampPNG(st.t,st.c,dt,st.sub||''),png:true,kind:'stamp'}}
+function trimCanvas(c){const ctx=c.getContext('2d');const d=ctx.getImageData(0,0,c.width,c.height).data;let x0=c.width,y0=c.height,x1=-1,y1=-1;
+  for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(d[(y*c.width+x)*4+3]>10){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+  if(x1<0)return null;const p=6;x0=Math.max(0,x0-p);y0=Math.max(0,y0-p);x1=Math.min(c.width-1,x1+p);y1=Math.min(c.height-1,y1+p);
+  const o=document.createElement('canvas');o.width=x1-x0+1;o.height=y1-y0+1;o.getContext('2d').drawImage(c,x0,y0,o.width,o.height,0,0,o.width,o.height);return o.toDataURL('image/png')}
+function sigModal(){
+  modal(`<h2>Nacrtaj potpis</h2><p>Potpiši se mišem ili olovkom na tabletu. Potpis se pamti za sledeći put.</p>
+    <canvas id="pad"></canvas>
+    <div class="row" style="justify-content:space-between;margin-top:10px"><div class="sw" id="padCol"><button style="background:#1a2a6c" class="on" data-c="#1a2a6c" title="Plava"></button><button style="background:#111" data-c="#111111" title="Crna"></button></div>
+    <button class="btn" id="padClr">${ico('trash')}Obriši</button></div>
+    <div class="acts"><button class="btn" data-close>Otkaži</button><button class="btn dark" id="padOk">Sačuvaj potpis</button></div>`);
+  const c=$('#pad');const dpr=window.devicePixelRatio||1;c.width=c.clientWidth*dpr*1.5;c.height=c.clientHeight*dpr*1.5;const ctx=c.getContext('2d');let col='#1a2a6c';
+  ctx.lineCap='round';ctx.lineJoin='round';let last=null;const lw=3.4*dpr;
+  $$('#padCol button').forEach(b=>b.onclick=()=>{col=b.dataset.c;$$('#padCol button').forEach(x=>x.classList.toggle('on',x===b))});
+  const P=e=>{const r=c.getBoundingClientRect();return[(e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height,e.timeStamp]};
+  c.onpointerdown=e=>{c.setPointerCapture(e.pointerId);last=P(e);ctx.fillStyle=col;ctx.beginPath();ctx.arc(last[0],last[1],lw/2,0,7);ctx.fill()};
+  c.onpointermove=e=>{if(!last)return;const q=P(e);const v=Math.hypot(q[0]-last[0],q[1]-last[1])/Math.max(1,q[2]-last[2]);const w=Math.max(1.4*dpr,Math.min(4.4*dpr,lw*1.4/(1+v*.35)));
+    ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(last[0],last[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();last=q};
+  c.onpointerup=()=>last=null;$('#padClr').onclick=()=>ctx.clearRect(0,0,c.width,c.height);
+  $('#padOk').onclick=()=>{const u=trimCanvas(c);if(!u)return toast('Prvo se potpiši');closeModal();addSig(u)};
+}
+function addSig(u){const s=store.get('sigs',[]);s.push(u);if(!store.set('sigs',s))toast('Potpis radi, ali ga pregledač ne može trajno zapamtiti');sigSel=s.length-1;if(tool!=='sign')setTool('sign');else{pending={src:u,png:true,kind:'sig'};props()}toast('Potpis spreman – klikni na stranicu')}
+$('#fSig').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const im=await loadImg(await readURL(f));const c=document.createElement('canvas');const m=Math.min(1,900/im.width);c.width=im.width*m;c.height=im.height*m;const ctx=c.getContext('2d');ctx.drawImage(im,0,0,c.width,c.height);
+  const id=ctx.getImageData(0,0,c.width,c.height);for(let k=0;k<id.data.length;k+=4){const l=(id.data[k]+id.data[k+1]+id.data[k+2])/3;if(l>200)id.data[k+3]=0;else if(l>150)id.data[k+3]=Math.round(255*(200-l)/50)}ctx.putImageData(id,0,0);const u=trimCanvas(c);if(u)addSig(u)};
+
+/* ================= modal ================= */
+function modal(html){$('#mcard').innerHTML=html;$('#modal').hidden=false;$$('#mcard [data-close]').forEach(b=>b.onclick=closeModal)}
+function closeModal(){$('#modal').hidden=true;$('#mcard').innerHTML=''}
+$('#modal').addEventListener('pointerdown',e=>{if(e.target.id==='modal')closeModal()});
+function askCalib(a){const cur=lenMM(Math.hypot(a.x2-a.x1,a.y2-a.y1));
+  modal(`<h2>Kalibracija razmere</h2><p>Koliko je stvarno duga linija koju si upravo nacrtao? Upiši kotu sa crteža.</p>
+    <div class="row"><input class="inp" id="clen" type="text" inputmode="decimal" placeholder="npr. 2000" style="max-width:180px"><select class="inp" id="cun" style="max-width:90px"><option>mm</option><option>cm</option><option>m</option></select></div>
+    <p style="margin-top:8px">Sada pokazuje: ${fmtLen(cur)} (razmera 1:${+meas.ratio.toFixed(3)})</p>
+    <div class="acts"><button class="btn" data-close>Otkaži</button><button class="btn dark" id="cok">Postavi razmeru</button></div>`);
+  setTimeout(()=>$('#clen').focus(),50);
+  const go=()=>{let v=parseFloat(($('#clen').value||'').replace(',','.'));if(!(v>0))return toast('Upiši dužinu');v*=({mm:1,cm:10,m:1000})[$('#cun').value];const paper=Math.hypot(a.x2-a.x1,a.y2-a.y1)*25.4/72;snap();meas.ratio=v/paper;closeModal();pages.forEach((p,i)=>drawLayer(i));props();status();toast(`Razmera postavljena: 1:${+meas.ratio.toFixed(2)}`)};
+  $('#cok').onclick=go;$('#clen').onkeydown=e=>{if(e.key==='Enter')go()};
+}
+
+/* ================= desni panel ================= */
+const COLORS=['#111111','#313c4e','#d32f2f','#1e5fa8','#1e7d3a','#e67e22','#7b3fa0','#ffe600'];
+const NAME={text:'Tekst',edit:'Izmenjen tekst',note:'Beleška',pen:'Crtež olovkom',line:'Linija',arrow:'Strelica',ellipse:'Krug / elipsa',img:'Slika / potpis / pečat',measure:'Merenje dužine',area:'Merenje površine'};
+const RNAME={hl:'Marker',white:'Pokrij belim',box:'Okvir',redact:'Trajno uklanjanje'};
+function sizeOf(a){if(['text','edit','note'].includes(a.t))return a.s;if(a.t==='pen')return Math.round(a.w*6);if(a.t==='measure')return Math.round(a.w*14);if('x1' in a||a.t==='area')return Math.round(a.w*(a.t==='area'?10:7));if(a.t==='ellipse')return Math.round(a.lw*7);return Math.round((a.w2||1)*7)}
+function props(){
+  const P=$('#props');const a=sel&&pages[sel.i]&&pages[sel.i].an[sel.k];let h='';
+  if(a){h+=`<h3 class="tt">${a.t==='rect'?RNAME[a.mode]:NAME[a.t]}</h3>`;if(a.t==='measure'||a.t==='area')h+=`<p>Vrednost: <b style="color:var(--fg)">${measLabel(a)}</b></p>`;else h+=`<p>Plava ručica = pomeranje. Strelice na tastaturi = fino pomeranje.</p>`}
+  else h+=`<h3 class="tt">${TOOLS[tool]}</h3><p>${HINT[tool]||''}</p>`;
+  const styleable=a?!(a.t==='img'||(a.t==='rect'&&['white','redact'].includes(a.mode))||a.t==='note'):['text','pen','hl','line','arrow','box','ellipse','measure','area'].includes(tool);
+  if(styleable){
+    const cc=a?a.c:(tool==='hl'?hlColor():style.c);const cols=(a&&a.t==='rect'&&a.mode==='hl')||(!a&&tool==='hl')?['#ffe600','#7CFC00','#00e5ff','#ff80ab']:COLORS;
+    h+=`<h3>Boja</h3><div class="sw" id="sw">${cols.map(c=>`<button style="background:${c}" data-c="${c}" class="${cc===c?'on':''}" title="${c}"></button>`).join('')}<input type="color" id="cpick" value="${cc||'#000000'}" title="Druga boja"></div>`;
+    const isTxt=a?['text','edit'].includes(a.t):tool==='text';
+    if(!(a&&a.t==='rect'&&a.mode==='hl')&&tool!=='hl'||a&&a.t!=='rect'){const sz=a?sizeOf(a):style.s;
+      h+=`<div class="row"><label>${isTxt?'Veličina':'Debljina'}</label><input type="range" id="sz" min="${isTxt?6:1}" max="${isTxt?72:40}" step="${isTxt?.5:1}" value="${sz}"><input class="num" id="szn" value="${+(+sz).toFixed(1)}"></div>`}
+    if(isTxt)h+=`<button class="btn" id="bold">${ico('bold')}${(a?a.b:style.b)?'Podebljano':'Normalno'}</button>`;
+  }
+  if(a)h+=`<div class="row" style="margin-top:14px;gap:6px"><button class="btn" id="dupA">${ico('copy')}Dupliraj</button><button class="btn red" id="delA">${ico('trash')}Obriši</button></div>`;
+  if(!a&&tool==='sign'){const s=store.get('sigs',[]);
+    h+=`<h3>Tvoji potpisi</h3>${s.length?`<div class="lib">${s.map((u,k)=>`<div class="it ${k===sigSel?'on':''}" data-s="${k}"><img src="${u}"><button class="x" data-del="${k}" title="Obriši potpis">×</button></div>`).join('')}</div>`:'<p>Još nema sačuvanih potpisa.</p>'}
+      <div style="display:grid;gap:6px;margin-top:10px"><button class="btn dark w" id="sigNew">${ico('sign')}Nacrtaj potpis</button><button class="btn w" id="sigUp">${ico('img')}Učitaj sliku potpisa</button></div>
+      <p style="margin-top:8px">Kod slike sa papira bela pozadina se sama uklanja.</p>`}
+  if(!a&&tool==='stamp'){const cs=store.get('stampCustom',{t:'MARTINOV DESIGN',c:'#313c4e',sub:'Veternik'});const dt=store.get('stampDate',true);
+    h+=`<h3>Pečati</h3><div class="lib">${STAMPS.map((s,k)=>`<div class="it ${k===stampSel?'on':''}" data-st="${k}"><img src="${stampPNG(s.t,s.c,dt,'')}"></div>`).join('')}<div class="it ${stampSel===STAMPS.length?'on':''}" data-st="${STAMPS.length}" title="Moj pečat"><img src="${stampPNG(cs.t,cs.c,dt,cs.sub)}"></div></div>
+      <label class="chk"><input type="checkbox" id="stD" ${dt?'checked':''}>Dodaj današnji datum</label>
+      <h3>Moj pečat</h3><input class="inp" id="stT" value="${esc(cs.t)}" placeholder="Tekst pečata"><input class="inp" id="stS" style="margin-top:6px" value="${esc(cs.sub||'')}" placeholder="Drugi red, npr. Veternik">
+      <div class="row"><label>Boja</label><input type="color" id="stC" value="${cs.c}"></div>`}
+  if(!a&&tool==='img')h+=`<button class="btn w" id="imgPick">${ico('img')}Izaberi drugu sliku</button>`;
+  if(!a&&(tool==='measure'||tool==='area'))h+=`<h3>Razmera crteža</h3><div class="row"><label>1 :</label><input class="num" id="ratio" style="width:110px" value="${+meas.ratio.toFixed(4)}"></div>
+      <p>1:1 = mere na papiru. Za crtež u razmeri 1:5 upiši 5.</p><button class="btn w" id="calibB">${ico('ruler')}Kalibriši po poznatoj meri</button>
+      <p style="margin-top:8px">Klikni dugme, pa nacrtaj liniju preko kote čiju dužinu znaš.</p>`;
+  if(!a&&tool==='crop'){const p=pages[cur];h+=p&&p.crop?`<button class="btn w red" id="uncrop">${ico('x')}Ukloni isecanje sa ove stranice</button>`:'<p>Trenutna stranica nije isečena.</p>'}
+  if(!a&&tool==='redact')h+=`<div class="box"><b>Kako radi</b><p style="margin:4px 0 0">Crni pravougaonici se pri čuvanju utiskuju u stranicu – ta stranica postaje slika, pa tekst ispod više ne postoji i ne može se kopirati ni pretražiti. Ostale stranice ostaju normalne.</p></div>`;
+  if(!a&&tool==='white')h+=`<p>Za skrivanje cena ili ličnih podataka pred slanje koristi <b>Ukloni</b> – Pokrij samo prekriva, a tekst ostaje ispod.</p>`;
+  const fc=docs.reduce((n,d)=>n+d.fields.length,0);
+  if(fc)h+=`<details open><summary>Obrazac · ${fc} polja</summary><p>Klikni u plava polja na stranici i kucaj. Pri čuvanju se vrednosti upisuju u PDF.</p></details>`;
+  h+=`<details ${deco.pn||deco.wm||deco.hdr||deco.ftr?'open':''}><summary>Brojevi strana, žig, zaglavlje</summary>
+    <label class="chk"><input type="checkbox" id="dPn" ${deco.pn?'checked':''}>Brojevi strana</label>
+    <div class="row"><input class="inp" id="dPnF" value="${esc(deco.pnFmt)}"><select class="inp" id="dPnP" style="max-width:100px"><option value="bc">dole sredina</option><option value="br">dole desno</option><option value="bl">dole levo</option><option value="tr">gore desno</option></select></div>
+    <label class="chk"><input type="checkbox" id="dWm" ${deco.wm?'checked':''}>Vodeni žig</label>
+    <div class="row"><input class="inp" id="dWmT" value="${esc(deco.wmText)}"></div>
+    <div class="row"><label>Jačina</label><input type="range" id="dWmO" min="0.05" max="0.5" step="0.01" value="${deco.wmOp}"></div>
+    <div class="row"><label>Zaglavlje</label><input class="inp" id="dH" value="${esc(deco.hdr)}" placeholder="tekst gore"></div>
+    <div class="row"><label>Podnožje</label><input class="inp" id="dF" value="${esc(deco.ftr)}" placeholder="tekst dole"></div>
+    <p>{n} = broj stranice, {N} = ukupno. Važi za ceo dokument.</p></details>`;
+  h+=`<details><summary>Prečice</summary><p style="line-height:2.1">
+    <span class="kbd">V</span> izaberi <span class="kbd">E</span> izmeni <span class="kbd">T</span> tekst <span class="kbd">K</span> beleška <span class="kbd">P</span> olovka <span class="kbd">H</span> marker <span class="kbd">L</span> linija <span class="kbd">A</span> strelica <span class="kbd">R</span> okvir <span class="kbd">O</span> krug <span class="kbd">S</span> potpis <span class="kbd">G</span> pečat <span class="kbd">I</span> slika <span class="kbd">W</span> pokrij <span class="kbd">X</span> ukloni <span class="kbd">C</span> iseci <span class="kbd">M</span> dužina <span class="kbd">U</span> površina<br>
+    <span class="kbd">Ctrl+S</span> sačuvaj <span class="kbd">Ctrl+P</span> štampaj <span class="kbd">Ctrl+F</span> traži <span class="kbd">Ctrl+Z</span> poništi <span class="kbd">Ctrl+Y</span> vrati <span class="kbd">Ctrl+D</span> dupliraj <span class="kbd">Ctrl+B</span> podebljano <span class="kbd">Del</span> obriši <span class="kbd">Ctrl+točkić</span> zum</p></details>`;
+  P.innerHTML=h;
+  const A=()=>sel&&pages[sel.i].an[sel.k];
+  $$('#sw button').forEach(b=>b.onclick=()=>{const x=A();if(x){snap();x.c=b.dataset.c;drawLayer(sel.i)}else style.c=b.dataset.c;props()});
+  const cp=$('#cpick');if(cp){cp.oninput=()=>{const x=A();if(x){x.c=cp.value;drawLayer(sel.i)}else style.c=cp.value};cp.onclick=()=>{if(A())snap()}}
+  const setSz=v=>{v=+v;if(!(v>0))return;const x=A();if(!x){style.s=v;return}
+    if(['text','edit','note'].includes(x.t))x.s=v;else if(x.t==='pen')x.w=Math.max(.5,v/6);else if(x.t==='measure')x.w=Math.max(.5,v/14);else if(x.t==='area')x.w=Math.max(.5,v/10);else if('x1' in x)x.w=Math.max(.5,v/7);else if(x.t==='ellipse')x.lw=Math.max(.5,v/7);else x.w2=Math.max(.5,v/7);drawLayer(sel.i)};
+  const sz=$('#sz'),szn=$('#szn');if(sz){sz.onpointerdown=()=>{if(A())snap()};sz.oninput=()=>{szn.value=sz.value;setSz(sz.value)};szn.onchange=()=>{if(A())snap();sz.value=szn.value;setSz(szn.value)}}
+  const bb=$('#bold');if(bb)bb.onclick=toggleBold;
+  const da=$('#delA');if(da)da.onclick=delSel;const du=$('#dupA');if(du)du.onclick=dupSel;
+  $$('[data-s]').forEach(el=>el.onclick=e=>{if(e.target.dataset.del!=null){const s=store.get('sigs',[]);s.splice(+e.target.dataset.del,1);store.set('sigs',s);sigSel=0;pending=s.length?{src:s[0],png:true,kind:'sig'}:null;props();return}sigSel=+el.dataset.s;pending={src:store.get('sigs',[])[sigSel],png:true,kind:'sig'};props()});
+  const sn=$('#sigNew');if(sn)sn.onclick=sigModal;const su=$('#sigUp');if(su)su.onclick=()=>$('#fSig').click();
+  $$('[data-st]').forEach(el=>el.onclick=()=>{setStamp(+el.dataset.st);props()});
+  const stD=$('#stD');if(stD)stD.onchange=()=>{store.set('stampDate',stD.checked);setStamp(stampSel);props()};
+  const saveCS=()=>{store.set('stampCustom',{t:$('#stT').value||'PEČAT',c:$('#stC').value,sub:$('#stS').value});setStamp(STAMPS.length);props()};
+  ['#stT','#stS','#stC'].forEach(s=>{const el=$(s);if(el)el.onchange=saveCS});
+  const ip=$('#imgPick');if(ip)ip.onclick=()=>$('#fImg').click();
+  const r=$('#ratio');if(r)r.onchange=()=>{const v=parseFloat(r.value.replace(',','.'));if(v>0){snap();meas.ratio=v;pages.forEach((p,i)=>drawLayer(i));status()}};
+  const cb=$('#calibB');if(cb)cb.onclick=()=>{calib=true;if(tool!=='measure')setTool('measure');toast('Nacrtaj liniju preko kote čiju dužinu znaš',4000)};
+  const uc=$('#uncrop');if(uc)uc.onclick=()=>{snap();delete pages[cur].crop;drawLayer(cur);props()};
+  const D=(id,fn,ev='input')=>{const el=$(id);if(el)el.addEventListener(ev,()=>{fn(el);pages.forEach((p,i)=>drawLayer(i))})};
+  D('#dPn',el=>deco.pn=el.checked,'change');D('#dPnF',el=>deco.pnFmt=el.value);D('#dPnP',el=>deco.pnPos=el.value,'change');
+  D('#dWm',el=>deco.wm=el.checked,'change');D('#dWmT',el=>deco.wmText=el.value);D('#dWmO',el=>deco.wmOp=+el.value);D('#dH',el=>deco.hdr=el.value);D('#dF',el=>deco.ftr=el.value);
+  const pp=$('#dPnP');if(pp)pp.value=deco.pnPos;
+}
+function toggleBold(){const a=sel&&pages[sel.i].an[sel.k];if(a&&['text','edit','note'].includes(a.t)){snap();a.b=!a.b;drawLayer(sel.i);props();return}style.b=!style.b;props()}
+function delSel(){if(!sel)return;snap();pages[sel.i].an.splice(sel.k,1);const i=sel.i;sel=null;drawLayer(i);props()}
+function dupSel(){if(!sel)return;snap();const p=pages[sel.i];const a=JSON.parse(JSON.stringify(p.an[sel.k]));if(a.t==='edit'){a.t='text';delete a.bx}translate(a,JSON.parse(JSON.stringify(a)),12,12);p.an.push(a);select(sel.i,p.an.length-1)}
+
+/* ---------- brojevi, žig, zaglavlje ---------- */
+const decoText=(fmt,n,N)=>fmt.replace(/\{n\}/g,n).replace(/\{N\}/g,N);
+function decoItems(Wd,Hd,n,N){const it=[],fs=9;
+  if(deco.pn&&deco.pnFmt){const pos=deco.pnPos;it.push({t:decoText(deco.pnFmt,n,N),fs,x:pos==='bl'?36:pos==='bc'?Wd/2:Wd-36,y:pos==='tr'?26:Hd-20,al:pos==='bl'?'l':pos==='bc'?'c':'r'})}
+  if(deco.hdr)it.push({t:decoText(deco.hdr,n,N),fs,x:Wd/2,y:deco.pn&&deco.pnPos==='tr'?40:26,al:'c'});
+  if(deco.ftr)it.push({t:decoText(deco.ftr,n,N),fs,x:Wd/2,y:Hd-(deco.pn&&deco.pnPos==='bc'?33:20),al:'c'});
+  return it}
+function decoPreview(i,L){
+  const p=pages[i];if(!(deco.pn||deco.wm||deco.hdr||deco.ftr))return;const z=zoom;const r=p.rot%180!==0;const Wd=r?p.h:p.w,Hd=r?p.w:p.h;
+  const box=document.createElement('div');Object.assign(box.style,{position:'absolute',left:'50%',top:'50%',width:Wd*z+'px',height:Hd*z+'px',transform:`translate(-50%,-50%) rotate(${-p.rot}deg)`,pointerEvents:'none'});
+  for(const d of decoItems(Wd,Hd,i+1,pages.length)){const e=document.createElement('div');e.className='deco';e.textContent=d.t;e.style.fontSize=d.fs*z+'px';e.style.top=(d.y-d.fs*.8)*z+'px';
+    if(d.al==='l')e.style.left=d.x*z+'px';else if(d.al==='r')e.style.right=(Wd-d.x)*z+'px';else{e.style.left=d.x*z+'px';e.style.transform='translateX(-50%)'}box.appendChild(e)}
+  if(deco.wm&&deco.wmText){const e=document.createElement('div');e.className='deco';e.textContent=deco.wmText;const fs=Math.min(Wd,Hd)/Math.max(4,deco.wmText.length*.62);
+    Object.assign(e.style,{fontSize:fs*z+'px',left:'50%',top:'50%',transform:'translate(-50%,-50%) rotate(-35deg)',color:`rgba(0,0,0,${deco.wmOp})`,fontWeight:'bold'});box.appendChild(e)}
+  L.appendChild(box);
+}
+
+/* ---------- tastatura ---------- */
+document.addEventListener('keydown',e=>{
+  const ae=document.activeElement;const ed=ae&&(ae.isContentEditable||/INPUT|SELECT|TEXTAREA/.test(ae.tagName));const C=e.ctrlKey||e.metaKey;const key=e.key.toLowerCase();
+  if(C&&key==='s'){e.preventDefault();save();return}
+  if(C&&key==='o'){e.preventDefault();$('#fOpen').click();return}
+  if(C&&key==='p'){e.preventDefault();printDoc();return}
+  if(C&&key==='f'){e.preventDefault();$('#q').focus();$('#q').select();return}
+  if(C&&key==='b'){e.preventDefault();toggleBold();return}
+  if(C&&(key==='+'||key==='=')){e.preventDefault();setZoom(zoom*1.2);return}
+  if(C&&key==='-'){e.preventDefault();setZoom(zoom/1.2);return}
+  if(!$('#modal').hidden){if(e.key==='Escape')closeModal();return}
+  if(ed){if(e.key==='Escape')ae.blur();return}
+  if(C&&key==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
+  if(C&&key==='y'){e.preventDefault();redo();return}
+  if(C&&key==='d'){e.preventDefault();dupSel();return}
+  if(tool==='area'&&areaDraft){if(e.key==='Enter'){finishArea();return}if(e.key==='Escape'){cancelArea();hist.pop();return}}
+  if(e.key==='Delete'||e.key==='Backspace'){if(sel){e.preventDefault();delSel()}return}
+  if(e.key==='Escape'){deselect();setTool('select');return}
+  if(sel&&e.key.startsWith('Arrow')){e.preventDefault();const a=pages[sel.i].an[sel.k];const st=e.shiftKey?5:.5;const dx=e.key==='ArrowLeft'?-st:e.key==='ArrowRight'?st:0,dy=e.key==='ArrowUp'?-st:e.key==='ArrowDown'?st:0;
+    if(!e.repeat)snap();translate(a,JSON.parse(JSON.stringify(a)),dx,dy);drawLayer(sel.i);return}
+  if(e.key==='PageDown'&&cur<pages.length-1){setCur(cur+1,true);return}
+  if(e.key==='PageUp'&&cur>0){setCur(cur-1,true);return}
+  if(!C&&!e.altKey&&KEYS[key])setTool(KEYS[key]);
+});
+function setZoom(z){zoom=Math.max(.2,Math.min(5,z));const c=cur;rebuild();setCur(c,true)}
+$('#bZi').onclick=()=>setZoom(zoom*1.2);$('#bZo').onclick=()=>setZoom(zoom/1.2);$('#bFit').onclick=()=>setZoom(fitZoom());
+$('#bUndo').onclick=undo;$('#bRedo').onclick=redo;
+view.addEventListener('wheel',e=>{if(e.ctrlKey&&pages.length){e.preventDefault();setZoom(zoom*(e.deltaY<0?1.1:1/1.1))}},{passive:false});
+$('#bTheme').onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark';store.set('theme',r.dataset.theme)};
+{const t=store.get('theme',null);if(t)document.documentElement.dataset.theme=t}
+$('#bMore').onclick=e=>{e.stopPropagation();$('#dd').hidden=!$('#dd').hidden};
+document.addEventListener('click',e=>{if(!e.target.closest('.menu'))$('#dd').hidden=true});
+$$('#dd button').forEach(b=>b.onclick=()=>{$('#dd').hidden=true;({savesel:()=>save({only:'picked'}),split:splitDlg,images:imagesDlg,compress:compressDlg})[b.dataset.act]()});
+
+/* ================= pravljenje PDF-a ================= */
+const FONT_URL={fontB64:FONT_R,fontB64b:FONT_B},fontCache={};
+function fontBytes(id){if(!fontCache[id])fontCache[id]=fetch(new URL(FONT_URL[id],document.baseURI)).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Uint8Array(b)).catch(()=>{delete fontCache[id];return null});return fontCache[id]}
+function hex(c){const n=parseInt((c||'#000000').slice(1),16);return PDFLib.rgb((n>>16&255)/255,(n>>8&255)/255,(n&255)/255)}
+function b64(u){const s=atob(u.split(',')[1]);const b=new Uint8Array(s.length);for(let i=0;i<s.length;i++)b[i]=s.charCodeAt(i);return b}
+function wrap(txt,font,size,maxW){const out=[];for(const para of txt.split('\n')){let line='';for(const w of para.split(' ')){const t=line?line+' '+w:w;if(font.widthOfTextAtSize(t,size)>maxW&&line){out.push(line);line=w}else line=t}out.push(line)}return out}
+async function rasterPage(p,scale,redacts,q){
+  const c=document.createElement('canvas');c.width=Math.round(p.w*scale);c.height=Math.round(p.h*scale);const ctx=c.getContext('2d');await paintBase(p,ctx,scale);
+  if(p.d>=0&&docs[p.d].fields.length){const vp=p.pj.getViewport({scale:1});for(const f of docs[p.d].fields)for(const w of f.w){if(w.n!==p.n)continue;const v=formVals[`${p.d}|${f.name}`];if(!v)continue;
+    const r=vp.convertToViewportRectangle(w.r);const x=Math.min(r[0],r[2]),y=Math.min(r[1],r[3]),W=Math.abs(r[2]-r[0]),H=Math.abs(r[3]-r[1]);ctx.fillStyle='#fff';ctx.fillRect(x*scale,y*scale,W*scale,H*scale);ctx.fillStyle='#000';
+    if(f.type==='check'){ctx.font=`${H*.9*scale}px "DejaVu Sans",Arial`;ctx.fillText('✓',(x+W*.15)*scale,(y+H*.85)*scale)}else{const fs=Math.min(H*.7,12);ctx.font=`${fs*scale}px "DejaVu Sans",Arial`;ctx.fillText(String(v),(x+2)*scale,(y+H/2+fs*.35)*scale)}}}
+  ctx.fillStyle='#000';for(const r of redacts)ctx.fillRect(r.x*scale,r.y*scale,r.w*scale,r.h*scale);
+  return{bytes:b64(c.toDataURL('image/jpeg',q)),jpg:true};
+}
+async function buildPdf(list,opt={}){
+  const {PDFDocument,degrees,LineCapStyle}=PDFLib;const out=await PDFDocument.create();out.registerFontkit(fontkit);
+  const src=new Map(),cp=new Map(),fonts={},lfonts={},missing=new Set();
+  const F=async b=>{const k=b?'b':'r';if(k in fonts)return fonts[k];fonts[k]=null;const fb=await fontBytes(b?'fontB64b':'fontB64');if(fb){try{fonts[k]=await out.embedFont(fb,{subset:true})}catch(e){}}return fonts[k]};
+  const FL=async a=>{for(const ps of psFor(a)){if(ps in lfonts){if(lfonts[ps])return lfonts[ps];continue}lfonts[ps]=null;const lf=LF.get(ps);if(!lf)continue;try{lfonts[ps]=await out.embedFont(new Uint8Array(await (await lf.blob()).arrayBuffer()),{subset:true});return lfonts[ps]}catch(e){}}missing.add(a.fam||a.fn);return null};
+  const N=list.length;
+  for(let pi=0;pi<N;pi++){
+    const p=list[pi];const redacts=p.an.filter(a=>a.t==='rect'&&a.mode==='redact');let page,intr=0,flat=false;
+    if(opt.raster||redacts.length){
+      const r=await rasterPage(p,(opt.raster||200)/72,redacts,opt.raster?opt.q:.92);const im=await out.embedJpg(r.bytes);
+      page=out.addPage([p.w,p.h]);page.drawImage(im,{x:0,y:0,width:p.w,height:p.h});flat=true;
+    }else if(p.d<0){page=out.addPage([p.w,p.h]);if(p.bg){const im=p.bg.png?await out.embedPng(b64(p.bg.src)):await out.embedJpg(b64(p.bg.src));page.drawImage(im,{x:p.bg.x,y:p.h-p.bg.y-p.bg.h,width:p.bg.w,height:p.bg.h})}}
+    else{
+      if(!src.has(p.d)){const D=docs[p.d];const sd=await PDFDocument.load(D.bytes,{ignoreEncryption:true});
+        if(D.fields.length){try{sd.registerFontkit(fontkit);const form=sd.getForm();const fb=await fontBytes('fontB64');const ff=fb?await sd.embedFont(fb):null;
+          for(const f of D.fields){const v=formVals[`${p.d}|${f.name}`];try{const fld=form.getField(f.name);if(f.type==='text')fld.setText(v||'');else if(f.type==='check')v?fld.check():fld.uncheck();else if(f.type==='drop'&&v)fld.select(v)}catch(e){}}
+          if(ff)form.updateFieldAppearances(ff);form.flatten()}catch(e){console.warn(e)}}
+        src.set(p.d,sd)}
+      if(!cp.has(p.d)){const ns=[...new Set(list.filter(q=>q.d===p.d&&!opt.raster&&!q.an.some(a=>a.t==='rect'&&a.mode==='redact')).map(q=>q.n-1))];
+        const arr=await out.copyPages(src.get(p.d),ns);cp.set(p.d,new Map(ns.map((n,i)=>[n,arr[i]])))}
+      /* sve stranice jednog PDF-a se kopiraju odjednom – zajedničke slike i fontovi se ne ponavljaju (manji fajl) */
+      const cm=cp.get(p.d);page=cm.get(p.n-1);if(page)cm.delete(p.n-1);else[page]=await out.copyPages(src.get(p.d),[p.n-1]);out.addPage(page);intr=page.getRotation().angle||0;
+    }
+    page.setRotation(degrees(((intr+p.rot)%360+360)%360));
+    const vp=(!flat&&p.d>=0)?p.pj.getViewport({scale:1}):null;
+    const P=(x,y)=>vp?vp.convertToPdfPoint(x,y):[x,p.h-y];
+    const rect=(x,y,w,h)=>{const a=P(x,y),b=P(x+w,y+h);return{x:Math.min(a[0],b[0]),y:Math.min(a[1],b[1]),width:Math.abs(b[0]-a[0]),height:Math.abs(b[1]-a[1])}};
+    const line=(x1,y1,x2,y2,w,c)=>{const a=P(x1,y1),b=P(x2,y2);page.drawLine({start:{x:a[0],y:a[1]},end:{x:b[0],y:b[1]},thickness:w,color:hex(c),lineCap:LineCapStyle.Round})};
+    const path=(pts,o)=>{const q=pts.map(v=>P(v[0],v[1]));page.drawSvgPath('M'+q.map(v=>`${v[0]} ${-v[1]}`).join(' L')+' Z',{x:0,y:0,...o})};
+    const text=async(t,x,y,size,c,font,rot)=>{const q=P(x,y);page.drawText(t,{x:q[0],y:q[1],size,font,color:hex(c),rotate:degrees((rot||0)+intr)})};
+    for(const a of p.an){
+      if(a.t==='pen'){for(let j=1;j<a.pts.length;j++)line(a.pts[j-1][0],a.pts[j-1][1],a.pts[j][0],a.pts[j][1],a.w,a.c)}
+      else if(a.t==='line'||a.t==='arrow'){line(a.x1,a.y1,a.x2,a.y2,a.w,a.c);if(a.t==='arrow')path(arrowHead(a.x1,a.y1,a.x2,a.y2,a.w),{color:hex(a.c),borderColor:hex(a.c),borderWidth:a.w*.5})}
+      else if(a.t==='measure'){const d=dimGeom(a);line(a.x1,a.y1,a.x2,a.y2,a.w,a.c);line(a.x1+d.nx*d.t,a.y1+d.ny*d.t,a.x1-d.nx*d.t,a.y1-d.ny*d.t,a.w,a.c);line(a.x2+d.nx*d.t,a.y2+d.ny*d.t,a.x2-d.nx*d.t,a.y2-d.ny*d.t,a.w,a.c);
+        const f=await F(false);const fs=Math.max(7,a.w*5);const lbl=measLabel(a);const tw=f.widthOfTextAtSize(lbl,fs);let ang=d.ang;if(ang>90)ang-=180;if(ang<-90)ang+=180;const rad=ang*Math.PI/180;
+        const ox=d.mx+Math.sin(rad)*3,oy=d.my-Math.cos(rad)*3;await text(lbl,ox-Math.cos(rad)*tw/2,oy-Math.sin(rad)*tw/2,fs,a.c,f,-ang)}
+      else if(a.t==='area'){path(a.pts,{color:hex(a.c),opacity:.12,borderColor:hex(a.c),borderWidth:a.w,borderOpacity:1});
+        const f=await F(false);const b=bbox(a);const fs=Math.max(8,a.w*5);const lbl=measLabel(a);await text(lbl,b.x+b.w/2-f.widthOfTextAtSize(lbl,fs)/2,b.y+b.h/2+fs*.35,fs,a.c,f)}
+      else if(a.t==='ellipse'){const c=P(a.x+a.w/2,a.y+a.h/2);page.drawEllipse({x:c[0],y:c[1],xScale:a.w/2,yScale:a.h/2,borderColor:hex(a.c),borderWidth:a.lw||1})}
+      else if(a.t==='rect'){const r=rect(a.x,a.y,a.w,a.h);
+        if(a.mode==='hl')page.drawRectangle({...r,color:hex(a.c||'#ffe600'),opacity:.4});else if(a.mode==='white')page.drawRectangle({...r,color:PDFLib.rgb(1,1,1)});
+        else if(a.mode==='redact'){if(!flat)page.drawRectangle({...r,color:PDFLib.rgb(0,0,0)})}else page.drawRectangle({...r,borderColor:hex(a.c),borderWidth:a.w2})}
+      else if(a.t==='img'){const im=a.png?await out.embedPng(b64(a.src)):await out.embedJpg(b64(a.src));page.drawImage(im,rect(a.x,a.y,a.w,a.h))}
+      else if(a.t==='note'){page.drawRectangle({...rect(a.x,a.y,a.w,a.h),color:PDFLib.rgb(1,.953,.65),borderColor:PDFLib.rgb(.85,.76,.29),borderWidth:.6});const f=await F(!!a.b);
+        let yy=a.y+4+a.s;for(const l of wrap(a.v,f,a.s,a.w-12)){if(yy>a.y+a.h-2)break;if(l)await text(l,a.x+6,yy,a.s,'#333333',f);yy+=a.s*1.25}}
+      else if(a.t==='text'||a.t==='edit'){
+        if(a.t==='edit')page.drawRectangle({...rect(a.bx,a.by,a.bw,a.bh),color:hex(a.bgc||'#ffffff')});
+        if(!a.v.trim())continue;const font=(a.fn&&await FL(a))||await F(!!a.b);const asc=a.asc||1.02,lh=a.lh||1.2;
+        const ls=a.v.split('\n');for(let j=0;j<ls.length;j++)if(ls[j])await text(ls[j],a.x,a.y+a.s*(asc+lh*j),a.s,a.c,font)}
+    }
+    if(p.crop){const r=rect(p.crop.x,p.crop.y,p.crop.w,p.crop.h);page.setCropBox(r.x,r.y,r.width,r.height)}
+    if(deco.pn||deco.wm||deco.hdr||deco.ftr){
+      const rr=p.rot%180!==0;const Wd=rr?p.h:p.w,Hd=rr?p.w:p.h;
+      const D2V=(X,Y)=>p.rot===90?[Y,p.h-X]:p.rot===180?[p.w-X,p.h-Y]:p.rot===270?[p.w-Y,X]:[X,Y];
+      const f=await F(false),fb=await F(true);const Rr=intr+p.rot;
+      const dtext=(t,X,Y,size,font,col,op,extra)=>{const v=D2V(X,Y);const q=P(v[0],v[1]);page.drawText(t,{x:q[0],y:q[1],size,font,color:col||PDFLib.rgb(.25,.25,.25),opacity:op==null?1:op,rotate:degrees(Rr+(extra||0))})};
+      for(const d of decoItems(Wd,Hd,pi+1,N)){const tw=f.widthOfTextAtSize(d.t,d.fs);const X=d.al==='l'?d.x:d.al==='c'?d.x-tw/2:d.x-tw;dtext(d.t,X,d.y,d.fs,f)}
+      if(deco.wm&&deco.wmText){const fs=Math.min(Wd,Hd)/Math.max(4,deco.wmText.length*.62);const tw=fb.widthOfTextAtSize(deco.wmText,fs);const an=35*Math.PI/180;
+        const X=Wd/2-Math.cos(an)*tw/2+Math.sin(an)*fs*.35,Y=Hd/2+Math.sin(an)*tw/2+Math.cos(an)*fs*.35;dtext(deco.wmText,X,Y,fs,fb,PDFLib.rgb(0,0,0),deco.wmOp,35)}
+    }
+  }
+  out.setProducer('Martinov PDF');out.setCreator('Martinov PDF');
+  return{bytes:await out.save({useObjectStreams:true}),missing};
+}
+function download(bytes,name,type){const url=URL.createObjectURL(new Blob([bytes],{type:type||'application/pdf'}));const l=document.createElement('a');l.href=url;l.download=name;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),8000)}
+function flush(){const ae=document.activeElement;if(ae&&ae.isContentEditable)ae.blur();if(areaDraft)finishArea()}
+async function save(o={}){
+  if(!pages.length)return toast('Prvo otvori PDF');flush();
+  const list=o.only==='picked'?[...picked].sort((a,b)=>a-b).map(i=>pages[i]):pages;
+  if(o.only==='picked'&&!list.length)return toast('Označi stranice u koloni Stranice (Ctrl+klik)');
+  if(isMob()&&!o.direct)return saveSheet(o);
+  const name0=baseName+(o.only==='picked'?'_stranice':'_izmenjen')+'.pdf';const h=await pickSave(name0);if(h===false)return;
+  toast('Pravim PDF…',8000);await localFonts();
+  try{const {bytes,missing}=await buildPdf(list);const name=await writeOut(h,bytes,name0);if(o.only!=='picked')markSaved();
+    const kb=Math.round(bytes.length/1024);toast(missing.size?`Sačuvano: ${name} (${kb} KB) · font ${[...missing].join(', ')} nije nađen – korišćen sličan`:`Sačuvano: ${name} (${kb} KB)`,4500)}
+  catch(e){console.error(e);toast('Greška pri čuvanju: '+e.message,6000)}
+}
+$('#bSave').onclick=()=>save();
+async function renderBytesToImages(bytes,dpi,fmt,q){
+  const pdf=await pdfjsLib.getDocument({data:bytes}).promise;const out=[];
+  for(let n=1;n<=pdf.numPages;n++){const pg=await pdf.getPage(n);const vp=pg.getViewport({scale:dpi/72});const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+    await pg.render({canvasContext:ctx,viewport:vp}).promise;out.push(c.toDataURL(fmt==='jpg'?'image/jpeg':'image/png',q||.92))}
+  return out}
+async function printDoc(){
+  if(!pages.length)return toast('Prvo otvori PDF');flush();toast('Pripremam štampu…',8000);
+  try{const {bytes}=await buildPdf(pages);const imgs=await renderBytesToImages(bytes,150,'jpg',.92);const pa=$('#printArea');pa.innerHTML=imgs.map(u=>`<img src="${u}">`).join('');
+    await Promise.all([...pa.querySelectorAll('img')].map(im=>im.decode().catch(()=>{})));$('#toast').classList.remove('show');window.print();setTimeout(()=>pa.innerHTML='',1500)}
+  catch(e){toast('Štampa nije uspela: '+e.message,6000)}
+}
+$('#bPrint').onclick=printDoc;
+function parseRanges(s,N){const out=[];for(const part of s.split(/[;,]+/)){const m=part.trim().match(/^(\d+)\s*(?:-\s*(\d+))?$/);if(!m)continue;let a=+m[1],b=m[2]?+m[2]:a;a=Math.max(1,a);b=Math.min(N,b);if(a<=b)out.push([a,b])}return out}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function toggleVal(id){let v=$(id+' .on').dataset.v;$$(id+' button').forEach(b=>b.onclick=()=>{v=b.dataset.v;$$(id+' button').forEach(x=>x.classList.toggle('on',x===b));if(b.onpick)b.onpick()});return()=>v}
+function splitDlg(){
+  if(!pages.length)return toast('Prvo otvori PDF');
+  modal(`<h2>Podeli PDF</h2><p>Dokument ima ${pages.length} stranica. Svaki deo se čuva kao poseban PDF.</p>
+    <div class="toggle" id="spM"><button class="on" data-v="each">Svaka stranica posebno</button><button data-v="rng">Po opsezima</button></div>
+    <div style="margin-top:12px"><input class="inp" id="spT" placeholder="Opsezi, npr. 1-3, 4, 5-8"></div>
+    <div class="acts"><button class="btn" data-close>Otkaži</button><button class="btn dark" id="spGo">${ico('split')}Podeli</button></div>`);
+  const gm=toggleVal('#spM');
+  $('#spGo').onclick=async()=>{const N=pages.length;const typed=$('#spT').value.trim();const groups=(gm()==='each'&&!typed)?pages.map((p,i)=>[i+1,i+1]):parseRanges(typed,N);if(!groups.length)return toast('Upiši opsege, npr. 1-3, 4');closeModal();flush();
+    const dir=await pickDir();if(dir===false)return;
+    for(let g=0;g<groups.length;g++){const [a,b]=groups[g];toast(`Pravim ${g+1} od ${groups.length}…`,8000);const {bytes}=await buildPdf(pages.slice(a-1,b));await writeDir(dir,bytes,`${baseName}_${a===b?a:a+'-'+b}.pdf`);if(!dir)await wait(400)}
+    toast(dir?`Gotovo – ${groups.length} fajlova u folderu ${dir.name}`:`Gotovo – ${groups.length} fajlova`)};
+}
+function imagesDlg(){
+  if(!pages.length)return toast('Prvo otvori PDF');
+  modal(`<h2>Sačuvaj kao slike</h2><p>Svaka stranica postaje posebna slika, sa svim izmenama.</p>
+    <div class="row"><label>Format</label><div class="toggle" id="imF" style="flex:1"><button class="on" data-v="jpg">JPG – manji</button><button data-v="png">PNG – oštriji</button></div></div>
+    <div class="row"><label>Kvalitet</label><div class="toggle" id="imD" style="flex:1"><button data-v="96">Ekran</button><button class="on" data-v="150">Standard</button><button data-v="300">Štampa</button></div></div>
+    <label class="chk"><input type="checkbox" id="imSel" ${picked.size>1?'checked':''}>Samo označene stranice${picked.size>1?` (${picked.size})`:''}</label>
+    <div class="acts"><button class="btn" data-close>Otkaži</button><button class="btn dark" id="imGo">${ico('photo')}Sačuvaj slike</button></div>`);
+  const gf=toggleVal('#imF'),gd=toggleVal('#imD');
+  $('#imGo').onclick=async()=>{const fmt=gf(),dpi=+gd(),onlySel=$('#imSel').checked;closeModal();flush();const dir=await pickDir();if(dir===false)return;toast('Pravim slike…',10000);
+    const idx=onlySel&&picked.size?[...picked].sort((a,b)=>a-b):pages.map((p,i)=>i);const {bytes}=await buildPdf(idx.map(i=>pages[i]));const imgs=await renderBytesToImages(bytes,dpi,fmt,.9);
+    for(let k=0;k<imgs.length;k++){await writeDir(dir,b64(imgs[k]),`${baseName}_strana_${idx[k]+1}.${fmt}`,fmt==='jpg'?'image/jpeg':'image/png');if(!dir)await wait(350)}
+    toast(dir?`Sačuvano slika: ${imgs.length} u folderu ${dir.name}`:`Sačuvano slika: ${imgs.length}`)};
+}
+function compressDlg(){
+  if(!pages.length)return toast('Prvo otvori PDF');
+  modal(`<h2>Smanji veličinu</h2><p>Stranice se pretvaraju u slike nižeg kvaliteta. Fajl je mnogo manji, ali tekst se više ne može označiti ni pretraživati. Original ostaje netaknut.</p>
+    <div class="toggle" id="cmQ"><button data-v="200|0.82">Malo</button><button class="on" data-v="130|0.72">Srednje</button><button data-v="96|0.6">Najviše</button></div>
+    <div class="acts"><button class="btn" data-close>Otkaži</button><button class="btn dark" id="cmGo">${ico('zip')}Smanji i sačuvaj</button></div>`);
+  const gq=toggleVal('#cmQ');
+  $('#cmGo').onclick=async()=>{const [dpi,q]=gq().split('|').map(Number);closeModal();flush();const h=await pickSave(baseName+'_manji.pdf');if(h===false)return;toast('Smanjujem…',15000);
+    const orig=docs.reduce((s,d)=>s+d.bytes.length,0);const {bytes}=await buildPdf(pages,{raster:dpi,q});await writeOut(h,bytes,baseName+'_manji.pdf');
+    toast(`Sačuvano: ${Math.round(bytes.length/1024)} KB`+(orig?` (original ${Math.round(orig/1024)} KB)`:''),5000)};
+}
+
+window.addEventListener('beforeunload',e=>{if(hist.length){e.preventDefault();e.returnValue=''}});
+setTool('select');status();
+</script>
+<script>/* ===== Martinov aplikacija: PDF u aplikaciji — telefon, otvaranje iz poslova, slanje, prilaganje poslu ===== */
+const HTML=document.documentElement;
+const isPhone=()=>/Android|iPhone|iPad/i.test(navigator.userAgent);
+const isMob=()=>matchMedia('(max-width:760px)').matches;
+const APP=(()=>{try{const p=window.parent;return p!==window&&p.__mtPdf?p.__mtPdf:null}catch(e){return null}})();
+let CTX=null,SAVED='';
+function markSaved(){try{SAVED=S()}catch(e){}}
+window.__pdfDirty=()=>pages.length>0&&hist.length>0&&S()!==SAVED;
+const kbOf=b=>Math.max(1,Math.round(b.length/1024));
+const normQ=s=>String(s||'').toLowerCase().replace(/đ/g,'dj').normalize('NFD').replace(/[̀-ͯ]/g,'');
+
+/* ---------- čuvanje: na računaru se bira mesto (pamti folder), na telefonu ide u Preuzimanja ---------- */
+async function pickSave(name,type){
+  if(!window.showSaveFilePicker||isPhone())return null;
+  const pdf=!type||type==='application/pdf';
+  try{return await window.showSaveFilePicker({suggestedName:name,id:'martinov',...(CTX&&CTX.handle?{startIn:CTX.handle}:{}),...(pdf?{types:[{description:'PDF',accept:{'application/pdf':['.pdf']}}]}:{})})}
+  catch(e){return e&&e.name==='AbortError'?false:null}}
+async function writeOut(h,bytes,name,type){type=type||'application/pdf';
+  if(h){try{const w=await h.createWritable();await w.write(new Blob([bytes],{type}));await w.close();return h.name}catch(e){console.warn(e)}}
+  download(bytes,name,type);return name}
+async function pickDir(){if(!window.showDirectoryPicker||isPhone())return null;
+  try{return await window.showDirectoryPicker({id:'martinov',mode:'readwrite',...(CTX&&CTX.handle?{startIn:CTX.handle}:{})})}catch(e){return e&&e.name==='AbortError'?false:null}}
+async function freeName(dir,name){const m=name.match(/^(.*?)(\.[^.]+)?$/);for(let i=1;i<200;i++){const n=i===1?name:`${m[1]} (${i})${m[2]||''}`;try{await dir.getFileHandle(n)}catch(e){return n}}return name}
+async function writeDir(dir,bytes,name,type){type=type||'application/pdf';
+  if(dir){try{const n=await freeName(dir,name);const fh=await dir.getFileHandle(n,{create:true});const w=await fh.createWritable();await w.write(new Blob([bytes],{type}));await w.close();return n}catch(e){console.warn(e)}}
+  download(bytes,name,type);return name}
+
+/* ---------- trenutni PDF: bez izmena = original bajt po bajt, inače nova kopija ---------- */
+function pristine(){
+  if(docs.length!==1||!docs[0].pdf)return false;const D=docs[0];if(pages.length!==D.pdf.numPages)return false;
+  if(deco.pn||deco.wm||deco.hdr||deco.ftr)return false;
+  for(let i=0;i<pages.length;i++){const p=pages[i];if(p.d!==0||p.n!==i+1||p.rot||p.an.length||p.crop||p.bg)return false}
+  for(const f of D.fields)if(formVals[`0|${f.name}`]!==f.val)return false;
+  return true}
+async function currentPdf(){flush();if(pristine())return{bytes:docs[0].bytes,name:baseName+'.pdf',orig:true};
+  await localFonts();const {bytes}=await buildPdf(pages);return{bytes,name:baseName+'_izmenjen.pdf'}}
+
+/* ---------- slanje (Viber, WhatsApp, mejl…) ---------- */
+const canShare=()=>{try{return!!(navigator.canShare&&navigator.canShare({files:[new File(['x'],'a.pdf',{type:'application/pdf'})]}))}catch(e){return false}};
+async function sharePdf(){
+  if(!pages.length)return toast('Prvo otvori PDF');
+  toast('Pripremam PDF…',8000);let r;try{r=await currentPdf()}catch(e){return toast('Greška: '+e.message,5000)}
+  const f=new File([r.bytes],r.name,{type:'application/pdf'});
+  const ask=()=>{modal(`<h2>PDF je spreman</h2><p>${esc(r.name)} · ${kbOf(r.bytes)} KB</p><div class="acts"><button class="btn" data-close>Otkaži</button><button class="btn dark" id="shGo">${ico('share')}Pošalji</button></div>`);$('#shGo').onclick=()=>{closeModal();go(true)}};
+  const go=async again=>{try{await navigator.share({files:[f]});markSaved();$('#toast').classList.remove('show')}
+    catch(e){if(e&&e.name==='NotAllowedError'&&!again)return ask();$('#toast').classList.remove('show');if(e&&e.name!=='AbortError')toast('Slanje nije uspelo: '+(e.message||e.name),5000)}};
+  $('#toast').classList.remove('show');go(false)}
+
+/* ---------- prilaganje poslu (fajlovi posla u aplikaciji) ---------- */
+function attachDlg(){
+  if(!APP)return;if(!pages.length)return toast('Prvo otvori PDF');
+  let jobs=[];try{jobs=APP.jobs()||[]}catch(e){}
+  if(!jobs.length)return toast('Nema poslova u aplikaciji',3500);
+  modal(`<h2>Priloži poslu</h2><p>PDF se dodaje u fajlove posla${pristine()?'':' (sa izmenama)'}.</p><input class="inp" id="ajQ" placeholder="Traži posao, kupca ili broj fakture" autocomplete="off"><div class="opts ajl" id="ajL"></div><div class="acts"><button class="btn" data-close>Otkaži</button></div>`);
+  const draw=()=>{const q=normQ($('#ajQ').value).trim();const arr=jobs.filter(j=>!q||normQ(j.name+' '+(j.sub||'')).includes(q)).slice(0,80);
+    $('#ajL').innerHTML=arr.length?arr.map(j=>`<button data-j="${esc(j.id)}"${j.active?'':' class="old"'}>${ico('page')}<span>${esc(j.name)}<small>${esc(j.sub||'')}${j.active?'':(j.sub?' · ':'')+(j.active===false?'završen':'')}</small></span></button>`).join(''):'<p>Nema posla sa tim imenom.</p>';
+    $$('#ajL button').forEach(b=>b.onclick=()=>doAttach(jobs.find(j=>j.id===b.dataset.j)))};
+  $('#ajQ').oninput=draw;draw();if(!isMob())$('#ajQ').focus()}
+async function doAttach(j){if(!j)return;closeModal();toast('Prilažem…',20000);
+  try{const r=await currentPdf();const nm=await APP.attachJob(j.id,r.bytes,r.name);markSaved();toast(`Priloženo poslu „${j.name}“: ${nm||r.name}`,4500)}
+  catch(e){toast('Prilaganje nije uspelo: '+((e&&e.message)||e),6000)}}
+
+/* ---------- čuvanje nazad u posao/zapis iz kog je PDF otvoren (kao novi fajl) ---------- */
+async function saveCtx(){
+  if(!CTX||!CTX.save||!pages.length)return;
+  toast('Čuvam…',20000);
+  try{const r=await currentPdf();if(r.orig){toast('Nema izmena – PDF je već u '+(CTX.where==='posao'?'poslu':'zapisu'),3500);return}
+    const nm=await CTX.save(r.bytes,r.name);markSaved();toast(`Sačuvano u ${CTX.where==='posao'?'posao':'zapis'}: ${nm||r.name} · original ostaje`,5000)}
+  catch(e){toast('Čuvanje nije uspelo: '+((e&&e.message)||e),6000)}}
+
+/* ---------- meni „Sačuvaj“ na telefonu ---------- */
+function saveSheet(o){
+  const opts=[];
+  if(CTX&&CTX.save&&o.only!=='picked')opts.push(['ctx','check',CTX.where==='posao'?'Sačuvaj u posao':'Sačuvaj u zapis',`„${CTX.label}“ – kao novi fajl, original ostaje`]);
+  if(canShare()&&o.only!=='picked')opts.push(['share','share','Pošalji…','Viber, WhatsApp, mejl…']);
+  if(APP&&o.only!=='picked')opts.push(['attach','attach','Priloži poslu…','Dodaj PDF u fajlove nekog posla']);
+  opts.push(['dl','save','Sačuvaj na telefon','U folder Preuzimanja (Download)']);
+  modal(`<h2>Sačuvaj PDF</h2><div class="opts">${opts.map(x=>`<button data-o="${x[0]}">${ico(x[1])}<span>${x[2]}<small>${esc(x[3])}</small></span></button>`).join('')}</div><div class="acts"><button class="btn" data-close>Otkaži</button></div>`);
+  $$('#mcard .opts button').forEach(b=>b.onclick=()=>{closeModal();({ctx:saveCtx,share:sharePdf,attach:attachDlg,dl:()=>save({...o,direct:true})})[b.dataset.o]()})}
+
+/* ---------- otvaranje iz aplikacije ---------- */
+window.__openPdfBlob=async(list,ctx)=>{
+  if(!list||!list.length)return;
+  CTX=ctx||null;HTML.classList.toggle('hasctx',!!(CTX&&CTX.save));
+  $('#ctxL').textContent=CTX&&CTX.label?(CTX.where==='posao'?'Posao: ':CTX.where==='zapis'?'Iz: ':'')+CTX.label:'';
+  try{const t=window.parent.document.documentElement.dataset.theme;if(t&&!store.get('theme',null))HTML.dataset.theme=t}catch(e){}
+  const files=list.map(x=>x instanceof File?x:new File([x.blob],x.name||'dokument.pdf',{type:(x.blob&&x.blob.type)||'application/pdf'}));
+  closeModal();HTML.classList.remove('medit','pOpen','srch');setTool('select');railH();
+  await loadFiles(files,false);markSaved()};
+window.__pdfCtx=c=>{CTX=c||null;HTML.classList.toggle('hasctx',!!(CTX&&CTX.save));$('#ctxL').textContent=''};
+$('#fOpen').addEventListener('change',()=>{CTX=null;HTML.classList.remove('hasctx');$('#ctxL').textContent=''});
+
+/* ---------- dodatna dugmad i ikone ---------- */
+document.querySelector('svg defs').insertAdjacentHTML('beforeend',`
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></symbol>
+<symbol id="i-attach" viewBox="0 0 24 24"><path d="m20 11.5-8.1 8.1a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>`);
+document.head.insertAdjacentHTML('beforeend',`<style>@font-face{font-family:"DejaVu Sans";src:url("${new URL(FONT_R,document.baseURI).href}")}@font-face{font-family:"DejaVu Sans";font-weight:bold;src:url("${new URL(FONT_B,document.baseURI).href}")}</style>`);
+$('#top').insertAdjacentHTML('afterbegin',`<button class="tb icon" id="bBack" title="Nazad u aplikaciju">${ico('back')}</button>`);
+$('#top .logo').insertAdjacentHTML('afterend','<span id="ctxL"></span>');
+$('#top .search').insertAdjacentHTML('beforebegin',`<button class="tb icon" id="bSrch" title="Pretraga">${ico('search')}</button>`);
+$('#bSave').insertAdjacentHTML('beforebegin',`<button class="tb" id="bShare" title="Pošalji – Viber, WhatsApp, mejl…">${ico('share')}<span>Pošalji</span></button><button class="tb" id="bCtx" title="Sačuvaj izmenjen PDF u posao – original ostaje">${ico('check')}<span>U posao</span></button>`);
+$('#dd').insertAdjacentHTML('afterbegin',(APP?`<button data-x="attach">${ico('attach')}<span>Priloži poslu…<small>Dodaj PDF u fajlove nekog posla</small></span></button>`:'')+(canShare()?`<button data-x="share">${ico('share')}<span>Pošalji…<small>Viber, WhatsApp, mejl</small></span></button>`:''));
+$$('#dd [data-x]').forEach(b=>b.onclick=()=>{$('#dd').hidden=true;({attach:attachDlg,share:sharePdf})[b.dataset.x]()});
+document.body.insertAdjacentHTML('beforeend',`<button id="fab" title="Izmeni – potpis, pečat, tekst, olovka">${ico('edit')}</button>`);
+$('#rail').insertAdjacentHTML('afterbegin',`<div class="grp gdone"><button class="tool" id="tDone" title="Gotovo – nazad na čitanje">${ico('check')}<small>Gotovo</small></button></div>`);
+if(APP)HTML.classList.add('inapp');
+if(canShare())HTML.classList.add('canshare');
+$('#bBack').onclick=()=>{try{window.parent.__mtPdfClose()}catch(e){}};
+$('#bShare').onclick=sharePdf;
+$('#bCtx').onclick=saveCtx;
+$('#bSrch').onclick=()=>{const on=HTML.classList.toggle('srch');if(on)setTimeout(()=>$('#q').focus(),30)};
+const railH=()=>{const r=$('#rail');HTML.style.setProperty('--railH',(HTML.classList.contains('medit')&&r.offsetHeight?r.offsetHeight:0)+'px')};
+const editMode=on=>{HTML.classList.toggle('medit',on);
+  if(!on){if(typeof flush==='function')flush();deselect();setTool('select');HTML.classList.remove('pOpen')}else toast('Izaberi alat dole – potpis, pečat, tekst…',2600);
+  requestAnimationFrame(railH)};
+$('#fab').onclick=()=>editMode(true);$('#tDone').onclick=()=>editMode(false);
+addEventListener('resize',railH);
+
+/* ---------- telefon: podešavanja alata kao donji panel ---------- */
+{const props0=props;props=function(){props0();const P=$('#props');if(!P||!isMob())return;const h=document.createElement('button');h.id='propsH';h.type='button';h.title='Podešavanja alata';h.innerHTML='<i></i>';h.onclick=()=>HTML.classList.toggle('pOpen');P.prepend(h)}}
+{const setTool0=setTool;setTool=function(t){setTool0(t);if(isMob()&&HTML.classList.contains('medit'))HTML.classList.toggle('pOpen',t!=='select')}}
+{const select0=select;select=function(i,k){select0(i,k);if(isMob()&&HTML.classList.contains('medit')&&sel)HTML.classList.add('pOpen')}}
+
+/* ---------- telefon: zumiranje sa dva prsta ---------- */
+(function(){let pz=null;const D=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+  view.addEventListener('touchstart',e=>{if(e.touches.length!==2||!pages.length)return;const [a,b]=e.touches;const r=view.getBoundingClientRect();
+    pz={d0:Math.max(10,D(a,b)),z0:zoom,ox:(a.clientX+b.clientX)/2-r.left,oy:(a.clientY+b.clientY)/2-r.top,k:1};view.style.transformOrigin=`${pz.ox}px ${pz.oy}px`;e.preventDefault()},{passive:false});
+  view.addEventListener('touchmove',e=>{if(!pz||e.touches.length!==2)return;e.preventDefault();const [a,b]=e.touches;pz.k=Math.max(.25/pz.z0,Math.min(5/pz.z0,D(a,b)/pz.d0));view.style.transform=`scale(${pz.k})`},{passive:false});
+  const end=()=>{if(!pz)return;const p=pz;pz=null;view.style.transform='';view.style.transformOrigin='';if(Math.abs(p.k-1)<.04)return;
+    const sx=view.scrollLeft,sy=view.scrollTop;zoom=p.z0*p.k;rebuild();view.scrollLeft=(sx+p.ox)*p.k-p.ox;view.scrollTop=(sy+p.oy)*p.k-p.oy;status()};
+  view.addEventListener('touchend',e=>{if(e.touches.length<2)end()});view.addEventListener('touchcancel',end)})();
+</script>
+</body>
+</html>

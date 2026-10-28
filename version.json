@@ -1,7 +1,12 @@
 {
- "v": "1.3.0",
+ "v": "1.4.0",
  "date": "28.10.2026.",
  "log": [
+  {
+   "v": "1.4.0",
+   "date": "28.10.2026.",
+   "t": "Novo: Krojenje ploča – materijal (ploča, cena), delovi, rez/razmak/ivica, Testera ili CNC, DXF prevuci (sam prepozna pravougaonik ili oblik), smer godova; PDF za radionicu, DXF/SVG za Aspire, ploče idu u Kupovinu i vezuju se za posao. Novo: PDF – otvara se iz menija i klikom na PDF u poslu; potpis, pečat, tekst, olovka; „U posao“ čuva izmenjen PDF kao novi fajl (original ostaje); „Priloži poslu…“; na telefonu čitanje sa zumiranjem dva prsta, a „Podeli → Martinov“ iz Vibera ili mejla otvara PDF u aplikaciji. Na računaru: „Otvori pomoću → Martinov“ za PDF fajlove. Sačuvan PDF je i do 4 puta manji."
+  },
   {
    "v": "1.3.0",
    "date": "28.10.2026.",

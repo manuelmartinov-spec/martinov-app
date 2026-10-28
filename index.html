@@ -346,6 +346,11 @@ table.g{border-collapse:separate;border-spacing:0;table-layout:fixed;background:
 .tbl-prev th{background:var(--head);position:sticky;top:0}
 
 #lb{position:fixed;inset:0;z-index:80;background:rgba(10,12,15,.92);display:flex;flex-direction:column}
+.pdfov{position:fixed;inset:0;z-index:85;background:var(--panel);padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) 0 env(safe-area-inset-left,0px)}
+.pdfov iframe{display:block;border:0;width:100%;height:100%;background:var(--panel)}
+.pdfov .pdfld{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);color:var(--muted);font-weight:600}
+.pdfov.ready .pdfld{display:none}
+html.pdfon,html.pdfon body{overflow:hidden}
 #lb header{display:flex;gap:8px;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 10px max(12px,env(safe-area-inset-left,0px));color:#fff}
 #lb header span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 #lb header a,#lb header button{color:#fff;border:1px solid rgba(255,255,255,.3);background:none;border-radius:8px;padding:7px 12px;text-decoration:none;font:600 13px var(--f-ui)}
@@ -1677,7 +1682,7 @@ function fieldInput(t,f,rid,primary){
     case'att':{const g=el('div','atts');
       cur.forEach((a,ix)=>{const d=el('div','att');const o=el('button','o');o.type='button';const img=/^image\//.test(a.type||'')||/\.(jpe?g|png|gif|webp|avif)$/i.test(a.name||'');
         if(img){const im=el('img');fileFill(im,a);im.alt=a.name||'';im.loading='lazy';o.appendChild(im)}else{o.appendChild(el('span','ti',(String(a.name||'').split('.').pop()||'fajl').slice(0,4).toUpperCase()));o.appendChild(el('span','fname',a.name||'fajl'))}
-        o.addEventListener('click',()=>openLb(a,img));d.appendChild(o);
+        o.addEventListener('click',()=>{if(!img&&window.__mtPdfAtt&&isPdf(a)){window.__mtPdfAtt(a,t,f,rid);return}openLb(a,img)});d.appendChild(o);
         if(!dis){const x=el('button','x','×');x.type='button';x.setAttribute('aria-label','Ukloni fajl');x.addEventListener('click',()=>{const now=val(t,f,rec());const removed=now[ix];setVal(t.id,rid,f,now.filter((_,j)=>j!==ix));toast('Fajl uklonjen','Vrati',()=>{const n2=val(t,f,rec()).slice();n2.splice(ix,0,removed);setVal(t.id,rid,f,n2)})});d.appendChild(x)}
         g.appendChild(d)});
       const up=uploading[key]||0;for(let i=0;i<up;i++)g.appendChild(el('div','att up','Šaljem…'));
@@ -1963,18 +1968,22 @@ Object.assign(P,{
   coins:'<ellipse cx="10" cy="5.5" rx="6" ry="2.5"/><path d="M4 5.5v4.5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V5.5M4 10v4.5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V10"/>',
   tag:'<path d="M3 3.5h6.3l7.7 7.7-5.8 5.8L3.5 9.3z"/><circle cx="6.8" cy="7.2" r="1.3"/>',
   print:'<path d="M5.5 7.5V3h9v4.5M5.5 14.5h-2v-6h13v6h-2"/><rect x="5.5" y="11.5" width="9" height="5.5"/>',
-  bell:'<path d="M5 13.5V9a5 5 0 0 1 10 0v4.5l1.5 1.5h-13zM8.5 17h3"/>'
+  bell:'<path d="M5 13.5V9a5 5 0 0 1 10 0v4.5l1.5 1.5h-13zM8.5 17h3"/>',
+  nest:'<rect x="2.5" y="4" width="15" height="12" rx="1"/><path d="M8 4v12M8 9.5h9.5M12.5 9.5V16"/>',
+  pdf:'<path d="M5.5 2.8h6.2l3.3 3.3v10.3a.8.8 0 0 1-.8.8H5.5a.8.8 0 0 1-.8-.8V3.6a.8.8 0 0 1 .8-.8z"/><path d="M11.5 3v3.3h3.3"/><path d="M6.8 13.8v-3.6h1.3a1.1 1.1 0 0 1 0 2.2H6.8M10.4 13.8v-3.6h.9a1.8 1.8 0 0 1 0 3.6zM14 10.2h-1.6v3.6M12.4 12h1.3"/>'
 });
 const MODS={
   pregled:{n:'Pregled',i:'home',cat:''},
   kal:{n:'Kalendar',i:'cal',cat:''},
   zadaci:{n:'Zadaci',i:'check',cat:'Poslovi',app:'zadaci',tab:'tabT'},
   cenovnik:{n:'Cenovnik',i:'tag',cat:'Proizvodi'},
+  krojenje:{n:'Krojenje ploča',i:'nest',cat:'Proizvodi',app:'nesting'},
   kupovina:{n:'Kupovina',i:'cart',cat:'Nabavka',app:'zadaci',tab:'tabS'},
   fakture:{n:'Fakture',i:'doc',cat:'Novac',app:'fakture'},
-  troskovi:{n:'Troškovi',i:'coins',cat:'Novac',app:'troskovi'}
+  troskovi:{n:'Troškovi',i:'coins',cat:'Novac',app:'troskovi'},
+  pdf:{n:'PDF',i:'pdf',cat:'',fn:()=>{if(typeof pdfOpen==='function')pdfOpen()}}
 };
-const APPS={zadaci:'apps/zadaci.html',fakture:'apps/fakture.html',troskovi:'apps/troskovi.html'};
+const APPS={zadaci:'apps/zadaci.html',fakture:'apps/fakture.html',troskovi:'apps/troskovi.html',nesting:'apps/nesting.html'};
 const BASECATS=['Poslovi','Kupci','Proizvodi','Nabavka','Novac'];
 const DEFCAT={poslovi:'Poslovi',kupci:'Kupci',proizvodi:'Proizvodi',stakupiti:'Nabavka'};
 const isMod=k=>typeof k==='string'&&k.startsWith('m:');
@@ -1984,7 +1993,7 @@ function allCats(){const c=[...BASECATS];for(const t of T.values()){const x=tabl
 const ntxt=s=>String(s==null?'':s).toLowerCase().replace(/đ/g,'dj').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
 
 /* ---------- podaci drugih delova aplikacije (fakture, kupci, zadaci, kupovina, događaji) ---------- */
-const X={docs:new Map(),clients:new Map(),auto:new Map(),events:new Map(),tasks:new Map(),shopping:new Map(),settings:new Map(),kupljeno:new Map()};
+const X={docs:new Map(),clients:new Map(),auto:new Map(),events:new Map(),tasks:new Map(),shopping:new Map(),settings:new Map(),kupljeno:new Map(),nesting:new Map()};
 const XL=new Set();
 function subX(col){
   if(!db)return;
@@ -2010,7 +2019,7 @@ function tabIcon(t){const i=el('span','tico',t.name.trim().charAt(0)||'T');i.sty
 function renderSide(){
   const box=$('tlist');box.innerHTML='';
   const pend=pendingProposals().length;
-  for(const k of ['pregled','kal'])box.appendChild(navBtn(MODS[k].n,ui.t==='m:'+k,()=>openModule(k),modIcon(k),null,k==='pregled'?pend:0));
+  for(const k of ['pregled','kal','pdf'])if(MODS[k]&&(k!=='pdf'||window.__mtFiles))box.appendChild(navBtn(MODS[k].n,ui.t==='m:'+k,()=>openModule(k),modIcon(k),null,k==='pregled'?pend:0));
   for(const c of allCats()){
     const items=[];
     for(const k in MODS)if(MODS[k].cat===c)items.push({k,mod:true});
@@ -2029,7 +2038,7 @@ function renderSide(){
   if(!T.size&&loadedT)box.appendChild(el('div','phint','Još nema tabela.'));
   renderTabbar();
 }
-function openModule(k){if(ui.edit)commitEdit();ui.t='m:'+k;ui.sel=null;saveUi();closeSide();closePop();render();try{$('content').scrollTo(0,0)}catch(e){}}
+function openModule(k){if(MODS[k]&&MODS[k].fn){closeSide();MODS[k].fn();return}if(ui.edit)commitEdit();ui.t='m:'+k;ui.sel=null;saveUi();closeSide();closePop();render();try{$('content').scrollTo(0,0)}catch(e){}}
 function headModule(){
   const k=modKey(ui.t),m=MODS[k]||{n:'',i:'home'};const tn=$('tname');tn.innerHTML='';tn.appendChild(modIcon(k in MODS?k:'pregled'));tn.appendChild(el('span','nm',m.n));tn.disabled=true;
   $('views').hidden=true;$('tools').hidden=true;$('menuBtn').innerHTML=ic('menu');
@@ -2757,7 +2766,7 @@ function renderJob(){
   /* izrada */
   const s2=jsec('Izrada');const tw=el('div','two');if(fDr)tw.appendChild(jf(t,fDr,rid,'Drvo'));if(fBo)tw.appendChild(jf(t,fBo,rid,'Boja'));s2.appendChild(tw);if(fMe)s2.appendChild(jf(t,fMe,rid,'Mere i opis'));body.appendChild(s2);
   /* šta kupiti */
-  if(fMat){const s=jsec('Šta kupiti');s.dataset.sec='mat';s.appendChild(jobMatBox(t,fMat,rid));body.appendChild(s)}
+  if(fMat){const s=jsec('Šta kupiti');s.dataset.sec='mat';s.appendChild(jobMatBox(t,fMat,rid));s.appendChild(nestChips(rid));body.appendChild(s)}
   /* novac */
   const s3=jsec('Novac');const t3=el('div','three');for(const [f,l] of [[fCe,'Cena (€)'],[fAv,'Avans (€)'],[fOs,'Ostatak']])if(f)t3.appendChild(jf(t,f,rid,l));s3.appendChild(t3);if(fPl)s3.appendChild(jf(t,fPl,rid,'Plaćanje'));body.appendChild(s3);
   /* sa fakture */
@@ -3120,6 +3129,62 @@ function matOpenBtn(o,l,i){const sid=o.tmpl?l.k:l.sid;const ph=tmplPhotos(sid);c
   if(ph.length){const im=el('img');im.alt='';fileFill(im,ph[0]);b.appendChild(im)}else b.innerHTML='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6.5h3l1.4-2h5.2l1.4 2h3v9H3z"/><circle cx="10" cy="10.8" r="3"/></svg>';
   if(nt)b.classList.add('hasn');
   b.addEventListener('click',()=>o.onOpen(i));return b}
+
+/* ---------- PDF alat za ugrađene delove (krojenje) ---------- */
+window.__mtJsPDF=async()=>{await loadScript(LIBS.pdf);return window.jspdf.jsPDF};
+/* ---------- krojenje ploča: veza sa poslom ---------- */
+function withApp(mod,app,fn){openModule(mod);let n=0;const t=setInterval(()=>{const fr=frames[app];const w=fr&&fr.contentWindow;if(w&&w.__openNest){clearInterval(t);try{fn(w)}catch(e){}}else if(++n>80)clearInterval(t)},150)}
+window.__mtNestOpen=id=>{closeJob();withApp('krojenje','nesting',w=>w.__openNest(id))};
+window.__mtNestNew=rid=>{closeJob();withApp('krojenje','nesting',w=>w.__newNest(rid))};
+function nestChips(rid){const w=el('div','chips nestc');if(!XL.has('nesting'))return w;
+  const list=[...X.nesting].filter(([id,d])=>d&&d.job===rid).sort((a,b)=>(b[1].at||0)-(a[1].at||0));
+  for(const [id,d] of list){const b=el('button','chip plain');b.type='button';b.innerHTML=ic('nest');b.appendChild(el('span',null,'Krojenje: '+(d.name||'bez naziva')+(d.sheets?' · '+d.sheets+(d.sheets===1?' ploča':' ploče'):'')+(d.util?' · '+fmtN(d.util,0)+'%':'')));b.addEventListener('click',()=>window.__mtNestOpen(id));w.appendChild(b)}
+  if(!readonly){const a=el('button','chip plain','+ Krojenje ploča za ovaj posao');a.type='button';a.addEventListener('click',()=>window.__mtNestNew(rid));w.appendChild(a)}
+  return w}
+
+/* ---------- Martinov PDF: pregled i izmena PDF-a preko cele aplikacije ---------- */
+const PDFAPP='apps/pdf.html';let pdfP=null,pdfHist=false,pdfSkip=false;
+const PDF_ASK='PDF ima izmene koje nisu sačuvane. Zatvori ipak?';
+function pdfOv(){let ov=$('pdfOv');if(ov)return ov;ov=el('div','pdfov');ov.id='pdfOv';ov.hidden=true;ov.appendChild(el('div','pdfld','Otvaram PDF…'));document.body.appendChild(ov);return ov}
+function pdfFrame(){
+  if(pdfP)return pdfP;const ov=pdfOv();const fr=el('iframe','pdffr');fr.title='PDF';ov.appendChild(fr);
+  pdfP=fetch(PDFAPP).then(r=>{if(!r.ok)throw new Error('load');return r.text()}).then(h=>new Promise((res,rej)=>{
+    fr.addEventListener('load',()=>{const w=fr.contentWindow;let n=0;const t=setInterval(()=>{let ok=false;try{ok=!!w.__openPdfBlob}catch(e){}
+      if(ok){clearInterval(t);ov.classList.add('ready');res(w)}else if(++n>150){clearInterval(t);rej(new Error('init'))}},100)},{once:true});
+    fr.srcdoc=h.replace(/<head[^>]*>/i,m=>m+BRIDGE)}));
+  pdfP.catch(()=>{pdfP=null;fr.remove();ov.classList.remove('ready')});return pdfP}
+function pdfShow(){const ov=pdfOv();if(!ov.hidden)return;ov.hidden=false;document.documentElement.classList.add('pdfon');try{closePop()}catch(e){}
+  try{history.pushState({mtPdf:1},'');pdfHist=true}catch(e){pdfHist=false}}
+function pdfHide(){const ov=$('pdfOv');if(ov)ov.hidden=true;document.documentElement.classList.remove('pdfon')}
+function pdfCloseNow(){if(pdfHist&&history.state&&history.state.mtPdf){pdfSkip=true;pdfHist=false;history.back()}else{pdfHist=false;pdfHide()}}
+function pdfDirty(){try{const fr=$('pdfOv').querySelector('iframe');return!!(fr&&fr.contentWindow.__pdfDirty&&fr.contentWindow.__pdfDirty())}catch(e){return false}}
+window.__mtPdfClose=()=>{if(pdfDirty()&&!confirm(PDF_ASK))return;pdfCloseNow()};
+addEventListener('popstate',()=>{const ov=$('pdfOv');if(!ov||ov.hidden){pdfSkip=false;return}
+  if(pdfSkip){pdfSkip=false;pdfHide();return}
+  if(pdfDirty()&&!confirm(PDF_ASK)){try{history.pushState({mtPdf:1},'');pdfHist=true}catch(e){}return}
+  pdfHist=false;pdfHide()});
+async function pdfOpen(list,ctx){
+  pdfShow();let w;try{w=await pdfFrame()}catch(e){pdfCloseNow();toast('PDF deo nije mogao da se učita. Proveri internet pa probaj ponovo.');return}
+  try{await w.__openPdfBlob(list||[],ctx||null)}catch(e){toast('PDF nije mogao da se otvori.')}}
+/* PDF iz posla ili zapisa: izmenjen PDF se čuva kao NOVI fajl u istom polju (original ostaje) */
+function attName(list,name){const has=new Set((list||[]).map(a=>String(a.name||'').toLowerCase()));if(!has.has(name.toLowerCase()))return name;
+  const m=name.match(/^(.*?)(\.[^.]+)?$/);for(let i=2;i<200;i++){const n=m[1]+' ('+i+')'+(m[2]||'');if(!has.has(n.toLowerCase()))return n}return name}
+async function attachPdf(t,f,rid,bytes,name){
+  if(readonly)throw new Error('samo pregled – nema dozvole za izmene');if(!assets)throw new Error('fajlovi ovde nisu dostupni');
+  const r0=recsOf(t.id).get(rid);if(!r0)throw new Error('zapis više ne postoji');
+  const nm=attName(val(t,f,r0),name);const file=new File([bytes],nm,{type:'application/pdf'});
+  const r=await assets.upload(file);const now=val(t,f,recsOf(t.id).get(rid)||r0);
+  setVal(t.id,rid,f,now.concat({id:r.id,url:r.url,name:nm,type:'application/pdf',size:r.sizeBytes||file.size}));try{refreshRec();refreshJob()}catch(e){}
+  return nm}
+window.__mtPdfAtt=async(a,t,f,rid)=>{
+  if(!window.__mtFiles){openLb(a,false);return}
+  pdfShow();let blob;try{blob=await window.__mtFiles.blob(a)}catch(e){pdfCloseNow();toast('PDF nije mogao da se učita. Proveri internet.');return}
+  const pt=PT();const isJob=!!(pt&&t.id===pt.id);
+  pdfOpen([{blob:new Blob([blob],{type:'application/pdf'}),name:a.name||'dokument.pdf'}],{label:recName(t.id,rid)||t.name,where:isJob?'posao':'zapis',save:(bytes,name)=>attachPdf(t,f,rid,bytes,name)})};
+window.__mtPdf={
+  jobs:()=>kupJobs().map(j=>({id:j.id,name:j.name,sub:[j.client,j.inv?'faktura '+j.inv:''].filter(Boolean).join(' · '),active:j.active})),
+  attachJob:(jid,bytes,name)=>{const t=PT();if(!t)throw new Error('nema tabele Poslovi');const f=F(t,'f_slike','Slike')||t.fields.find(x=>x.type==='att');
+    if(!f||f.type!=='att')throw new Error('Poslovi nemaju polje za fajlove');return attachPdf(t,f,jid,bytes,name)}};
 /* Tekst jutarnjeg obaveštenja — isti u aplikaciji (dugme „Probaj“) i u programu koji šalje obaveštenja.
    data = {tasks:[{title,due,hot,next}], shop:[{name,qty,unit,store,hot,for}]}  (samo otvorene stavke)
    o    = {tasks:true|false, shop:'sve'|'kuca'|'radionica'|'ne'}
@@ -3291,6 +3356,20 @@ function pushCard(){
 (function(){const go=m=>{if(!m||!MODS[m])return;let n=0;const t=setInterval(()=>{if(loadedT){clearInterval(t);try{openModule(m)}catch(e){}}else if(++n>60)clearInterval(t)},300)};
   try{const q=new URLSearchParams(location.search);const m=q.get('m');if(m){history.replaceState(null,'',location.pathname);go(m)}}catch(e){}
   if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='mt-open')go(e.data.m)})})();
+/* PDF iz drugih aplikacija: telefon „Podeli → Martinov“, računar „Otvori pomoću → Martinov“ */
+(function(){
+  try{const q=new URLSearchParams(location.search);
+    if(q.has('share')){history.replaceState(null,'',location.pathname);(async()=>{try{const c=await caches.open('mt-share');const ks=await c.keys();const out=[];
+      for(const k of ks){const r=await c.match(k);if(r)out.push({blob:await r.blob(),name:decodeURIComponent(r.headers.get('x-name')||'dokument.pdf')});await c.delete(k)}
+      if(out.length)pdfOpen(out,null);else toast('Fajl nije stigao – podeli ga ponovo.')}catch(e){toast('Fajl nije mogao da se otvori.')}})()}
+    else if(q.has('pdf'))history.replaceState(null,'',location.pathname)}catch(e){}
+  if('launchQueue' in window)window.launchQueue.setConsumer(async p=>{if(!p||!p.files||!p.files.length)return;const out=[];let h=null;
+    for(const fh of p.files){try{const f=await fh.getFile();if(!/pdf/i.test(f.type)&&!/\.pdf$/i.test(f.name))continue;out.push({blob:f,name:f.name});h=h||fh}catch(e){}}
+    if(out.length)pdfOpen(out,{handle:h})});
+  /* PDF radi i bez interneta: biblioteke se jednom sačuvaju u telefonu */
+  setTimeout(()=>{if(!('caches' in window)||!navigator.onLine)return;caches.open('mt-run-v1').then(async c=>{
+    for(const u of ['lib/pdf.min.js','lib/pdf.worker.min.js','lib/pdf-lib.min.js','lib/fontkit.umd.min.js']){try{if(!(await c.match(u)))await fetch(u)}catch(e){}}}).catch(()=>{})},25000);
+})();
 
 /* ================= ALATI: filter, sortiranje, grupe, polja ================= */
 function fieldOpts(t,pred){return t.fields.filter(pred||(()=>true)).map(f=>[f.id,TYPES[f.type].i+'  '+f.name])}
@@ -3489,11 +3568,11 @@ render();
     onData();
   },e=>{if(e&&e.code==='unavailable'){setTimeout(sub,2000);return}loadedT=true;setConn('off');showBanner('Veza sa bazom je prekinuta. Osveži stranicu.');onData()})}catch(e){loadedT=true;onData()}};
   sub();
-  for(const c of ['docs','clients','auto','events','tasks','shopping','settings','kupljeno'])subX(c);
+  for(const c of ['docs','clients','auto','events','tasks','shopping','settings','kupljeno','nesting'])subX(c);
   if(typeof subKurs==='function')subKurs();
 })();
 })();
-</script><script type="module" src="fb.js?v=1.3.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.4.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}

@@ -1,0 +1,611 @@
+<!doctype html><html lang="sr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Krojenje ploča</title>
+<style>
+/* Layout: levo podešavanje (materijal, način, delovi), desno rezultat (ploče sa rasporedom); na telefonu jedno ispod drugog */
+:root{--bg:#F4F1EC;--panel:#FFFFFF;--fg:#232B36;--muted:#6E7682;--line:#E2DCD2;--navy:#333F50;--gold:#B99C71;--gold-soft:#F3ECE1;--ok:#2F7D57;--warn:#A86B12;--bad:#B0412E;--bad-soft:#F6E4DF;--field:#FBFAF7;--lift:rgba(35,43,54,.10);--wood:#E9D7B8;--wood2:#D9C29A;
+  --f-ui:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;--f-num:"IBM Plex Mono",ui-monospace,"Consolas",monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#171B21;--panel:#1F252D;--fg:#E7E3DC;--muted:#9AA2AD;--line:#323A45;--navy:#C9D3E0;--gold:#CDB089;--gold-soft:#2B2A26;--field:#252C35;--lift:rgba(0,0,0,.4);--wood:#5A4A33;--wood2:#7A6444;--bad-soft:#3A2622}}
+:root[data-theme="dark"]{--bg:#171B21;--panel:#1F252D;--fg:#E7E3DC;--muted:#9AA2AD;--line:#323A45;--navy:#C9D3E0;--gold:#CDB089;--gold-soft:#2B2A26;--field:#252C35;--lift:rgba(0,0,0,.4);--wood:#5A4A33;--wood2:#7A6444;--bad-soft:#3A2622}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px var(--f-ui);-webkit-text-size-adjust:100%}
+header.top{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.hin{display:flex;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-left,0px));max-width:1500px;margin:0 auto}
+.brand{font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px;color:var(--navy)}.brand small{font-weight:500;letter-spacing:.06em;color:var(--gold);text-transform:none;font-size:12px;margin-left:6px}
+.sp{flex:1}.msg{font-size:12px;color:var(--muted)}
+.wrap{display:grid;grid-template-columns:minmax(360px,520px) minmax(0,1fr);gap:16px;padding:16px max(16px,env(safe-area-inset-left,0px)) 60px;max-width:1500px;margin:0 auto;align-items:start}
+@media (max-width:980px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+h3{margin:0;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:700;display:flex;align-items:center;gap:8px}
+h3 .sp{flex:1}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+button{font:600 13px var(--f-ui);border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:8px 12px;cursor:pointer;min-height:38px;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+button.pri{background:var(--navy);border-color:var(--navy);color:var(--panel)}button.ghost{background:none}button.danger{color:var(--bad)}
+button:disabled{opacity:.5;cursor:default}
+button svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+input,select{font:15px var(--f-ui);color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-height:38px;min-width:0;width:100%}
+input.num{font-family:var(--f-num);text-align:right}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.seg{display:inline-grid;grid-auto-flow:column;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;min-height:32px;padding:4px 14px;border-radius:7px;color:var(--muted)}.seg button[aria-pressed="true"]{background:var(--panel);color:var(--fg);box-shadow:0 1px 3px var(--lift)}
+.ck{display:flex;align-items:center;gap:8px;font-size:13px}.ck input{width:18px;height:18px;min-height:0}
+.note{font-size:12px;color:var(--muted);line-height:1.45}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:14px;text-align:center;color:var(--muted);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.drop.on{border-color:var(--gold);background:var(--gold-soft);color:var(--fg)}
+.parts{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pr{display:grid;grid-template-columns:28px 44px minmax(0,1fr) 78px 78px 58px 110px 30px;gap:6px;align-items:center;padding:6px;border-top:1px solid var(--line)}
+.pr:first-child{border-top:0}
+.pr.h{background:var(--gold-soft);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-block:7px}
+.pr .no{font:600 12px var(--f-num);color:var(--muted);text-align:center}
+.pr .pv{width:44px;height:34px;border:1px solid var(--line);border-radius:6px;background:var(--field);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pr .pv svg{width:40px;height:30px}
+.pr input,.pr select{min-height:34px;padding:5px 7px;font-size:14px}
+.pr .nm{display:flex;flex-direction:column;gap:2px;min-width:0}.pr .nm small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr .x{border:0;background:none;color:var(--muted);font-size:18px;min-height:30px;width:30px;padding:0}
+.pr .ro{font:13px var(--f-num);text-align:right;color:var(--fg)}
+@media (max-width:620px){.pr{grid-template-columns:24px 44px minmax(0,1fr) 30px;grid-template-areas:"n v m x" "n l w q" "n g g g"}.pr.h{display:none}
+  .pr .no{grid-area:n}.pr .pv{grid-area:v}.pr .nm{grid-area:m}.pr .x{grid-area:x}.pr .cL{grid-area:l}.pr .cW{grid-area:w}.pr .cQ{grid-area:q}.pr .cG{grid-area:g}
+  .pr{grid-template-columns:24px 1fr 1fr 1fr}.pr .pv{display:none}.pr{grid-template-areas:"n m m x" "n l w q" "n g g g"}}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--field);border:1px solid var(--line);color:var(--muted)}.chip b{font-family:var(--f-num);font-weight:500;color:var(--fg);margin-left:4px}
+.chip.ok{color:var(--ok)}.chip.warn{color:var(--warn);border-color:var(--warn)}
+.sheet{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--field)}
+.sheet+.sheet{margin-top:12px}
+.sheet .sh{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:8px;font-size:13px}.sheet .sh b{font-size:14px}.sheet .sh .num{font-family:var(--f-num);color:var(--muted);font-size:12px}
+.sheet svg{width:100%;height:auto;display:block}
+.sheet svg .pt{stroke:var(--fg);stroke-width:1.2;vector-effect:non-scaling-stroke}
+.sheet svg .pt:hover{fill-opacity:.85;cursor:default}
+.sheet svg .lbl{font-family:var(--f-ui);font-weight:700;fill:#232B36;pointer-events:none}
+.sheet svg .bd{fill:var(--panel);stroke:var(--muted);stroke-width:1;vector-effect:non-scaling-stroke}
+.empty{padding:30px 16px;text-align:center;color:var(--muted);line-height:1.6;border:1px dashed var(--line);border-radius:12px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);z-index:90;background:var(--navy);color:var(--panel);padding:10px 16px;border-radius:12px;font-weight:600;font-size:13px;box-shadow:0 10px 30px var(--lift);max-width:calc(100vw - 24px)}
+.busy{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+.busy i{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--navy);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head><body>
+<header class="top"><div class="hin"><div class="brand">Martinov <small>krojenje ploča</small></div><div class="sp"></div><span class="msg" id="state"></span></div></header>
+<div class="wrap">
+ <div class="col">
+  <section class="card">
+   <h3>Krojenje<span class="sp"></span><button type="button" class="ghost" id="bNew">Novo</button></h3>
+   <div class="g2">
+    <label class="f">Naziv<input id="nName" type="text" placeholder="npr. Komoda Rimini – korpus"></label>
+    <label class="f">Sačuvana krojenja<select id="nSaved"></select></label>
+   </div>
+   <label class="f">Za posao<select id="nJob"></select></label>
+  </section>
+  <section class="card">
+   <h3>Materijal (ploča)<span class="sp"></span><button type="button" class="ghost" id="mSave">Sačuvaj materijal</button></h3>
+   <label class="f">Izaberi<select id="mSel"></select></label>
+   <div class="g2"><label class="f">Naziv<input id="mName" type="text" placeholder="npr. Šperploča breza"></label><label class="f">Gde kupiti<input id="mStore" type="text" placeholder="npr. Drvara Novi Sad"></label></div>
+   <div class="g4">
+    <label class="f">Dužina (mm)<input id="mL" class="num" inputmode="decimal"></label>
+    <label class="f">Širina (mm)<input id="mW" class="num" inputmode="decimal"></label>
+    <label class="f">Debljina (mm)<input id="mT" class="num" inputmode="decimal"></label>
+    <label class="f">Cena ploče<div style="display:flex;gap:4px"><input id="mP" class="num" inputmode="decimal" placeholder="—"><select id="mC" style="width:78px;flex:none"><option value="RSD">din</option><option value="EUR">€</option></select></div></label>
+   </div>
+   <label class="ck"><input type="checkbox" id="mG"> Ploča ima smer goda (po dužini ploče)</label>
+  </section>
+  <section class="card">
+   <h3>Način sečenja</h3>
+   <div class="seg" id="mode"><button type="button" data-m="saw" aria-pressed="true">Testera</button><button type="button" data-m="cnc" aria-pressed="false">CNC</button></div>
+   <div class="g3" id="sawF"><label class="f">Širina reza (mm)<input id="kerf" class="num" inputmode="decimal" value="4"></label><label class="f">Rub ploče (mm)<input id="marginS" class="num" inputmode="decimal" value="10"></label></div>
+   <div class="g3" id="cncF" hidden><label class="f">Glodalo Ø (mm)<input id="tool" class="num" inputmode="decimal" value="6"></label><label class="f">Razmak + (mm)<input id="spacing" class="num" inputmode="decimal" value="4"></label><label class="f">Rub ploče (mm)<input id="marginC" class="num" inputmode="decimal" value="10"></label></div>
+   <div class="note" id="modeNote"></div>
+  </section>
+  <section class="card">
+   <h3>Delovi<span class="sp"></span><button type="button" class="ghost" id="addRect">+ Pravougaonik</button></h3>
+   <div class="drop" id="drop"><span>Prevuci DXF fajlove ovde (pravougaonici ili bilo koji oblik)</span><button type="button" id="pickDxf">Izaberi DXF</button><input type="file" id="dxfIn" accept=".dxf,.DXF" multiple hidden></div>
+   <div class="parts" id="parts"></div>
+   <div class="note">Smer goda: <b>↔</b> god ide po dužini dela (deo se ne okreće poprečno), <b>↕</b> po širini, <b>slobodno</b> – sme da se okrene kako najbolje staje. Za DXF oblik, ↔ je po X osi crteža.</div>
+  </section>
+ </div>
+ <div class="col">
+  <section class="card">
+   <div class="bar"><button type="button" class="pri" id="go">Složi</button><span id="busy" class="busy" hidden><i></i>Slažem…</span><div class="chips" id="sum"></div></div>
+   <div class="bar" id="acts" hidden>
+    <button type="button" id="ePdf"><svg viewBox="0 0 20 20"><path d="M5 2.5h7l3.5 3.5v11.5H5z"/><path d="M12 2.5V6h3.5"/></svg>PDF za radionicu</button>
+    <button type="button" id="eDxf"><svg viewBox="0 0 20 20"><path d="M3 16.5l5-13 4 9 5-6"/></svg>DXF za Aspire</button>
+    <button type="button" id="eSvg">SVG</button>
+    <button type="button" id="eShop"><svg viewBox="0 0 20 20"><path d="M2.5 3.5h2l2 9h9l1.5-6.5H6"/><circle cx="8" cy="16" r="1.2"/><circle cx="14.5" cy="16" r="1.2"/></svg><span id="eShopT">U kupovinu</span></button>
+    <span class="sp"></span><button type="button" class="pri" id="bSave">Sačuvaj</button>
+   </div>
+   <div id="sheets"><div class="empty">Upiši materijal i delove (ili prevuci DXF), pa klikni <b>Složi</b>.</div></div>
+  </section>
+ </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script id="coreSrc">
+/* ================= NESTING JEZGRO: DXF, geometrija, slaganje (bez DOM-a) ================= */
+const NEST=(function(){
+'use strict';
+/* ---------- geometrija ---------- */
+const area=p=>{let a=0;for(let i=0,j=p.length-1;i<p.length;j=i++)a+=(p[j][0]+p[i][0])*(p[j][1]-p[i][1]);return a/2};
+const bbox=p=>{let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;for(const [x,y] of p){if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y}return{x0,y0,x1,y1,w:x1-x0,h:y1-y0}};
+const bboxAll=ps=>{let b={x0:Infinity,y0:Infinity,x1:-Infinity,y1:-Infinity};for(const p of ps){const q=bbox(p);b.x0=Math.min(b.x0,q.x0);b.y0=Math.min(b.y0,q.y0);b.x1=Math.max(b.x1,q.x1);b.y1=Math.max(b.y1,q.y1)}b.w=b.x1-b.x0;b.h=b.y1-b.y0;return b};
+function inside(pt,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const [xi,yi]=poly[i],[xj,yj]=poly[j];if(((yi>pt[1])!==(yj>pt[1]))&&(pt[0]<(xj-xi)*(pt[1]-yi)/(yj-yi)+xi))c=!c}return c}
+function rot(p,deg){const r=deg*Math.PI/180,c=Math.round(Math.cos(r)*1e12)/1e12,s=Math.round(Math.sin(r)*1e12)/1e12;return p.map(([x,y])=>[x*c-y*s,x*s+y*c])}
+function shift(p,dx,dy){return p.map(([x,y])=>[x+dx,y+dy])}
+function simplify(pts,tol){if(pts.length<4)return pts;const sq=tol*tol;
+  const d2=(p,a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1];const l=dx*dx+dy*dy;if(!l)return(p[0]-a[0])**2+(p[1]-a[1])**2;let t=((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l;t=Math.max(0,Math.min(1,t));return(p[0]-a[0]-t*dx)**2+(p[1]-a[1]-t*dy)**2};
+  const keep=new Uint8Array(pts.length);keep[0]=keep[pts.length-1]=1;const st=[[0,pts.length-1]];
+  while(st.length){const [a,b]=st.pop();let mx=0,mi=-1;for(let i=a+1;i<b;i++){const d=d2(pts[i],pts[a],pts[b]);if(d>mx){mx=d;mi=i}}if(mx>sq&&mi>0){keep[mi]=1;st.push([a,mi],[mi,b])}}
+  return pts.filter((_,i)=>keep[i])}
+function cleanLoop(p){const out=[];for(const q of p){const l=out[out.length-1];if(!l||Math.hypot(l[0]-q[0],l[1]-q[1])>1e-6)out.push(q)}
+  if(out.length>1&&Math.hypot(out[0][0]-out[out.length-1][0],out[0][1]-out[out.length-1][1])<1e-6)out.pop();return out}
+/* pravougaonik? (posle uklanjanja tačaka na pravoj liniji) */
+function rectInfo(p){const q=simplify(p.concat([p[0]]),0.05);q.pop();if(q.length!==4)return null;
+  for(let i=0;i<4;i++){const a=q[i],b=q[(i+1)%4],c=q[(i+2)%4];const v1=[b[0]-a[0],b[1]-a[1]],v2=[c[0]-b[0],c[1]-b[1]];const l1=Math.hypot(...v1),l2=Math.hypot(...v2);if(l1<1e-6||l2<1e-6)return null;
+    if(Math.abs((v1[0]*v2[0]+v1[1]*v2[1])/(l1*l2))>0.002)return null}
+  const e=[q[1][0]-q[0][0],q[1][1]-q[0][1]];const ang=Math.atan2(e[1],e[0])*180/Math.PI;const L=Math.hypot(...e),W=Math.hypot(q[2][0]-q[1][0],q[2][1]-q[1][1]);return{ang,L,W}}
+
+/* ---------- DXF ---------- */
+function bulgePts(a,b,bulge,seg){if(!bulge)return[];const th=4*Math.atan(bulge);const dx=b[0]-a[0],dy=b[1]-a[1];const d=Math.hypot(dx,dy);if(d<1e-9)return[];
+  const nx=-dy/d,ny=dx/d;const h=d/(2*Math.tan(th/2));const c=[(a[0]+b[0])/2+nx*h,(a[1]+b[1])/2+ny*h];
+  const R=Math.hypot(a[0]-c[0],a[1]-c[1]);const a0=Math.atan2(a[1]-c[1],a[0]-c[0]);const n=Math.max(2,Math.ceil(Math.abs(th)*R/seg));const out=[];
+  for(let k=1;k<n;k++){const t=a0+th*k/n;out.push([c[0]+R*Math.cos(t),c[1]+R*Math.sin(t)])}return out}
+function arcPts(cx,cy,r,a0,a1,seg){let s=a0*Math.PI/180,e=a1*Math.PI/180;while(e<=s)e+=2*Math.PI;const n=Math.max(2,Math.ceil((e-s)*r/seg));const out=[];for(let i=0;i<=n;i++){const t=s+(e-s)*i/n;out.push([cx+r*Math.cos(t),cy+r*Math.sin(t)])}return out}
+function splinePts(deg,ctrl,knots,weights,seg){const n=ctrl.length;if(n<2)return ctrl.slice();if(!knots||knots.length!==n+deg+1){knots=[];for(let i=0;i<=n+deg;i++)knots.push(i<=deg?0:i>=n?n-deg:i-deg)}
+  const w=weights&&weights.length===n?weights:ctrl.map(()=>1);const t0=knots[deg],t1=knots[n];
+  let len=0;for(let i=1;i<n;i++)len+=Math.hypot(ctrl[i][0]-ctrl[i-1][0],ctrl[i][1]-ctrl[i-1][1]);const steps=Math.max(8,Math.min(2000,Math.ceil(len/seg)*2));
+  const out=[];for(let s=0;s<=steps;s++){let t=t0+(t1-t0)*s/steps;if(s===steps)t=t1-1e-9;
+    let k=deg;while(k<n-1&&t>=knots[k+1])k++;
+    const d=[];for(let j=0;j<=deg;j++){const i=k-deg+j;d.push([ctrl[i][0]*w[i],ctrl[i][1]*w[i],w[i]])}
+    for(let r=1;r<=deg;r++)for(let j=deg;j>=r;j--){const i=k-deg+j;const den=knots[i+deg-r+1]-knots[i];const a=den?(t-knots[i])/den:0;d[j]=[(1-a)*d[j-1][0]+a*d[j][0],(1-a)*d[j-1][1]+a*d[j][1],(1-a)*d[j-1][2]+a*d[j][2]]}
+    out.push([d[deg][0]/d[deg][2],d[deg][1]/d[deg][2]])}
+  return out}
+function catmull(P,seg){if(P.length<3)return P.slice();const out=[P[0]];const ext=[P[0]].concat(P,[P[P.length-1]]);
+  for(let i=1;i<ext.length-2;i++){const p0=ext[i-1],p1=ext[i],p2=ext[i+1],p3=ext[i+2];const n=Math.max(4,Math.ceil(Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/seg));
+    for(let k=1;k<=n;k++){const t=k/n,t2=t*t,t3=t2*t;out.push([0.5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),
+      0.5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)])}}
+  return out}
+function parseDXF(text,opt){opt=opt||{};const seg=opt.seg||0.5;
+  const L=text.split(/\r?\n/);const pairs=[];for(let i=0;i+1<L.length;i+=2){const c=parseInt(L[i].trim(),10);if(isNaN(c))continue;pairs.push([c,L[i+1].replace(/\s+$/,'')])}
+  let units=0;const blocks={};let section='';let i=0;const ents=[];
+  const readEnt=(start)=>{const o={type:pairs[start][1],g:[]};let j=start+1;while(j<pairs.length&&pairs[j][0]!==0){o.g.push(pairs[j]);j++}return[o,j]};
+  let curBlock=null;
+  while(i<pairs.length){const [c,v]=pairs[i];
+    if(c===0&&v==='SECTION'){section=(pairs[i+1]&&pairs[i+1][1])||'';i+=2;continue}
+    if(c===0&&v==='ENDSEC'){section='';i++;continue}
+    if(section==='HEADER'&&c===9&&v==='$INSUNITS'){units=parseInt(pairs[i+1][1],10)||0;i+=2;continue}
+    if(c===0&&(section==='ENTITIES'||section==='BLOCKS')){
+      if(v==='BLOCK'){const [o,j]=readEnt(i);curBlock={name:'',bx:0,by:0,ents:[]};for(const [cc,vv] of o.g){if(cc===2)curBlock.name=vv;if(cc===10)curBlock.bx=+vv;if(cc===20)curBlock.by=+vv}i=j;continue}
+      if(v==='ENDBLK'){if(curBlock)blocks[curBlock.name]=curBlock;curBlock=null;const [,j]=readEnt(i);i=j;continue}
+      if(v==='POLYLINE'){const [o,j0]=readEnt(i);let j=j0;o.verts=[];while(j<pairs.length&&pairs[j][1]==='VERTEX'){const [vv,jj]=readEnt(j);o.verts.push(vv);j=jj}if(j<pairs.length&&pairs[j][1]==='SEQEND'){const [,jj]=readEnt(j);j=jj}
+        (curBlock?curBlock.ents:ents).push(o);i=j;continue}
+      const [o,j]=readEnt(i);(curBlock?curBlock.ents:ents).push(o);i=j;continue}
+    i++}
+  const scale={1:25.4,2:304.8,4:1,5:10,6:1000,0:1}[units]??1;
+  const loops=[],opens=[];
+  const g1=(o,c)=>{const p=o.g.find(x=>x[0]===c);return p?parseFloat(p[1]):undefined};
+  const gAll=(o,c)=>o.g.filter(x=>x[0]===c).map(x=>parseFloat(x[1]));
+  function emit(o,T){const tf=p=>T(p);const t=o.type;
+    if(t==='LINE'){opens.push([tf([g1(o,10),g1(o,20)]),tf([g1(o,11),g1(o,21)])]);return}
+    if(t==='CIRCLE'){const cx=g1(o,10),cy=g1(o,20),r=g1(o,40);const p=arcPts(cx,cy,r,0,360,seg);p.pop();loops.push(p.map(tf));return}
+    if(t==='ARC'){opens.push(arcPts(g1(o,10),g1(o,20),g1(o,40),g1(o,50),g1(o,51),seg).map(tf));return}
+    if(t==='LWPOLYLINE'||t==='POLYLINE'){let vs=[];const flags=g1(o,70)||0;
+      if(t==='LWPOLYLINE'){let cur=null;for(const [c,v] of o.g){if(c===10){cur={x:+v,y:0,b:0};vs.push(cur)}else if(c===20&&cur)cur.y=+v;else if(c===42&&cur)cur.b=+v}}
+      else vs=o.verts.map(vv=>({x:g1(vv,10),y:g1(vv,20),b:g1(vv,42)||0}));
+      if(!vs.length)return;const closed=(flags&1)===1;const pts=[];
+      for(let k=0;k<vs.length;k++){const a=vs[k];pts.push([a.x,a.y]);const nb=k+1<vs.length?vs[k+1]:closed?vs[0]:null;if(nb&&a.b)pts.push(...bulgePts([a.x,a.y],[nb.x,nb.y],a.b,seg))}
+      if(closed)loops.push(pts.map(tf));else opens.push(pts.map(tf));return}
+    if(t==='ELLIPSE'){const cx=g1(o,10),cy=g1(o,20),mx=g1(o,11),my=g1(o,21),ra=g1(o,40);let s=g1(o,41)??0,e=g1(o,42)??Math.PI*2;if(e<=s)e+=Math.PI*2;
+      const R=Math.hypot(mx,my),an=Math.atan2(my,mx);const n=Math.max(8,Math.ceil((e-s)*R/seg));const p=[];for(let k=0;k<=n;k++){const t=s+(e-s)*k/n;const x=R*Math.cos(t),y=R*ra*Math.sin(t);p.push([cx+x*Math.cos(an)-y*Math.sin(an),cy+x*Math.sin(an)+y*Math.cos(an)])}
+      if(Math.abs(e-s-Math.PI*2)<1e-6){p.pop();loops.push(p.map(tf))}else opens.push(p.map(tf));return}
+    if(t==='SPLINE'){const deg=g1(o,71)||3;const kn=gAll(o,40);const xs=gAll(o,10),ys=gAll(o,20),ws=gAll(o,41);const fx=gAll(o,11),fy=gAll(o,21);const flags=g1(o,70)||0;
+      let p;if(xs.length>=2){p=splinePts(deg,xs.map((x,k)=>[x,ys[k]]),kn,ws,seg)}else if(fx.length>=2){p=catmull(fx.map((x,k)=>[x,fy[k]]),seg)}else return;
+      const closed=(flags&1)===1||Math.hypot(p[0][0]-p[p.length-1][0],p[0][1]-p[p.length-1][1])<1e-6;if(closed){loops.push(cleanLoop(p).map(tf))}else opens.push(p.map(tf));return}
+    if(t==='INSERT'){const b=blocks[(o.g.find(x=>x[0]===2)||[])[1]];if(!b)return;const ix=g1(o,10)||0,iy=g1(o,20)||0,sx=g1(o,41)??1,sy=g1(o,42)??1,ra=(g1(o,50)||0)*Math.PI/180;
+      const T2=p=>{const x=(p[0]-b.bx)*sx,y=(p[1]-b.by)*sy;return T([ix+x*Math.cos(ra)-y*Math.sin(ra),iy+x*Math.sin(ra)+y*Math.cos(ra)])};for(const e of b.ents)emit(e,T2);return}
+  }
+  const ID=p=>[p[0]*scale,p[1]*scale];
+  for(const o of ents){try{emit(o,ID)}catch(e){}}
+  /* spoji otvorene delove u zatvorene konture */
+  const tol=Math.max(0.05,(opt.tol||0.2));const segs=opens.filter(s=>s.length>=2).map(s=>s.slice());
+  while(segs.length){let cur=segs.pop();let grown=true;
+    while(grown){grown=false;const a=cur[0],b=cur[cur.length-1];if(Math.hypot(a[0]-b[0],a[1]-b[1])<=tol&&cur.length>2)break;
+      for(let k=0;k<segs.length;k++){const s=segs[k],s0=s[0],s1=s[s.length-1];
+        if(Math.hypot(b[0]-s0[0],b[1]-s0[1])<=tol){cur=cur.concat(s.slice(1));segs.splice(k,1);grown=true;break}
+        if(Math.hypot(b[0]-s1[0],b[1]-s1[1])<=tol){cur=cur.concat(s.slice(0,-1).reverse());segs.splice(k,1);grown=true;break}
+        if(Math.hypot(a[0]-s1[0],a[1]-s1[1])<=tol){cur=s.slice(0,-1).concat(cur);segs.splice(k,1);grown=true;break}
+        if(Math.hypot(a[0]-s0[0],a[1]-s0[1])<=tol){cur=s.slice(1).reverse().concat(cur);segs.splice(k,1);grown=true;break}}}
+    const a=cur[0],b=cur[cur.length-1];if(Math.hypot(a[0]-b[0],a[1]-b[1])<=tol&&cur.length>2)loops.push(cleanLoop(cur));}
+  /* delovi: konture koje nisu unutar druge; unutrašnje su rupe */
+  const L2=loops.map(p=>cleanLoop(p)).filter(p=>p.length>=3&&Math.abs(area(p))>0.01).map(p=>({p,a:Math.abs(area(p))})).sort((x,y)=>y.a-x.a);
+  const parts=[];
+  for(const l of L2){const host=parts.find(pt=>inside(l.p[0],pt.outer)&&inside(l.p[Math.floor(l.p.length/2)],pt.outer));
+    if(host){if(!host.holes.some(h=>inside(l.p[0],h)))host.holes.push(l.p)}else parts.push({outer:l.p,holes:[]})}
+  return{units,scale,parts,openLeft:0};
+}
+/* normalizuj deo: spoljna kontura CCW, pomeri u (0,0), prepoznaj pravougaonik */
+function normPart(pt){let outer=pt.outer.slice();if(area(outer)<0)outer.reverse();let holes=pt.holes.map(h=>{h=h.slice();if(area(h)>0)h.reverse();return h});
+  const ri=rectInfo(outer);
+  if(ri&&Math.abs(ri.ang%90)>0.01){outer=rot(outer,-ri.ang);holes=holes.map(h=>rot(h,-ri.ang))}
+  if(ri){const b0=bbox(outer);if(b0.h>b0.w+1e-6){outer=rot(outer,90);holes=holes.map(h=>rot(h,90))}}
+  const b=bbox(outer);outer=shift(outer,-b.x0,-b.y0);holes=holes.map(h=>shift(h,-b.x0,-b.y0));
+  outer=simplify(outer.concat([outer[0]]),0.02);outer.pop();holes=holes.map(h=>{const s=simplify(h.concat([h[0]]),0.02);s.pop();return s});
+  return{kind:ri?'rect':'poly',L:Math.round(b.w*100)/100,W:Math.round(b.h*100)/100,outer,holes,areaMM:Math.abs(area(outer))-holes.reduce((a,h)=>a+Math.abs(area(h)),0)}}
+
+/* ---------- slaganje pravougaonika: MaxRects (CNC) ---------- */
+function maxRects(W,H,items,gap,heur){/* items: {i,w,h,rots:[0,90]} ; gap: razmak između delova */
+  const sheets=[];const place=[];
+  const newSheet=()=>{const s={free:[{x:0,y:0,w:W+gap,h:H+gap}],used:[]};sheets.push(s);return s};
+  const fitIn=(s,w,h)=>{let best=null;for(const f of s.free){if(w<=f.w+1e-9&&h<=f.h+1e-9){const ls=Math.min(f.w-w,f.h-h),ll=Math.max(f.w-w,f.h-h);
+      const sc=heur==='bl'?[f.y+h,f.x]:heur==='baf'?[f.w*f.h-w*h,ls]:[ls,ll];if(!best||sc[0]<best.sc[0]-1e-9||(Math.abs(sc[0]-best.sc[0])<1e-9&&sc[1]<best.sc[1]))best={x:f.x,y:f.y,sc}}}return best};
+  const split=(s,r)=>{const nf=[];for(const f of s.free){if(r.x>=f.x+f.w||r.x+r.w<=f.x||r.y>=f.y+f.h||r.y+r.h<=f.y){nf.push(f);continue}
+      if(r.x>f.x)nf.push({x:f.x,y:f.y,w:r.x-f.x,h:f.h});if(r.x+r.w<f.x+f.w)nf.push({x:r.x+r.w,y:f.y,w:f.x+f.w-r.x-r.w,h:f.h});
+      if(r.y>f.y)nf.push({x:f.x,y:f.y,w:f.w,h:r.y-f.y});if(r.y+r.h<f.y+f.h)nf.push({x:f.x,y:r.y+r.h,w:f.w,h:f.y+f.h-r.y-r.h})}
+    s.free=nf.filter((a,i)=>!nf.some((b,j)=>j!==i&&a.x>=b.x-1e-9&&a.y>=b.y-1e-9&&a.x+a.w<=b.x+b.w+1e-9&&a.y+a.h<=b.y+b.h+1e-9&&(j<i||a.x!==b.x||a.y!==b.y||a.w!==b.w||a.h!==b.h)))};
+  for(const it of items){let done=false;
+    for(let si=0;si<=sheets.length&&!done;si++){const s=si<sheets.length?sheets[si]:null;if(!s&&si===sheets.length){}
+      const sh=s||newSheet();let best=null;
+      for(const r of it.rots){const w=(r%180?it.h:it.w)+gap,h=(r%180?it.w:it.h)+gap;const f=fitIn(sh,w,h);if(f&&(!best||f.sc[0]<best.sc[0]||(f.sc[0]===best.sc[0]&&f.sc[1]<best.sc[1])))best={...f,r,w,h}}
+      if(best){split(sh,{x:best.x,y:best.y,w:best.w,h:best.h});place.push({i:it.i,sheet:sheets.indexOf(sh),x:best.x,y:best.y,rot:best.r});done=true}
+      else if(!s){sheets.pop();return null}}}
+  return{n:sheets.length,place}}
+/* ---------- slaganje pravougaonika: giljotina (testera – rezovi od kraja do kraja) ---------- */
+function guillotine(W,H,items,kerf,heur,splitRule){
+  const sheets=[];const place=[];
+  const newSheet=()=>{const s={free:[{x:0,y:0,w:W+kerf,h:H+kerf}]};sheets.push(s);return s};
+  for(const it of items){let done=false;
+    for(let si=0;si<=sheets.length&&!done;si++){const isNew=si===sheets.length;const sh=isNew?newSheet():sheets[si];let best=null;
+      sh.free.forEach((f,fi)=>{for(const r of it.rots){const w=(r%180?it.h:it.w)+kerf,h=(r%180?it.w:it.h)+kerf;if(w<=f.w+1e-9&&h<=f.h+1e-9){
+        const sc=heur==='baf'?f.w*f.h-w*h:heur==='bssf'?Math.min(f.w-w,f.h-h):Math.max(f.w-w,f.h-h);if(!best||sc<best.sc)best={fi,r,w,h,sc}}}});
+      if(best){const f=sh.free[best.fi];sh.free.splice(best.fi,1);
+        const rw=f.w-best.w,rh=f.h-best.h;let horiz;
+        if(splitRule==='sas')horiz=f.w<=f.h;else if(splitRule==='las')horiz=f.w>f.h;else if(splitRule==='slas')horiz=rw<=rh;else horiz=rw>rh;
+        if(horiz){if(rh>0)sh.free.push({x:f.x,y:f.y+best.h,w:f.w,h:rh});if(rw>0)sh.free.push({x:f.x+best.w,y:f.y,w:rw,h:best.h})}
+        else{if(rw>0)sh.free.push({x:f.x+best.w,y:f.y,w:rw,h:f.h});if(rh>0)sh.free.push({x:f.x,y:f.y+best.h,w:best.w,h:rh})}
+        place.push({i:it.i,sheet:si,x:f.x,y:f.y,rot:best.r});done=true}
+      else if(isNew){sheets.pop();return null}}}
+  return{n:sheets.length,place}}
+
+/* ---------- slaganje oblika: rasterska mreža (donji levi ugao, sa preskakanjem) ---------- */
+function rasterize(poly,holes,cell,dil){/* vraća {w,h,rows:[[x0,x1],...] po redu} – pokrivene ćelije + širenje dil ćelija */
+  const b=bbox(poly);const ox=b.x0-dil*cell,oy=b.y0-dil*cell;const w=Math.ceil(b.w/cell)+2*dil+1,h=Math.ceil(b.h/cell)+2*dil+1;
+  const g=new Uint8Array(w*h);
+  /* popuni unutrašnjost (sredina ćelije) + ivice (sve ćelije koje dodiruje ivica) */
+  for(let j=0;j<h;j++){const yc=oy+(j+0.5)*cell;const xs=[];for(let i=0,k=poly.length-1;i<poly.length;k=i++){const [x1,y1]=poly[k],[x2,y2]=poly[i];if((y1>yc)!==(y2>yc))xs.push(x1+(yc-y1)*(x2-x1)/(y2-y1))}
+    xs.sort((a,b)=>a-b);for(let k=0;k+1<xs.length;k+=2){const a=Math.max(0,Math.floor((xs[k]-ox)/cell)),bb=Math.min(w-1,Math.floor((xs[k+1]-ox)/cell));for(let x=a;x<=bb;x++)g[j*w+x]=1}}
+  for(let i=0,k=poly.length-1;i<poly.length;k=i++){const [x1,y1]=poly[k],[x2,y2]=poly[i];const n=Math.max(1,Math.ceil(Math.hypot(x2-x1,y2-y1)/(cell*0.5)));for(let s=0;s<=n;s++){const x=x1+(x2-x1)*s/n,y=y1+(y2-y1)*s/n;const cx=Math.floor((x-ox)/cell),cy=Math.floor((y-oy)/cell);if(cx>=0&&cy>=0&&cx<w&&cy<h)g[cy*w+cx]=1}}
+  /* širenje (kvadratno) */
+  let G=g;if(dil>0){const t=new Uint8Array(w*h);for(let y=0;y<h;y++){let last=-1e9;for(let x=0;x<w;x++){if(G[y*w+x])last=x;if(x-last<=dil)t[y*w+x]=1}let nxt=1e9;for(let x=w-1;x>=0;x--){if(G[y*w+x])nxt=x;if(nxt-x<=dil)t[y*w+x]=1}}
+    const u=new Uint8Array(w*h);for(let x=0;x<w;x++){let last=-1e9;for(let y=0;y<h;y++){if(t[y*w+x])last=y;if(y-last<=dil)u[y*w+x]=1}let nxt=1e9;for(let y=h-1;y>=0;y--){if(t[y*w+x])nxt=y;if(nxt-y<=dil)u[y*w+x]=1}}G=u}
+  const rows=[];for(let y=0;y<h;y++){const r=[];let x=0;while(x<w){while(x<w&&!G[y*w+x])x++;if(x>=w)break;const s=x;while(x<w&&G[y*w+x])x++;r.push([s,x-1])}rows.push(r)}
+  return{w,h,rows,ox,oy}}
+function rasterNest(Wmm,Hmm,items,opt){/* items: {i,poly,holes,rots,area} ; opt:{gap,margin,cell,order} */
+  const cell=opt.cell;const dil=Math.ceil((opt.gap/2)/cell);const GW=Math.floor(Wmm/cell),GH=Math.floor(Hmm/cell);const mc=Math.max(0,Math.ceil(opt.margin/cell)-dil);
+  const sheets=[];const place=[];const rcache=new Map();
+  const getR=(it,r)=>{const k=it.i+'_'+r;if(!rcache.has(k)){const p=rot(it.poly,r);rcache.set(k,{rs:rasterize(p,[],cell,dil),p})}return rcache.get(k)};
+  const newSheet=()=>{const free=[];for(let y=0;y<GH;y++){const a=new Int32Array(GW+1);free.push(a)}
+    const s={occ:new Uint8Array(GW*GH),free};
+    for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)if(y<mc||y>=GH-mc||x<mc||x>=GW-mc)s.occ[y*GW+x]=1;
+    for(let y=0;y<GH;y++)recalc(s,y);sheets.push(s);return s};
+  function recalc(s,y){const f=s.free[y];f[GW]=0;for(let x=GW-1;x>=0;x--)f[x]=s.occ[y*GW+x]?0:f[x+1]+1}
+  function find(s,R){/* najmanji x, pa najmanji y */let best=null;
+    if(R.w>GW||R.h>GH)return null;
+    for(let y=0;y+R.h<=GH;y++){let x=0;const lim=best?best.x:GW-R.w;
+      while(x<=Math.min(lim,GW-R.w)){let ok=true,jump=0;
+        for(let j=0;j<R.h&&ok;j++){const fr=s.free[y+j];for(const [a,b] of R.rows[j]){const need=b-a+1;if(fr[x+a]<need){ok=false;
+              /* pomeri se iza prve zauzete ćelije u ovom delu reda */let k=x+a+fr[x+a];jump=Math.max(jump,k-a+1-x);break}}}
+        if(ok){if(!best||x<best.x||(x===best.x&&y<best.y))best={x,y};break}
+        x+=Math.max(1,jump)}}
+    return best}
+  function mark(s,R,x,y){for(let j=0;j<R.h;j++){for(const [a,b] of R.rows[j])for(let k=a;k<=b;k++)s.occ[(y+j)*GW+x+k]=1;recalc(s,y+j)}}
+  for(const it of items){let done=false;
+    for(let si=0;si<=sheets.length&&!done;si++){const isNew=si===sheets.length;const sh=isNew?newSheet():sheets[si];let best=null;
+      for(const r of it.rots){const {rs}=getR(it,r);const f=find(sh,rs);if(f&&(!best||f.x<best.x||(f.x===best.x&&f.y<best.y)))best={...f,r,rs}}
+      if(best){mark(sh,best.rs,best.x,best.y);const {p}=getR(it,best.r);const b=bbox(p);
+        /* stvarni pomeraj u mm: ćelija (x,y) odgovara poreklu rastera (ox,oy) */
+        place.push({i:it.i,sheet:si,rot:best.r,dx:best.x*cell-best.rs.ox,dy:best.y*cell-best.rs.oy});done=true}
+      else if(isNew){sheets.pop();return null}}}
+  /* iskorišćena dužina poslednje ploče (za poređenje) */
+  return{n:sheets.length,place,cell}}
+
+/* ---------- glavno: složi ---------- */
+function solve(job){/* job:{W,H,mode:'saw'|'cnc',kerf,tool,spacing,margin,parts:[{id,name,qty,kind,L,W,outer,holes,grain:'x'|'y'|'free'}],sheetGrain:true} */
+  const W=+job.W,H=+job.H;const margin=Math.max(0,+job.margin||0);const saw=job.mode==='saw';
+  const gap=saw?Math.max(0,+job.kerf||0):Math.max(0,+job.tool||0)+Math.max(0,+job.spacing||0);
+  const inst=[];
+  for(const p of job.parts){const q=Math.max(0,Math.round(+p.qty||0));const rots=p.grain==='x'?[0,180]:p.grain==='y'?[90,270]:[0,90,180,270];
+    for(let k=0;k<q;k++)inst.push({part:p,k,rots})}
+  if(!inst.length)return{sheets:[],items:[],gap,warn:[]};
+  const warn=[];
+  const allRect=inst.every(x=>x.part.kind!=='poly')||saw;
+  const usableW=W-2*margin,usableH=H-2*margin;
+  /* provera da li svaki deo uopšte staje */
+  const tooBig=[];
+  for(const p of job.parts){const fits=(p.grain==='y'?[[p.W,p.L]]:p.grain==='x'?[[p.L,p.W]]:[[p.L,p.W],[p.W,p.L]]).some(([a,b])=>a<=usableW+1e-6&&b<=usableH+1e-6);if(!fits&&+p.qty>0)tooBig.push(p.name||'deo')}
+  if(tooBig.length)return{error:'Ne staje na ploču: '+tooBig.join(', '),sheets:[],items:[]};
+  const t0=Date.now();let best=null;
+  const orders=[
+    a=>a.slice().sort((x,y)=>(y.part.L*y.part.W)-(x.part.L*x.part.W)),
+    a=>a.slice().sort((x,y)=>Math.max(y.part.L,y.part.W)-Math.max(x.part.L,x.part.W)),
+    a=>a.slice().sort((x,y)=>(y.part.L+y.part.W)-(x.part.L+x.part.W)),
+    a=>a.slice().sort((x,y)=>Math.min(y.part.L,y.part.W)-Math.min(x.part.L,x.part.W))];
+  let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+  const score=r=>{/* manje ploča, pa što manja korišćena dužina poslednje ploče */return r.n*1e9+r.lastUse};
+  if(allRect){
+    const base=inst.map((x,i)=>({i,w:x.part.L,h:x.part.W,rots:x.part.grain==='x'?[0]:x.part.grain==='y'?[90]:[0,90]}));
+    const tries=[];for(const o of orders)tries.push(o);for(let k=0;k<12;k++)tries.push(a=>{const b=orders[0](a);for(let j=0;j<b.length;j++){if(rnd()<0.25&&j+1<b.length){const t=b[j];b[j]=b[j+1];b[j+1]=t}}return b});
+    const heurs=saw?[['baf','slas'],['bssf','slas'],['blsf','slas'],['baf','llas'],['bssf','sas'],['baf','las']]:[['bssf'],['bl'],['baf']];
+    for(const ord of tries){const it=ord(base.map(b=>({...b,part:inst[b.i].part}))).map(b=>({...b}));
+      for(const h of heurs){if(Date.now()-t0>1800&&best)break;
+        const r=saw?guillotine(usableW,usableH,it,gap,h[0],h[1]):maxRects(usableW,usableH,it,gap,h[0]);if(!r)continue;
+        let lastUse=0;for(const pl of r.place)if(pl.sheet===r.n-1){const b=base[pl.i];const w=pl.rot%180?b.h:b.w;lastUse=Math.max(lastUse,pl.x+w)}
+        r.lastUse=lastUse;if(!best||score(r)<score(best)){best=r;best.kind='rect'}}}
+    if(!best)return{error:'Delovi ne mogu da se slože.',sheets:[],items:[]};
+    /* u mm: pozicija pravougaonika (sa rubom) */
+    const items=best.place.map(pl=>{const src=inst[pl.i];const p=src.part;const r=pl.rot%180?90:0;
+      const w=r?p.W:p.L,h=r?p.L:p.W;
+      const useShape=p.kind==='poly'&&!saw;
+      let poly=p.outer&&p.outer.length&&(p.kind!=='poly'||useShape)?p.outer:[[0,0],[p.L,0],[p.L,p.W],[0,p.W]];let holes=(p.kind!=='poly'||useShape)?(p.holes||[]):[];
+      let shape=p.kind==='poly'&&saw?p.outer:null;
+      if(r){const rr=q=>rot(q,90);poly=rr(poly);holes=holes.map(rr);if(shape)shape=rr(shape);const b=bbox(poly);poly=shift(poly,-b.x0,-b.y0);holes=holes.map(q=>shift(q,-b.x0,-b.y0));if(shape)shape=shift(shape,-b.x0,-b.y0)}
+      const ox=margin+pl.x,oy=margin+pl.y;
+      return{part:p,k:src.k,sheet:pl.sheet,rot:r,x:ox,y:oy,w,h,poly:shift(poly,ox,oy),holes:holes.map(q=>shift(q,ox,oy)),shape:shape?shift(shape,ox,oy):null}});
+    if(saw&&inst.some(x=>x.part.kind==='poly'))warn.push('Testera: oblici su složeni kao pravougaonici oko njih.');
+    return finish(job,best.n,items,gap,warn,'rect')}
+  /* oblici: rasterska mreža */
+  const big=Math.max(W,H);const cell=Math.max(1,Math.min(6,Math.round(big/600*10)/10));
+  const base=inst.map((x,i)=>{const p=x.part;const poly=p.outer&&p.outer.length?p.outer:[[0,0],[p.L,0],[p.L,p.W],[0,p.W]];return{i,poly,holes:p.holes||[],rots:x.rots,area:Math.abs(area(poly)),src:x}});
+  const ordsP=[a=>a.slice().sort((x,y)=>y.area-x.area),a=>a.slice().sort((x,y)=>{const bx=bbox(x.poly),by=bbox(y.poly);return Math.max(by.w,by.h)-Math.max(bx.w,bx.h)})];
+  const triesP=ordsP.slice();for(let k=0;k<6;k++)triesP.push(a=>{const b=ordsP[0](a);for(let j=0;j+1<b.length;j++)if(rnd()<0.3){const t=b[j];b[j]=b[j+1];b[j+1]=t}return b});
+  for(const ord of triesP){if(best&&Date.now()-t0>2500)break;const it=ord(base);const r=rasterNest(W,H,it,{gap,margin,cell});if(!r)continue;
+    let lastUse=0;for(const pl of r.place)if(pl.sheet===r.n-1){const b=bbox(rot(base[pl.i].poly,pl.rot));lastUse=Math.max(lastUse,pl.dx+b.x1)}r.lastUse=lastUse;
+    if(!best||score(r)<score(best))best=r}
+  if(!best)return{error:'Delovi ne mogu da se slože.',sheets:[],items:[]};
+  const items=best.place.map(pl=>{const src=inst[pl.i];const p=src.part;const b0=base[pl.i];const poly=shift(rot(b0.poly,pl.rot),pl.dx,pl.dy);const holes=(b0.holes||[]).map(h=>shift(rot(h,pl.rot),pl.dx,pl.dy));const bb=bbox(poly);
+    return{part:p,k:src.k,sheet:pl.sheet,rot:pl.rot,x:bb.x0,y:bb.y0,w:bb.w,h:bb.h,poly,holes}});
+  return finish(job,best.n,items,gap,warn,'shape')}
+function rotP(p,deg){return rot(p,deg)}
+function finish(job,n,items,gap,warn,kind){const W=+job.W,H=+job.H;const sheets=[];
+  for(let s=0;s<n;s++){const its=items.filter(i=>i.sheet===s);const used=its.reduce((a,i)=>a+(i.part.kind==='poly'&&i.part.areaMM?i.part.areaMM:i.part.L*i.part.W),0);
+    let maxX=0;for(const i of its)maxX=Math.max(maxX,i.x+i.w);sheets.push({i:s,items:its,util:used/(W*H),usedLen:maxX})}
+  const total=items.reduce((a,i)=>a+(i.part.kind==='poly'&&i.part.areaMM?i.part.areaMM:i.part.L*i.part.W),0);
+  return{sheets,items,gap,warn,kind,util:total/(n*W*H),wasteM2:(n*W*H-total)/1e6}}
+
+/* ---------- izvoz: DXF (R12) ---------- */
+function toDXF(job,res,opt){opt=opt||{};const W=+job.W,H=+job.H,gapY=200;const out=[];const P=(c,v)=>out.push(String(c),String(v));
+  P(0,'SECTION');P(2,'HEADER');P(9,'$ACADVER');P(1,'AC1009');P(9,'$INSUNITS');P(70,4);P(0,'ENDSEC');
+  P(0,'SECTION');P(2,'TABLES');P(0,'TABLE');P(2,'LAYER');P(70,4);for(const [n,c] of [['PLOCA',8],['DELOVI',7],['RUPE',1],['OZNAKE',3]]){P(0,'LAYER');P(2,n);P(70,0);P(62,c);P(6,'CONTINUOUS')}P(0,'ENDTAB');P(0,'ENDSEC');
+  P(0,'SECTION');P(2,'ENTITIES');
+  const poly=(pts,layer,dy)=>{P(0,'POLYLINE');P(8,layer);P(66,1);P(70,1);P(10,0);P(20,0);P(30,0);for(const [x,y] of pts){P(0,'VERTEX');P(8,layer);P(10,(+x).toFixed(4));P(20,(+y+dy).toFixed(4));P(30,0)}P(0,'SEQEND');P(8,layer)};
+  const text=(x,y,h,s,layer)=>{P(0,'TEXT');P(8,layer);P(10,x.toFixed(3));P(20,y.toFixed(3));P(30,0);P(40,h.toFixed(2));P(1,s)};
+  res.sheets.forEach((sh,si)=>{if(opt.only!=null&&opt.only!==si)return;const dy=opt.only!=null?0:si*(H+gapY);
+    poly([[0,0],[W,0],[W,H],[0,H]],'PLOCA',dy);text(0,dy+H+20,Math.max(10,H/60),'Ploca '+(si+1)+' / '+res.sheets.length+(job.material?' - '+job.material:''),'OZNAKE');
+    sh.items.forEach(it=>{poly(it.poly,'DELOVI',dy);for(const h of it.holes||[])poly(h,'RUPE',dy);const lab=String(it.part.no||'')+(it.part.name?' '+it.part.name:'');
+      const th=Math.max(4,Math.min(it.w,it.h)/8,Math.min(30,Math.min(it.w,it.h)/5));text(it.x+Math.min(10,it.w*0.1),it.y+it.h/2+dy-th/2,Math.min(th,30),lab,'OZNAKE')})});
+  P(0,'ENDSEC');P(0,'EOF');return out.join('\r\n')}
+/* ---------- izvoz: SVG ---------- */
+function toSVG(job,res,si,opt){opt=opt||{};const W=+job.W,H=+job.H;const sh=res.sheets[si];const f=n=>(+n).toFixed(2);
+  const path=p=>'M'+p.map(([x,y])=>f(x)+' '+f(H-y)).join(' L')+' Z';
+  let s='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'mm" height="'+H+'mm" viewBox="0 0 '+W+' '+H+'">';
+  s+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="none" stroke="#888" stroke-width="'+Math.max(1,W/1500)+'"/>';
+  for(const it of sh.items){s+='<path d="'+path(it.poly)+(it.holes||[]).map(h=>' '+path(h)).join('')+'" fill="none" stroke="#000" stroke-width="'+Math.max(0.5,W/3000)+'"/>'}
+  if(opt.labels)for(const it of sh.items){const th=Math.max(6,Math.min(28,Math.min(it.w,it.h)/5));s+='<text x="'+f(it.x+it.w/2)+'" y="'+f(H-(it.y+it.h/2))+'" font-size="'+f(th)+'" text-anchor="middle" dominant-baseline="middle" font-family="Arial">'+String(it.part.no||'')+'</text>'}
+  return s+'</svg>'}
+
+return{parseDXF,normPart,solve,toDXF,toSVG,area,bbox,rot,shift,simplify,rectInfo};
+})();
+if(typeof module!=='undefined')module.exports=NEST;
+
+</script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+const P=()=>{try{return window.parent&&window.parent!==window?window.parent:null}catch(e){return null}};
+const HK=()=>{const p=P();try{return p&&p.__mtKup||null}catch(e){return null}};
+const num=v=>{if(v==null)return null;const t=String(v).trim().replace(/\s/g,'').replace(',','.');if(!t)return null;const n=parseFloat(t);return isFinite(n)?n:null};
+const fmt=(n,d)=>{if(n==null||!isFinite(n))return'';const s=(+n).toFixed(d==null?0:d).split('.');return s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.')+(s[1]?','+s[1]:'')};
+const fmtMM=n=>{if(n==null||!isFinite(n))return'';const r=Math.round(n*10)/10;return(Math.abs(r-Math.round(r))>0.05?r.toFixed(1):String(Math.round(r))).replace('.',',')};
+let tT=null;function toast(t,ms){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(tT);tT=setTimeout(()=>{e.hidden=true},ms||2600)}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const kurs=()=>{try{const h=HK();return h&&h.kurs?(h.kurs().eur||117.2):117.2}catch(e){return 117.2}};
+const COLORS=['#E9D7B8','#CFE0F2','#D5EBD9','#F2D6C9','#E4D9F0','#F4E6B8','#D3ECEC','#EAD3DE','#DCE3C5','#E6DCCB'];
+
+/* ---------- stanje ---------- */
+let db=null,downloads=null,readonly=false;
+const S={id:null,name:'',job:'',mat:{id:'',name:'',store:'',L:2800,W:2070,T:18,price:null,cur:'RSD',grain:false},mode:'saw',kerf:4,tool:6,spacing:4,margin:10,parts:[],shopId:''};
+let MATS=[],SAVED=new Map(),RES=null,dirty=false,saveT=null;
+const DEFMATS=[{id:'m_sper18',name:'Šperploča breza 18 mm',store:'',L:2500,W:1250,T:18,price:null,cur:'RSD',grain:true},
+  {id:'m_mdf18',name:'MDF 18 mm',store:'',L:2800,W:2070,T:18,price:null,cur:'RSD',grain:false},
+  {id:'m_furn19',name:'Furnirana ploča 19 mm',store:'',L:2800,W:2070,T:19,price:null,cur:'RSD',grain:true},
+  {id:'m_cnc',name:'CNC sto – ploča 3000×1500',store:'',L:3000,W:1500,T:18,price:null,cur:'RSD',grain:false}];
+function setState(t){$('state').textContent=t}
+
+/* ---------- materijal ---------- */
+function fillMats(){const s=$('mSel');s.innerHTML='';const o0=el('option',null,'— svoj materijal —');o0.value='';s.appendChild(o0);
+  for(const m of MATS){const o=el('option',null,m.name+' · '+fmtMM(m.L)+'×'+fmtMM(m.W)+(m.T?' · '+fmtMM(m.T)+' mm':''));o.value=m.id;s.appendChild(o)}s.value=S.mat.id&&MATS.some(m=>m.id===S.mat.id)?S.mat.id:''}
+function showMat(){const m=S.mat;$('mName').value=m.name||'';$('mStore').value=m.store||'';$('mL').value=m.L??'';$('mW').value=m.W??'';$('mT').value=m.T??'';$('mP').value=m.price==null?'':String(m.price).replace('.',',');$('mC').value=m.cur||'RSD';$('mG').checked=!!m.grain;fillMats()}
+function readMat(){const m=S.mat;m.name=$('mName').value.trim();m.store=$('mStore').value.trim();m.L=num($('mL').value);m.W=num($('mW').value);m.T=num($('mT').value);m.price=num($('mP').value);m.cur=$('mC').value;m.grain=$('mG').checked}
+$('mSel').addEventListener('change',()=>{const m=MATS.find(x=>x.id===$('mSel').value);if(m){S.mat=Object.assign({},m);showMat();changed(true)}});
+for(const id of ['mName','mStore','mL','mW','mT','mP'])$(id).addEventListener('input',()=>{readMat();changed(['mL','mW'].includes(id))});
+for(const id of ['mC','mG'])$(id).addEventListener('change',()=>{readMat();changed(id==='mG')});
+$('mSave').addEventListener('click',()=>{readMat();const m=S.mat;if(!m.name||!m.L||!m.W){toast('Upiši naziv i dimenzije ploče.');return}
+  const ex=MATS.find(x=>x.id&&x.id===m.id)||MATS.find(x=>x.name===m.name);if(ex){m.id=ex.id;Object.assign(ex,m)}else{m.id='m'+uid();MATS.push(Object.assign({},m))}
+  saveMats();fillMats();toast('Materijal sačuvan: '+m.name)});
+function saveMats(){if(!db||readonly)return;try{db.doc('settings/nesting').set({materials:MATS,at:Date.now()})}catch(e){}}
+
+/* ---------- način ---------- */
+function showMode(){for(const b of $('mode').children)b.setAttribute('aria-pressed',String(b.dataset.m===S.mode));$('sawF').hidden=S.mode!=='saw';$('cncF').hidden=S.mode!=='cnc';
+  $('kerf').value=S.kerf;$('tool').value=S.tool;$('spacing').value=S.spacing;$('marginS').value=S.margin;$('marginC').value=S.margin;
+  $('modeNote').textContent=S.mode==='saw'?'Testera (formatizerka): rezovi idu od kraja do kraja ploče. Oblici iz DXF-a se slažu kao pravougaonik oko oblika.':'CNC: delovi bilo kog oblika se slažu gusto. Razmak između delova = glodalo + razmak. Rub je najmanje pola tog razmaka.'}
+for(const b of $('mode').children)b.addEventListener('click',()=>{S.mode=b.dataset.m;showMode();changed(true)});
+$('kerf').addEventListener('input',()=>{S.kerf=num($('kerf').value)??0;changed(true)});
+$('tool').addEventListener('input',()=>{S.tool=num($('tool').value)??0;changed(true)});
+$('spacing').addEventListener('input',()=>{S.spacing=num($('spacing').value)??0;changed(true)});
+for(const id of ['marginS','marginC'])$(id).addEventListener('input',()=>{S.margin=num($(id).value)??0;changed(true)});
+
+/* ---------- delovi ---------- */
+function partSvg(p){const W=p.L||1,H=p.W||1;const s=Math.min(38/W,28/H);const path=q=>'M'+q.map(([x,y])=>(2+x*s).toFixed(1)+' '+(30-2-y*s).toFixed(1)).join(' L')+' Z';
+  const o=p.outer&&p.outer.length?p.outer:[[0,0],[W,0],[W,H],[0,H]];
+  return'<svg viewBox="0 0 42 32"><path d="'+path(o)+(p.holes||[]).map(h=>' '+path(h)).join('')+'" fill="'+COLORS[(p.no-1)%COLORS.length]+'" fill-rule="evenodd" stroke="currentColor" stroke-width="1"/></svg>'}
+function drawParts(){const box=$('parts');box.innerHTML='';
+  const h=el('div','pr h');for(const t of ['#','','Naziv','Dužina','Širina','Kom','Smer goda',''])h.appendChild(el('span',null,t));box.appendChild(h);
+  S.parts.forEach((p,i)=>{p.no=i+1;const r=el('div','pr');r.appendChild(el('span','no',String(i+1)));
+    const pv=el('span','pv');pv.innerHTML=partSvg(p);r.appendChild(pv);
+    const nm=el('div','nm');const ni=el('input');ni.value=p.name||'';ni.placeholder='Naziv dela';ni.addEventListener('input',()=>{p.name=ni.value;changed(false)});nm.appendChild(ni);
+    if(p.src)nm.appendChild(el('small',null,(p.kind==='poly'?'oblik':'pravougaonik')+' · '+p.src));r.appendChild(nm);
+    const mkN=(cls,key)=>{const w=el('span',cls);if(p.src){w.appendChild(el('span','ro',fmtMM(p[key])))}else{const inp=el('input','num');inp.inputMode='decimal';inp.value=p[key]??'';inp.setAttribute('aria-label',key==='L'?'Dužina':'Širina');
+        inp.addEventListener('input',()=>{p[key]=num(inp.value);p.outer=null;pv.innerHTML=partSvg(p);changed(true)});w.appendChild(inp)}return w};
+    r.appendChild(mkN('cL','L'));r.appendChild(mkN('cW','W'));
+    const qw=el('span','cQ');const q=el('input','num');q.inputMode='numeric';q.value=p.qty??1;q.setAttribute('aria-label','Komada');q.addEventListener('input',()=>{p.qty=Math.max(0,Math.round(num(q.value)||0));changed(true)});qw.appendChild(q);r.appendChild(qw);
+    const gw=el('span','cG');const g=el('select');for(const [v,t] of [['x','↔ po dužini'],['y','↕ po širini'],['free','slobodno']]){const o=el('option',null,t);o.value=v;g.appendChild(o)}g.value=p.grain||'free';g.setAttribute('aria-label','Smer goda');g.addEventListener('change',()=>{p.grain=g.value;changed(true)});gw.appendChild(g);r.appendChild(gw);
+    const x=el('button','x','×');x.type='button';x.setAttribute('aria-label','Ukloni deo '+(i+1));x.addEventListener('click',()=>{S.parts.splice(i,1);drawParts();changed(true)});r.appendChild(x);
+    box.appendChild(r)});
+  if(!S.parts.length)box.appendChild(el('div','note','  Još nema delova.'))}
+$('addRect').addEventListener('click',()=>{S.parts.push({id:uid(),name:'',kind:'rect',L:null,W:null,qty:1,grain:S.mat.grain?'x':'free'});drawParts();const ins=$('parts').querySelectorAll('.pr:last-child input');if(ins[0])ins[0].focus()});
+/* DXF */
+async function addDxfFiles(files){let n=0,bad=[];
+  for(const f of files){if(!/\.dxf$/i.test(f.name)){bad.push(f.name);continue}let txt='';try{txt=await f.text()}catch(e){bad.push(f.name);continue}
+    let r;try{r=NEST.parseDXF(txt)}catch(e){bad.push(f.name);continue}if(!r.parts.length){bad.push(f.name);continue}
+    const base=f.name.replace(/\.dxf$/i,'');
+    r.parts.forEach((pt,k)=>{const np=NEST.normPart(pt);S.parts.push({id:uid(),name:base+(r.parts.length>1?' '+(k+1):''),kind:np.kind,L:np.L,W:np.W,qty:1,grain:S.mat.grain?'x':'free',outer:np.outer,holes:np.holes,areaMM:np.areaMM,src:f.name+(r.units===1?' (inči)':'')});n++})}
+  drawParts();if(n)changed(true);
+  toast((n?'Dodato delova: '+n:'Nijedan deo nije pronađen')+(bad.length?' · nije pročitano: '+bad.join(', '):''),4000)}
+$('pickDxf').addEventListener('click',()=>$('dxfIn').click());
+$('dxfIn').addEventListener('change',e=>{const fs=[...e.target.files];e.target.value='';if(fs.length)addDxfFiles(fs)});
+(function(){let n=0;const d=$('drop');const isF=e=>[...((e.dataTransfer&&e.dataTransfer.types)||[])].includes('Files');
+  document.addEventListener('dragenter',e=>{if(isF(e)){n++;d.classList.add('on')}});document.addEventListener('dragleave',()=>{n=Math.max(0,n-1);if(!n)d.classList.remove('on')});
+  document.addEventListener('dragover',e=>{if(isF(e))e.preventDefault()});
+  document.addEventListener('drop',e=>{if(!isF(e))return;e.preventDefault();n=0;d.classList.remove('on');addDxfFiles([...e.dataTransfer.files])})})();
+
+/* ---------- posao i sačuvana krojenja ---------- */
+function fillJobs(){const s=$('nJob');s.innerHTML='';const o0=el('option',null,'— nije za posao —');o0.value='';s.appendChild(o0);let jobs=[];try{const h=HK();jobs=h&&h.jobs?h.jobs():[]}catch(e){}
+  const act=jobs.filter(j=>j.active),old=jobs.filter(j=>!j.active);const add=(par,j)=>{const o=el('option',null,j.name+(j.client&&!j.name.includes(j.client)?' – '+j.client:'')+(j.inv?' · '+j.inv:''));o.value=j.id;par.appendChild(o)};
+  for(const j of act)add(s,j);if(old.length){const g=el('optgroup');g.label='Ranije';for(const j of old.slice(0,80))add(g,j);s.appendChild(g)}
+  if(S.job&&![...s.options].some(o=>o.value===S.job)){const o=el('option',null,'(posao '+S.job+')');o.value=S.job;s.appendChild(o)}s.value=S.job||''}
+$('nJob').addEventListener('focus',fillJobs);
+$('nJob').addEventListener('change',()=>{S.job=$('nJob').value;changed(false)});
+$('nName').addEventListener('input',()=>{S.name=$('nName').value;changed(false)});
+function fillSaved(){const s=$('nSaved');s.innerHTML='';const o0=el('option',null,SAVED.size?'— izaberi —':'— nema sačuvanih —');o0.value='';s.appendChild(o0);
+  for(const [id,d] of [...SAVED].sort((a,b)=>(b[1].at||0)-(a[1].at||0))){const o=el('option',null,(d.name||'Bez naziva')+(d.sheets?' · '+d.sheets+' pl.':''));o.value=id;s.appendChild(o)}s.value=S.id&&SAVED.has(S.id)?S.id:''}
+$('nSaved').addEventListener('change',()=>{const id=$('nSaved').value;if(id)load(id)});
+function load(id){const d=SAVED.get(id);if(!d)return;Object.assign(S,{id,name:d.name||'',job:d.job||'',mat:Object.assign({},S.mat,d.mat||{}),mode:d.mode||'saw',kerf:d.kerf??4,tool:d.tool??6,spacing:d.spacing??4,margin:d.margin??10,parts:(d.parts||[]).map(p=>Object.assign({},p,{outer:p.outer?JSON.parse(p.outer):null,holes:p.holes?JSON.parse(p.holes):[]})),shopId:d.shopId||''});
+  showAll();dirty=false;setState('Učitano');solveNow()}
+window.__openNest=id=>{if(SAVED.has(id))load(id);else pendingOpen=id};let pendingOpen=null;
+window.__newNest=job=>{Object.assign(S,{id:null,name:'',job:job||'',parts:[],shopId:''});RES=null;showAll();drawRes();setState('');try{const h=HK();const j=h&&h.jobs?h.jobs().find(x=>x.id===job):null;if(j){S.name=j.name;$('nName').value=j.name}}catch(e){}};
+$('bNew').addEventListener('click',()=>{Object.assign(S,{id:null,name:'',job:'',parts:[],shopId:''});RES=null;showAll();drawRes();setState('')});
+function showAll(){$('nName').value=S.name||'';fillJobs();fillSaved();showMat();showMode();drawParts()}
+function docOf(){return{name:S.name||'',job:S.job||'',jobName:(()=>{try{const h=HK();const j=h&&h.jobs?h.jobs().find(x=>x.id===S.job):null;return j?j.name:''}catch(e){return''}})(),
+  mat:Object.assign({},S.mat),mode:S.mode,kerf:S.kerf,tool:S.tool,spacing:S.spacing,margin:S.margin,
+  parts:S.parts.map(p=>({id:p.id,name:p.name||'',kind:p.kind,L:p.L,W:p.W,qty:p.qty,grain:p.grain,src:p.src||'',areaMM:p.areaMM||null,outer:p.outer?JSON.stringify(p.outer.map(q=>[Math.round(q[0]*100)/100,Math.round(q[1]*100)/100])):null,holes:p.holes&&p.holes.length?JSON.stringify(p.holes.map(h=>h.map(q=>[Math.round(q[0]*100)/100,Math.round(q[1]*100)/100]))):null})),
+  sheets:RES&&!RES.error?RES.sheets.length:null,util:RES&&!RES.error?Math.round(RES.util*1000)/10:null,shopId:S.shopId||'',at:Date.now()}}
+function save(quiet){if(!db||readonly){toast('Ovde nema čuvanja.');return}if(!S.name.trim()){S.name=(S.parts[0]&&S.parts[0].name)||('Krojenje '+new Date().toLocaleDateString('sr-RS'));$('nName').value=S.name}
+  if(!S.id)S.id='n'+uid();const d=docOf();SAVED.set(S.id,d);try{db.collection('nesting').doc(S.id).set(d)}catch(e){toast('Nije sačuvano.');return}dirty=false;fillSaved();setState('Sačuvano');if(!quiet)toast('Krojenje sačuvano')}
+$('bSave').addEventListener('click',()=>save(false));
+function changed(resolve){dirty=true;setState(S.id?'Čuvam…':'Nije sačuvano');if(S.id){clearTimeout(saveT);saveT=setTimeout(()=>save(true),1200)}if(resolve)solveSoon()}
+
+/* ---------- slaganje (u pozadini) ---------- */
+let worker=null,solveT=null,ticket=0;
+function getWorker(){if(worker!==null)return worker;try{const src=$('coreSrc').textContent+'\nonmessage=function(e){var r;try{r=NEST.solve(e.data.job)}catch(x){r={error:"Greška pri slaganju: "+x.message}}postMessage({t:e.data.t,r:JSON.parse(JSON.stringify(r))})};';
+  worker=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));worker.onmessage=e=>{if(e.data.t===ticket)gotRes(e.data.r)};worker.onerror=()=>{worker=false}}catch(e){worker=false}return worker}
+function jobInput(){readMat();return{W:S.mat.L,H:S.mat.W,mode:S.mode,kerf:S.kerf,tool:S.tool,spacing:S.spacing,margin:S.margin,material:S.mat.name,
+  parts:S.parts.filter(p=>p.L>0&&p.W>0&&p.qty>0).map((p,i)=>({id:p.id,no:p.no,name:p.name||('Deo '+p.no),kind:p.kind||'rect',L:+p.L,W:+p.W,qty:+p.qty,grain:p.grain||'free',outer:p.outer||null,holes:p.holes||[],areaMM:p.areaMM||null}))}}
+function solveSoon(){clearTimeout(solveT);solveT=setTimeout(solveNow,700)}
+function solveNow(){clearTimeout(solveT);const job=jobInput();if(!job.W||!job.H){RES=null;drawRes('Upiši dužinu i širinu ploče.');return}if(!job.parts.length){RES=null;drawRes();return}
+  $('busy').hidden=false;const t=++ticket;const w=getWorker();if(w){w.postMessage({t,job})}else setTimeout(()=>{if(t===ticket){let r;try{r=NEST.solve(job)}catch(e){r={error:e.message}}gotRes(r)}},30)}
+function gotRes(r){$('busy').hidden=true;RES=r;RES.job=jobInput();drawRes();if(S.id)changed(false)}
+$('go').addEventListener('click',solveNow);
+
+/* ---------- prikaz rezultata ---------- */
+function money(){const m=S.mat;if(m.price==null||!RES||RES.error)return null;const n=RES.sheets.length;const k=kurs();
+  const rsd=m.cur==='EUR'?m.price*k:m.price;return{n,rsd:rsd*n,eur:rsd*n/k}}
+function drawRes(msg){const box=$('sheets');box.innerHTML='';const sum=$('sum');sum.innerHTML='';$('acts').hidden=true;
+  if(msg){box.appendChild(el('div','empty',msg));return}
+  if(!RES){box.appendChild(Object.assign(el('div','empty'),{innerHTML:'Upiši materijal i delove (ili prevuci DXF), pa klikni <b>Složi</b>.'}));return}
+  if(RES.error){box.appendChild(el('div','empty',RES.error));return}
+  const job=RES.job;const W=job.W,H=job.H;const n=RES.sheets.length;
+  const chip=(t,v,c)=>{const s=el('span','chip'+(c?' '+c:''),t);if(v!=null)s.appendChild(el('b',null,v));sum.appendChild(s)};
+  chip('Ploča',String(n));chip('Iskorišćenost',fmt(RES.util*100,0)+'%',RES.util>0.75?'ok':'');chip('Otpad',fmt(RES.wasteM2,2)+' m²');
+  const mo=money();if(mo)chip('Ploče',fmt(mo.rsd,0)+' din ≈ '+fmt(mo.eur,0)+' €');
+  for(const w of RES.warn||[])chip(w,null,'warn');
+  $('acts').hidden=false;$('eShopT').textContent=S.shopId?'Ažuriraj kupovinu ('+n+')':'U kupovinu ('+n+' '+(n===1?'ploča':'ploče')+')';
+  RES.sheets.forEach((sh,si)=>{const c=el('div','sheet');const hd=el('div','sh');hd.appendChild(el('b',null,'Ploča '+(si+1)+' / '+n));
+    hd.appendChild(el('span','num',fmt(sh.util*100,0)+'% · '+sh.items.length+' del.'));const rest=W-sh.usedLen-(job.margin||0);if(rest>50)hd.appendChild(el('span','num','ostaje traka '+fmtMM(rest)+' × '+fmtMM(H)+' mm'));c.appendChild(hd);
+    c.insertAdjacentHTML('beforeend',sheetSvg(sh,W,H));box.appendChild(c)});
+  const lg=el('div','legend');for(const p of job.parts){const s=el('span');const i=el('i');i.style.background=COLORS[(p.no-1)%COLORS.length];s.append(i,document.createTextNode(p.no+' '+p.name+' · '+fmtMM(p.L)+'×'+fmtMM(p.W)+' · '+p.qty+' kom'));lg.appendChild(s)}box.appendChild(lg)}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function sheetSvg(sh,W,H){const f=n=>(+n).toFixed(1);const path=p=>'M'+p.map(([x,y])=>f(x)+' '+f(H-y)).join(' L')+' Z';
+  let s='<svg viewBox="-2 -2 '+(W+4)+' '+(H+4)+'" role="img" aria-label="Raspored na ploči"><rect class="bd" x="0" y="0" width="'+W+'" height="'+H+'"/>';
+  if(S.mat.grain){for(let y=40;y<H;y+=80)s+='<line x1="0" x2="'+W+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" stroke-opacity=".07" stroke-width="1" vector-effect="non-scaling-stroke"/>'}
+  for(const it of sh.items){const col=COLORS[(it.part.no-1)%COLORS.length];
+    s+='<path class="pt" d="'+path(it.poly)+(it.holes||[]).map(h=>' '+path(h)).join('')+'" fill="'+col+'" fill-rule="evenodd"><title>'+esc(it.part.no+' '+it.part.name+' · '+fmtMM(it.part.L)+'×'+fmtMM(it.part.W)+' mm')+'</title></path>';
+    if(it.shape)s+='<path d="'+path(it.shape)+'" fill="none" stroke="currentColor" stroke-dasharray="6 4" stroke-width="1" vector-effect="non-scaling-stroke"/>'}
+  const fs=Math.max(18,Math.max(W,H)/42);
+  for(const it of sh.items){const cx=it.x+it.w/2,cy=it.y+it.h/2;const big=Math.min(it.w,it.h)>fs*2.2;
+    s+='<text class="lbl" x="'+f(cx)+'" y="'+f(H-cy)+'" font-size="'+f(Math.min(fs*1.3,Math.min(it.w,it.h)*0.5))+'" text-anchor="middle" dominant-baseline="middle">'+it.part.no+'</text>';
+    if(big&&it.part.kind!=='poly')s+='<text class="lbl" x="'+f(cx)+'" y="'+f(H-cy+fs*1.3)+'" font-size="'+f(fs*0.75)+'" text-anchor="middle" dominant-baseline="middle" style="font-weight:500">'+fmtMM(it.rot?it.part.W:it.part.L)+'×'+fmtMM(it.rot?it.part.L:it.part.W)+'</text>'}
+  return s+'</svg>'}
+
+/* ---------- izvoz ---------- */
+function fileBase(){return('Krojenje '+(S.name||S.mat.name||'')).replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim()}
+async function saveFile(name,data,type){try{if(downloads){await downloads.save({filename:name,data:data instanceof Blob?data:new Blob([data],{type})});toast('Sačuvano: '+name);return}}catch(e){if(e&&e.code==='declined')return}
+  const u=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type}));const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);toast('Sačuvano: '+name)}
+$('eDxf').addEventListener('click',()=>{if(!RES||RES.error)return;saveFile(fileBase()+'.dxf',NEST.toDXF(RES.job,RES),'application/dxf')});
+$('eSvg').addEventListener('click',async()=>{if(!RES||RES.error)return;for(let i=0;i<RES.sheets.length;i++)await saveFile(fileBase()+' - ploca '+(i+1)+'.svg',NEST.toSVG(RES.job,RES,i,{labels:true}),'image/svg+xml')});
+$('ePdf').addEventListener('click',async()=>{if(!RES||RES.error)return;let jsPDF=null;try{const p=P();jsPDF=p&&p.__mtJsPDF?await p.__mtJsPDF():(window.jspdf&&window.jspdf.jsPDF)}catch(e){}
+  if(!jsPDF){toast('Alat za PDF nije dostupan.');return}
+  const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});const job=RES.job;const n=RES.sheets.length;
+  let jobName='';try{const h=HK();const j=h&&h.jobs?h.jobs().find(x=>x.id===S.job):null;if(j)jobName=j.name+(j.client&&!j.name.includes(j.client)?' – '+j.client:'')}catch(e){}
+  RES.sheets.forEach((sh,si)=>{if(si)pdf.addPage();const c=pagePng(sh,si,n,job,jobName);pdf.addImage(c,'JPEG',0,0,297,210,undefined,'FAST')});
+  await saveFile(fileBase()+'.pdf',new Blob([pdf.output('arraybuffer')],{type:'application/pdf'}),'application/pdf')});
+function pagePng(sh,si,n,job,jobName){const S2=6;const c=document.createElement('canvas');c.width=297*S2;c.height=210*S2;const x=c.getContext('2d');const mm=v=>v*S2;
+  x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#232B36';x.textBaseline='top';
+  x.font='700 '+mm(5)+'px Arial';x.fillText('MARTINOV DESIGN · Krojenje ploča',mm(12),mm(10));
+  x.font='400 '+mm(3.4)+'px Arial';x.fillStyle='#555';
+  const line1=[S.name,jobName&&('Posao: '+jobName)].filter(Boolean).join('   ·   ');
+  const line2=[(job.material||'Ploča')+' '+fmtMM(job.W)+'×'+fmtMM(job.H)+(S.mat.T?'×'+fmtMM(S.mat.T):'')+' mm',S.mode==='saw'?'Testera, rez '+fmtMM(S.kerf)+' mm':'CNC, glodalo Ø'+fmtMM(S.tool)+' + razmak '+fmtMM(S.spacing)+' mm','rub '+fmtMM(S.margin)+' mm',S.mat.grain?'god po dužini ploče':''].filter(Boolean).join('   ·   ');
+  x.fillText(line1,mm(12),mm(17.5));x.fillText(line2,mm(12),mm(22.5));
+  x.textAlign='right';x.font='700 '+mm(5)+'px Arial';x.fillStyle='#232B36';x.fillText('Ploča '+(si+1)+' / '+n,mm(285),mm(10));
+  x.font='400 '+mm(3.2)+'px Arial';x.fillStyle='#555';x.fillText(fmt(sh.util*100,0)+'% iskorišćeno · '+new Date().toLocaleDateString('sr-RS'),mm(285),mm(17.5));x.textAlign='left';
+  /* crtež */
+  const aw=273,ah=120,ax=12,ay=30;const sc=Math.min(aw/job.W,ah/job.H);const ox=ax+(aw-job.W*sc)/2,oy=ay;const P2=([px,py])=>[mm(ox+px*sc),mm(oy+(job.H-py)*sc)];
+  x.lineWidth=mm(0.25);x.strokeStyle='#777';x.strokeRect(mm(ox),mm(oy),mm(job.W*sc),mm(job.H*sc));
+  const poly=(p,fill)=>{x.beginPath();p.forEach((q,i)=>{const [X,Y]=P2(q);if(i)x.lineTo(X,Y);else x.moveTo(X,Y)});x.closePath()};
+  for(const it of sh.items){x.beginPath();for(const ring of [it.poly,...(it.holes||[])]){ring.forEach((q,i)=>{const [X,Y]=P2(q);if(i)x.lineTo(X,Y);else x.moveTo(X,Y)});x.closePath()}
+    x.fillStyle=COLORS[(it.part.no-1)%COLORS.length];x.fill('evenodd');x.strokeStyle='#232B36';x.lineWidth=mm(0.25);x.stroke()}
+  x.textAlign='center';x.textBaseline='middle';
+  for(const it of sh.items){const [X,Y]=P2([it.x+it.w/2,it.y+it.h/2]);const wmm=it.w*sc,hmm=it.h*sc;const fsz=Math.max(2.2,Math.min(5,Math.min(wmm,hmm)/3));
+    x.fillStyle='#232B36';x.font='700 '+mm(fsz)+'px Arial';x.fillText(String(it.part.no),X,Y-(Math.min(wmm,hmm)>9?mm(fsz*0.45):0));
+    if(Math.min(wmm,hmm)>9&&it.part.kind!=='poly'){x.font='400 '+mm(Math.max(2,fsz*0.6))+'px Arial';x.fillText(fmtMM(it.rot?it.part.W:it.part.L)+'×'+fmtMM(it.rot?it.part.L:it.part.W),X,Y+mm(fsz*0.6))}}
+  /* dimenzije ploče */
+  x.font='400 '+mm(2.8)+'px Arial';x.fillStyle='#555';x.fillText(fmtMM(job.W)+' mm',mm(ox+job.W*sc/2),mm(oy+job.H*sc+4));
+  /* tabela delova na ovoj ploči */
+  x.textAlign='left';x.textBaseline='top';const cnt=new Map();for(const it of sh.items){const k=it.part.no;cnt.set(k,(cnt.get(k)||0)+1)}
+  const rows=[...cnt].sort((a,b)=>a[0]-b[0]).map(([no,q])=>{const p=job.parts.find(pp=>pp.no===no);return[String(no),p?p.name:'',p?fmtMM(p.L)+' × '+fmtMM(p.W):'',String(q),p&&p.grain!=='free'?(p.grain==='x'?'↔':'↕'):'']});
+  let ty=oy+ah+11;const cols=[[12,'#'],[22,'Deo'],[110,'Mere (mm)'],[160,'Kom'],[180,'God']];
+  x.font='700 '+mm(3)+'px Arial';x.fillStyle='#232B36';for(const [cx,t] of cols)x.fillText(t,mm(cx),mm(ty));
+  x.strokeStyle='#ccc';x.beginPath();x.moveTo(mm(12),mm(ty+4.5));x.lineTo(mm(285),mm(ty+4.5));x.stroke();ty+=6;x.font='400 '+mm(3)+'px Arial';
+  const per=Math.max(1,Math.floor((205-ty)/4.6));const two=rows.length>per;
+  rows.forEach((r,i)=>{const col=two&&i>=per?1:0;const yy=ty+(i%per)*4.6;const dx=col*140;if(i>=per*2)return;r.forEach((t,k)=>x.fillText(t,mm(cols[k][0]+dx>285?285:cols[k][0]+dx),mm(yy)))});
+  return c.toDataURL('image/jpeg',0.9)}
+
+/* ---------- u kupovinu ---------- */
+$('eShop').addEventListener('click',()=>{if(!RES||RES.error||!db)return;if(readonly){toast('Ovde možeš samo da gledaš.');return}if(!S.id)save(true);const m=S.mat;const n=RES.sheets.length;const now=Date.now();
+  let jobInfo={};try{const h=HK();const j=h&&h.jobs?h.jobs().find(x=>x.id===S.job):null;if(j)jobInfo={job:j.id,jobName:j.name,client:j.client||'',inv:j.inv||''}}catch(e){}
+  const priceE=m.price==null?'':Math.round((m.cur==='EUR'?m.price:m.price/kurs())*100)/100;
+  const name=(m.name||'Ploča')+' '+fmtMM(m.L)+'×'+fmtMM(m.W)+(m.T&&!String(m.name||'').includes(fmtMM(m.T))?' · '+fmtMM(m.T)+' mm':'');
+  const note=['Krojenje: '+(S.name||'')+' · iskorišćenost '+fmt(RES.util*100,0)+'%'].join('\n');
+  const id=S.shopId||('s'+uid());const base={name,qty:n,unit:'kom',price:priceE,store:m.store||'',for:'radionica',hot:false,note,bought:false,boughtAt:null,by:null,byName:'Krojenje',createdAt:now,updatedAt:now,photos:[],...jobInfo,nest:S.id||''};
+  try{db.collection('shopping').doc(id).set(base)}catch(e){toast('Nije upisano u kupovinu.');return}
+  const was=!!S.shopId;S.shopId=id;if(S.id)save(true);toast(was?'Kupovina ažurirana: '+n+' kom':'U kupovini: '+name+' – '+n+' kom');drawRes()});
+
+/* ---------- povezivanje ---------- */
+(async()=>{try{db=window.claude&&window.claude.use?await window.claude.use('db'):null}catch(e){db=null}
+  try{downloads=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){downloads=null}
+  MATS=DEFMATS.map(m=>Object.assign({},m));S.mat=Object.assign({},MATS[0]);showAll();drawRes();
+  if(!db){setState('Bez baze – ništa se ne čuva');return}
+  db.doc('settings/nesting').onSnapshot(s=>{const d=s.exists?s.data():null;if(d&&Array.isArray(d.materials)&&d.materials.length){MATS=d.materials;fillMats()}},()=>{});
+  db.collection('nesting').onSnapshot(q=>{SAVED=new Map(q.docs.map(d=>[d.id,d.data()]));fillSaved();if(pendingOpen&&SAVED.has(pendingOpen)){const id=pendingOpen;pendingOpen=null;load(id)}},()=>{});
+})();
+})();
+</script></body></html>
