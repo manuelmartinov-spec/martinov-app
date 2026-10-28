@@ -8,4 +8,4 @@ export const FIREBASE_CONFIG={
   appId:"1:815779512836:web:5e556bd0955c3f6996ab51"
 };
 /* javni ključ za obaveštenja (Firebase → Project settings → Cloud Messaging → Web Push certificates) */
-export const VAPID_KEY="";
+export const VAPID_KEY="BCEOFoJrFXnPV4HOas6aqC88ZBCHd1w_hhE0iHAGWW7PExAN2rvqIzKBcEH3gQycnMmiDXmUcpSs4xVEvFF23BI";
