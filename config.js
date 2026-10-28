@@ -7,3 +7,5 @@ export const FIREBASE_CONFIG={
   messagingSenderId:"815779512836",
   appId:"1:815779512836:web:5e556bd0955c3f6996ab51"
 };
+/* javni ključ za obaveštenja (Firebase → Project settings → Cloud Messaging → Web Push certificates) */
+export const VAPID_KEY="";

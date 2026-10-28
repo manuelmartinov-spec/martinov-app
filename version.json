@@ -1,7 +1,12 @@
 {
- "v": "1.1.1",
- "date": "27.10.2026.",
+ "v": "1.2.0",
+ "date": "28.10.2026.",
  "log": [
+  {
+   "v": "1.2.0",
+   "date": "28.10.2026.",
+   "t": "Obaveštenja na telefonu i računaru: svako jutro kratak spisak (hitno, kasni, danas, sutra, kupovina). Uključuje se u Aplikacija → Obaveštenja; svako bira vreme i šta želi. Klik na obaveštenje otvara Zadatke ili Kupovinu."
+  },
   {
    "v": "1.1.1",
    "date": "27.10.2026.",

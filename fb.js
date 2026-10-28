@@ -3,7 +3,8 @@
 import {initializeApp} from './lib/firebase-app.js';
 import {initializeFirestore,getFirestore,persistentLocalCache,persistentMultipleTabManager,doc,collection,getDoc,getDocFromCache,getDocsFromCache,getDocs,setDoc,updateDoc,deleteDoc,onSnapshot,writeBatch,FieldPath} from './lib/firebase-firestore.js';
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut,reauthenticateWithPopup} from './lib/firebase-auth.js';
-import {FIREBASE_CONFIG} from './config.js';
+import * as CFG from './config.js';
+const {FIREBASE_CONFIG}=CFG;
 
 const T=window.__MT_TEST||null;          /* samo za lokalni test */
 const app=initializeApp(FIREBASE_CONFIG);
@@ -192,8 +193,59 @@ async function admit(u){
     const res=await Promise.race([chk,new Promise(r=>setTimeout(()=>r('timeout'),8000))]);
     if(res==='not_granted'){showGate('denied','Nalog '+(u.email||'')+' nema pristup. Javi Manuelu da te doda.');return}}
   showGate('ok');ready();
+  setTimeout(()=>{try{pushApi.refresh()}catch(e){}},4000);
 }
 if(T&&T.user){admit(T.user)}
 else onAuthStateChanged(auth,u=>{if(u)admit(u);else{me=null;showGate('out','')}});
 window.__mtUser=()=>me;
 window.__mtSetPriv=putPriv;
+
+/* ---------- obaveštenja na telefonu/računaru (Firebase Cloud Messaging) ----------
+   Svaki uređaj koji uključi obaveštenja upisuje se u naprave/{id}. Program na GitHub-u svako jutro
+   pročita spisak (podsetnik) i pošalje obaveštenje na te uređaje. */
+const VAPID_KEY=CFG.VAPID_KEY||'';
+let msgMod=null,msgI=null;
+async function msgInit(){if(msgI)return msgI;msgMod=await import('./lib/firebase-messaging.js');if(!(await msgMod.isSupported()))throw{code:'unsupported'};msgI=msgMod.getMessaging(app);return msgI}
+async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('').slice(0,40)}
+function devName(){const u=navigator.userAgent;if(/iPhone/.test(u))return'iPhone';if(/iPad/.test(u))return'iPad';if(/Android/.test(u))return/Mobile/.test(u)?'Android telefon':'Android tablet';if(/Windows/.test(u))return'Windows računar';if(/Macintosh/.test(u))return'Mac';if(/Linux/.test(u))return'Linux računar';return'Uređaj'}
+const PK='mt.push';
+function pget(){try{return JSON.parse(localStorage.getItem(PK)||'null')}catch(e){return null}}
+function pset(v){try{if(v)localStorage.setItem(PK,JSON.stringify(v));else localStorage.removeItem(PK)}catch(e){}}
+const isIOS=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const standalone=()=>navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+async function getTok(){if(T&&T.push)return T.push.token;const m=await msgInit();const reg=await navigator.serviceWorker.ready;return msgMod.getToken(m,{vapidKey:VAPID_KEY,serviceWorkerRegistration:reg})}
+function tzName(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'Europe/Belgrade'}catch(e){return'Europe/Belgrade'}}
+const pushApi={
+  support(){
+    if(!VAPID_KEY&&!(T&&T.push))return'nokey';
+    if(!('serviceWorker' in navigator)||!('Notification' in window)||!('PushManager' in window))return isIOS()&&!standalone()?'ios-home':'no';
+    return'ok'},
+  perm(){return'Notification' in window?Notification.permission:'default'},
+  local(){return pget()},
+  async enable(o){
+    if(!me)throw{code:'auth'};if(!navigator.onLine)throw{code:'offline'};
+    let p=Notification.permission;if(p!=='granted')p=await Notification.requestPermission();
+    if(p!=='granted')throw{code:p==='denied'?'denied':'dismissed'};
+    const tok=await getTok();if(!tok)throw{code:'notoken'};
+    const id=await sha(tok);const old=pget();o=o||{};
+    const set={time:o.time||(old&&old.time)||'07:00',tasks:o.tasks!=null?!!o.tasks:old&&old.tasks!=null?old.tasks:true,shop:o.shop||(old&&old.shop)||'sve'};
+    fire(setDoc(doc(fs,'naprave/'+id),{token:tok,uid:me.uid,email:(me.email||'').toLowerCase(),name:me.displayName||'',device:devName(),on:true,...set,tz:tzName(),at:Date.now(),seen:Date.now()},{merge:true}));
+    if(old&&old.id&&old.id!==id)deleteDoc(doc(fs,'naprave/'+old.id)).catch(()=>{});
+    pset({id,...set});return pget()},
+  async update(ch){const l=pget();if(!l)throw{code:'off'};const c={};for(const k of['time','tasks','shop'])if(k in ch)c[k]=ch[k];
+    pset({...l,...c});fire(updateDoc(doc(fs,'naprave/'+l.id),{...c,at:Date.now()}));return pget()},
+  async disable(){const l=pget();pset(null);if(l&&l.id)fire(deleteDoc(doc(fs,'naprave/'+l.id)));
+    if(!(T&&T.push)){try{const m=await msgInit();await msgMod.deleteToken(m)}catch(e){}}},
+  async list(){const s=await getDocs(collection(fs,'naprave'));return s.docs.map(d=>{const x=d.data();return{id:d.id,name:x.name||'',email:x.email||'',device:x.device||'',time:x.time||'',tasks:x.tasks!==false,shop:x.shop||'sve',lastSent:x.lastSent||'',mine:!!(pget()&&pget().id===d.id)}})},
+  async remove(id){fire(deleteDoc(doc(fs,'naprave/'+id)));const l=pget();if(l&&l.id===id)pset(null)},
+  async status(){try{const s=await getDoc(doc(fs,'app_meta/obavestenja'));return s.exists()?s.data():null}catch(e){return null}},
+  async test(t){const reg=await navigator.serviceWorker.ready;return reg.showNotification(t.title,{body:t.body,icon:'icons/m-icon-192.png',badge:'icons/m-badge-96.png',tag:'mt-proba',data:{url:'./?m='+(t.m||'zadaci')}})},
+  async refresh(){const l=pget();if(!l||!me||!navigator.onLine||!('Notification' in window)||Notification.permission!=='granted')return;
+    try{const s=await getDoc(doc(fs,'naprave/'+l.id));
+      if(!s.exists()&&!s.metadata.fromCache){pset(null);return}            /* uklonjen sa drugog uređaja */
+      const tok=await getTok();if(!tok)return;const id=await sha(tok);
+      if(id!==l.id){const base=s.exists()?s.data():{};await setDoc(doc(fs,'naprave/'+id),{...base,token:tok,uid:me.uid,email:(me.email||'').toLowerCase(),name:me.displayName||'',device:devName(),on:true,time:l.time,tasks:l.tasks,shop:l.shop,tz:tzName(),at:Date.now(),seen:Date.now()},{merge:true});
+        deleteDoc(doc(fs,'naprave/'+l.id)).catch(()=>{});pset({...l,id})}
+      else if(!s.data().seen||Date.now()-s.data().seen>3*864e5)updateDoc(doc(fs,'naprave/'+id),{seen:Date.now()}).catch(()=>{})}catch(e){}}
+};
+window.__mtPush=pushApi;

@@ -25,6 +25,17 @@
 @media (prefers-color-scheme: dark){.gdbox{background:#1F252D;color:#E7E3DC}.gdbox p{color:#9AA2AD}.gdbox .gdn{background:#252C35}.gdb button{background:#1F252D;color:#E7E3DC;border-color:#323A45}}
 .pkey{font:600 14px "IBM Plex Mono",monospace;background:#F4F1EC;border-radius:8px;padding:8px 10px;word-break:break-all;user-select:all}
 @media (prefers-color-scheme: dark){.pkey{background:#252C35}}
+
+.pwrap{display:flex;flex-direction:column;gap:8px}
+.pushc .pgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%}
+.pushc .pf{display:flex;flex-direction:column;gap:3px;min-width:0}
+.pushc .pf select{width:100%;min-width:0}
+.pushc .prow{display:flex;flex-wrap:wrap;gap:8px}
+.pushc .btn.pri{align-self:flex-start}
+.plist{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.plist .pitem{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;border:1px solid var(--line,#E2DCD2);border-radius:10px}
+.plist .pitem span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:520px){.pushc .pgrid{grid-template-columns:1fr 1fr}}
 </style><script>window.__MT_PWA=true;
 window.__MT_LIBS={h2c:'lib/html2canvas.min.js',pdf:'lib/jspdf.umd.min.js',pdfjs:'lib/pdf.min.js',pdfjsw:'lib/pdf.worker.min.js',xlsx:'lib/xlsx.full.min.js'};
 (function(){var res;var p=new Promise(function(r){res=r});window.__fbResolve=function(f){res(f)};window.claude={use:function(n){return p.then(function(f){return f(n)})}}})();
@@ -3002,6 +3013,68 @@ async function exportAll(){
   }catch(e){const c=e&&e.code;if(c!=='declined')toast('Izvoz nije uspeo'+(c?' ('+c+')':'')+'. Pokušaj ponovo.')}
 }
 if(!window.__MT_PWA){const f=document.querySelector('#side .sfoot');if(f){const b=el('button','btn ghost','Izvoz za novu aplikaciju');b.type='button';b.id='expBtn';b.addEventListener('click',exportAll);f.insertBefore(b,f.querySelector('.conn'))}}
+/* Tekst jutarnjeg obaveštenja — isti u aplikaciji (dugme „Probaj“) i u programu koji šalje obaveštenja.
+   data = {tasks:[{title,due,hot,next}], shop:[{name,qty,unit,store,hot,for}]}  (samo otvorene stavke)
+   o    = {tasks:true|false, shop:'sve'|'kuca'|'radionica'|'ne'}
+   today = 'YYYY-MM-DD' (lokalni datum)
+   Vraća {title, body, m, n} ili null kad nema ničega za javiti. */
+function podText(data, o, today) {
+  o = o || {};
+  const wantT = o.tasks !== false, wantS = o.shop || 'sve';
+  const days = (a, b) => Math.round((Date.UTC(+a.slice(0, 4), +a.slice(5, 7) - 1, +a.slice(8, 10)) - Date.UTC(+b.slice(0, 4), +b.slice(5, 7) - 1, +b.slice(8, 10))) / 864e5);
+  const okD = s => /^\d{4}-\d{2}-\d{2}/.test(String(s || ''));
+  const cut = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1) + '…' : s };
+  const lines = [], cnt = { hot: 0, late: 0, today: 0, tom: 0, shop: 0 };
+  if (wantT) {
+    const hot = [], late = [], tod = [], tom = [];
+    for (const t of (data && data.tasks) || []) {
+      if (!t || !t.title) continue;
+      const d = okD(t.due) ? days(String(t.due).slice(0, 10), today) : null;
+      if (t.hot) hot.push([t, d]);
+      else if (d === null) continue;
+      else if (d < 0) late.push([t, d]);
+      else if (d === 0) tod.push([t, d]);
+      else if (d === 1) tom.push([t, d]);
+    }
+    const rel = d => d === null ? '' : d < 0 ? ' (kasni ' + (-d) + ' d.)' : d === 0 ? ' (danas)' : d === 1 ? ' (sutra)' : '';
+    late.sort((a, b) => a[1] - b[1]);
+    for (const [t, d] of hot) lines.push('Hitno: ' + cut(t.title, 70) + rel(d));
+    for (const [t, d] of late) lines.push('Kasni ' + (-d) + ' d.: ' + cut(t.title, 70));
+    for (const [t] of tod) lines.push('Danas: ' + cut(t.title, 70));
+    for (const [t] of tom) lines.push('Sutra: ' + cut(t.title, 70));
+    cnt.hot = hot.length; cnt.late = late.length; cnt.today = tod.length; cnt.tom = tom.length;
+  }
+  if (wantS !== 'ne') {
+    const n = s => String(s || '').toLowerCase().replace(/ć/g, 'c');
+    const items = ((data && data.shop) || []).filter(x => {
+      if (!x || !x.name) return false;
+      const f = n(x.for);
+      if (wantS === 'kuca') return !f || f.startsWith('kuc');
+      if (wantS === 'radionica') return !f || f.startsWith('radion');
+      return true;
+    });
+    const q = x => { const a = x.qty === '' || x.qty == null ? '' : String(x.qty); return a ? ' ' + a + (x.unit ? ' ' + x.unit : '') : '' };
+    const by = new Map();
+    for (const x of items.filter(x => x.hot).concat(items.filter(x => !x.hot))) {
+      const k = String(x.store || '').trim() || 'bilo gde';
+      if (!by.has(k)) by.set(k, []);
+      by.get(k).push((x.hot ? '!' : '') + cut(x.name, 40) + q(x));
+    }
+    for (const [k, arr] of by) lines.push('Kupiti – ' + k + ': ' + arr.join(', '));
+    cnt.shop = items.length;
+  }
+  if (!lines.length) return null;
+  const parts = [];
+  if (cnt.hot) parts.push(cnt.hot + ' hitno');
+  if (cnt.late) parts.push(cnt.late + ' kasni');
+  if (cnt.today) parts.push(cnt.today + ' danas');
+  if (cnt.tom) parts.push(cnt.tom + ' sutra');
+  if (cnt.shop) parts.push(cnt.shop + ' za kupiti');
+  const MAX = 7;
+  const body = lines.length > MAX ? lines.slice(0, MAX - 1).concat('+ još ' + (lines.length - MAX + 1)) : lines;
+  const onlyShop = !(cnt.hot || cnt.late || cnt.today || cnt.tom);
+  return { title: 'Martinov – ' + parts.join(', '), body: body.join('\n'), m: onlyShop ? 'kupovina' : 'zadaci', n: lines.length };
+}
 
 /* ================= APLIKACIJA (instalirana verzija): veza, meni, ažuriranje, uvoz ================= */
 function setConn(s){
@@ -3022,13 +3095,14 @@ function appDlg(){
   const u=window.__mtUser&&window.__mtUser();
   openDlg('Aplikacija',b=>{
     if(u){const r=el('div','kcard');r.append(el('b',null,u.displayName||u.email||'Prijavljen'),el('span','mute',u.email||''));const o=el('button','chip plain','Odjavi se');o.type='button';o.addEventListener('click',()=>{closeDlg();window.__mtLogout()});r.appendChild(o);b.appendChild(fld('Nalog',r))}
+    {const f=el('div','f');f.appendChild(el('span','lb','Obaveštenja'));f.appendChild(pushCard());b.appendChild(f)}
     const v=el('div','kcard');v.appendChild(el('b',null,'Verzija '+(APPV.v||'?')+(APPV.date?' · '+APPV.date:'')));
     const up=el('button','chip plain','Proveri ažuriranje');up.type='button';up.addEventListener('click',()=>{if(window.__mtCheckUpdate)window.__mtCheckUpdate(true);else toast('Ažuriranje nije dostupno.')});v.appendChild(up);
     if(APPV.log&&APPV.log.length){const l=el('div','vlog');for(const x of APPV.log.slice(0,8)){const it=el('div');it.append(el('b',null,x.v+(x.date?' · '+x.date:'')),el('span',null,x.t));l.appendChild(it)}v.appendChild(l)}
     b.appendChild(fld('Šta je novo',v));
     if(installEv){const i=el('button','btn pri','Instaliraj aplikaciju');i.type='button';i.addEventListener('click',async()=>{const e=installEv;installEv=null;closeDlg();try{e.prompt();await e.userChoice}catch(x){}});b.appendChild(i)}
     else b.appendChild(el('div','note','Instalacija: u Chrome-u ⋮ → „Instaliraj aplikaciju“ (na telefonu „Dodaj na početni ekran“ → Instaliraj). Na iPhone-u: Safari → Podeli → „Dodaj na početni ekran“.'));
-    {const pk=el('div','kcard');pk.appendChild(el('b',null,'Jutarnji podsetnik'));pk.appendChild(el('span','mute','Ključ koji Claude robot koristi da svako jutro pročita otvorene zadatke i kupovinu (samo čitanje).'));
+    {const pk=el('div','kcard');pk.appendChild(el('b',null,'Ključ za Claude podsetnik'));pk.appendChild(el('span','mute','Ključ koji Claude robot koristi da svako jutro pročita otvorene zadatke i kupovinu (samo čitanje).'));
       const kk=el('code','pkey',podKey||'…');pk.appendChild(kk);const cp=el('button','chip plain','Kopiraj ključ');cp.type='button';cp.disabled=!podKey;cp.addEventListener('click',()=>copyText(podKey,'Ključ kopiran'));pk.appendChild(cp);b.appendChild(fld('Podsetnik',pk))}
     const im=el('button','btn','Prebaci podatke iz Claude aplikacije');im.type='button';im.addEventListener('click',()=>{closeDlg();importDlg()});b.appendChild(fld('Podaci',im,'Učitaj fajl koji si sačuvao u staroj aplikaciji (Martinov Tabele u Claude-u → „Izvoz za novu aplikaciju“).'));
   });
@@ -3064,6 +3138,52 @@ function podData(){
 function podTick(){clearTimeout(podT);podT=setTimeout(()=>{if(!podKey||!db||readonly||!XL.has('tasks')||!XL.has('shopping'))return;
   const d=podData();const h=JSON.stringify(d);if(h===podLast)return;podLast=h;
   db.doc('podsetnik/'+podKey).set({json:h,at:Date.now(),app:'https://manuelmartinov-spec.github.io/martinov-app/'})},1500)}
+
+/* ================= OBAVEŠTENJA NA UREĐAJU =================
+   Ko uključi obaveštenja, svako jutro u izabrano vreme dobije kratak spisak (šalje ga program na GitHub-u). */
+const PTIMES=[];for(let h=5;h<=10;h++)for(const m of['00','30']){if(h===10&&m==='30')continue;PTIMES.push(String(h).padStart(2,'0')+':'+m)}
+const PSHOP=[['sve','Sve'],['kuca','Samo kuća'],['radionica','Samo radionica'],['ne','Ne']];
+function pushErr(e){const c=e&&e.code;return{denied:'Obaveštenja su blokirana. Dozvoli ih u podešavanjima telefona (ili kod katanca levo od adrese).',dismissed:'Obaveštenja nisu dozvoljena. Klikni ponovo i izaberi „Dozvoli“.',offline:'Za ovo treba internet.',unsupported:'Ovaj pregledač ne podržava obaveštenja. Probaj u Chrome-u.',auth:'Prvo se prijavi.',notoken:'Uređaj nije dao adresu za obaveštenja. Probaj ponovo.',off:'Obaveštenja nisu uključena.'}[c]||('Nije uspelo'+(c?' ('+c+')':'')+'. Probaj ponovo.')}
+function podToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function pushCard(){
+  const P=window.__mtPush;const wrap=el('div','pwrap');const w=el('div','kcard pushc');const lw=el('div','plist');wrap.append(w,lw);
+  const sel=(opts,val)=>{const x=el('select');for(const [v,t] of opts){const o=el('option',null,t);o.value=v;x.appendChild(o)}if(!opts.some(o=>o[0]===val)){const o=el('option',null,val);o.value=val;x.appendChild(o)}x.value=val;return x};
+  const lab=(t,n)=>{const x=el('label','pf');x.append(el('span','mute',t),n);return x};
+  const save=ch=>P.update(ch).then(()=>{toast('Sačuvano');drawList()},e=>toast(pushErr(e)));
+  const draw=()=>{w.innerHTML='';w.appendChild(el('b',null,'Jutarnje obaveštenje na ovom uređaju'));
+    if(!P){w.appendChild(el('span','mute','Nije dostupno u ovoj verziji.'));return}
+    const s=P.support(),l=P.local();
+    if(s==='nokey'){w.appendChild(el('span','mute','Obaveštenja se još podešavaju.'));return}
+    if(s==='ios-home'){w.appendChild(el('span','mute','Na iPhone-u: u Safari-ju Podeli → „Dodaj na početni ekran“, pa otvori aplikaciju sa početnog ekrana i ovde uključi obaveštenja.'));return}
+    if(s!=='ok'){w.appendChild(el('span','mute','Ovaj pregledač ne podržava obaveštenja. Probaj u Chrome-u.'));return}
+    if(P.perm()==='denied'){w.appendChild(el('span','mute','Obaveštenja su blokirana za ovu aplikaciju. Telefon: drži prst na ikoni aplikacije → Informacije o aplikaciji → Obaveštenja → uključi. Računar: katanac levo od adrese → Obaveštenja → Dozvoli. Pa se vrati ovde.'));return}
+    if(!l){w.appendChild(el('span','mute','Svako jutro stiže kratak spisak: hitno, kasni, danas, sutra i šta treba kupiti. Ako nema ničega, obaveštenje ne stiže.'));
+      const b=el('button','btn pri','Uključi obaveštenja');b.type='button';
+      b.addEventListener('click',async()=>{b.disabled=true;b.textContent='Uključujem…';try{await P.enable({});toast('Obaveštenja su uključena na ovom uređaju')}catch(e){toast(pushErr(e))}draw();drawList()});
+      w.appendChild(b);return}
+    const tm=sel(PTIMES.map(t=>[t,t.replace(/^0/,'')]),l.time||'07:00');tm.addEventListener('change',()=>save({time:tm.value}));
+    const tk=sel([['1','Da'],['0','Ne']],l.tasks===false?'0':'1');tk.addEventListener('change',()=>save({tasks:tk.value==='1'}));
+    const sh=sel(PSHOP,l.shop||'sve');sh.addEventListener('change',()=>save({shop:sh.value}));
+    const g=el('div','pgrid');g.append(lab('Vreme',tm),lab('Zadaci',tk),lab('Kupovina',sh));w.appendChild(g);
+    const bt=el('div','prow');
+    const pr=el('button','chip plain','Probaj obaveštenje');pr.type='button';
+    pr.addEventListener('click',async()=>{let t=null;try{t=podText(podData(),{tasks:tk.value==='1',shop:sh.value},podToday())}catch(e){}
+      if(!t)t={title:'Martinov – proba',body:'Obaveštenja rade. Danas nema ništa hitno ni za kupovinu.',m:'zadaci'};
+      try{await P.test(t);toast('Poslato – pogledaj obaveštenja')}catch(e){toast(pushErr(e))}});
+    const off=el('button','chip plain','Isključi na ovom uređaju');off.type='button';
+    off.addEventListener('click',async()=>{off.disabled=true;try{await P.disable()}catch(e){}toast('Obaveštenja su isključena na ovom uređaju');draw();drawList()});
+    bt.append(pr,off);w.appendChild(bt);
+    const st=el('div','note');w.appendChild(st);
+    P.status().then(x=>{if(!x||!x.last)return;const d=new Date(x.last);st.textContent=(x.ok?'Poslednje slanje: ':'Greška pri slanju: ')+d.toLocaleString('sr-RS',{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'})+(x.msg?' · '+x.msg:'')})};
+  const drawList=()=>{if(!P||P.support()==='nokey')return;P.list().then(arr=>{lw.innerHTML='';if(!arr.length)return;lw.appendChild(el('span','mute','Uređaji koji primaju obaveštenja:'));
+    for(const x of arr){const r=el('div','pitem');r.appendChild(el('span',null,(x.name||x.email||'?')+' · '+x.device+' · '+String(x.time).replace(/^0/,'')+(x.mine?' (ovaj)':'')));
+      const rm=el('button','chip plain','Ukloni');rm.type='button';rm.addEventListener('click',async()=>{rm.disabled=true;try{await P.remove(x.id)}catch(e){toast(pushErr(e))}draw();drawList()});
+      r.appendChild(rm);lw.appendChild(r)}},()=>{})};
+  draw();drawList();return wrap}
+/* klik na obaveštenje otvara Zadatke ili Kupovinu */
+(function(){const go=m=>{if(!m||!MODS[m])return;let n=0;const t=setInterval(()=>{if(loadedT){clearInterval(t);try{openModule(m)}catch(e){}}else if(++n>60)clearInterval(t)},300)};
+  try{const q=new URLSearchParams(location.search);const m=q.get('m');if(m){history.replaceState(null,'',location.pathname);go(m)}}catch(e){}
+  if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='mt-open')go(e.data.m)})})();
 
 /* ================= ALATI: filter, sortiranje, grupe, polja ================= */
 function fieldOpts(t,pred){return t.fields.filter(pred||(()=>true)).map(f=>[f.id,TYPES[f.type].i+'  '+f.name])}
@@ -3265,7 +3385,7 @@ render();
   for(const c of ['docs','clients','auto','events','tasks','shopping','settings'])subX(c);
 })();
 })();
-</script><script type="module" src="fb.js?v=1.1.1"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.2.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}

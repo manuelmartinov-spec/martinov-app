@@ -1,0 +1,47 @@
+name: Jutarnji podsetnik
+
+# Svakih 30 minuta ujutru proveri ko treba da dobije obaveštenje (svako bira svoje vreme u aplikaciji).
+on:
+  schedule:
+    - cron: '12,42 3-9 * * *'
+  workflow_dispatch:
+    inputs:
+      proba:
+        description: 'Pošalji probno obaveštenje svim uređajima odmah'
+        type: boolean
+        default: true
+  push:
+    branches: [main]
+    paths: ['.github/proba-obavestenja.txt']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: podsetnik
+  cancel-in-progress: false
+
+jobs:
+  posalji:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Pošalji obaveštenja
+        run: node tools/podsetnik.mjs
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SA }}
+          PROBA: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.proba) }}
+      # GitHub gasi zakazana pokretanja posle 60 dana bez izmena u projektu; ovo ih drži uključenim.
+      - name: Održavanje
+        if: github.event_name == 'schedule'
+        run: |
+          last=$(git log -1 --format=%ct)
+          if [ $(( ( $(date +%s) - last ) / 86400 )) -gt 45 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "Održavanje: jutarnji podsetnik ostaje uključen"
+            git push
+          fi
