@@ -1,7 +1,12 @@
 {
- "v": "1.2.1",
+ "v": "1.3.0",
  "date": "28.10.2026.",
  "log": [
+  {
+   "v": "1.3.0",
+   "date": "28.10.2026.",
+   "t": "Kupovina: slike i opis sa tačkama; po prodavnici „Pošalji“ (prvo tekst, pa slike sa brojevima – za Viber), „Kopiraj“ i „Kupljeno“ (cena, plaćanje, za koji posao – ide u Troškove i u istoriju). Istorija kupovine i poslednje cene; cena se sama upisuje u šablon „Šta kupiti“. Šablon ima sliku i opis. Na poslu: procena materijala u € i din i stvarno kupljeno, po kursu NBS (može i ručni kurs). Veliko početno slovo dok pišeš."
+  },
   {
    "v": "1.2.1",
    "date": "28.10.2026.",

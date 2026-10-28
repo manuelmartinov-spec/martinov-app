@@ -70,11 +70,31 @@ function localNow(tz) {
 }
 const hm = s => { const m = /^(\d{1,2}):(\d{2})/.exec(String(s || '')); return m ? (+m[1]) * 60 + (+m[2]) : 7 * 60; };
 
+// Srednji kurs evra (Narodna banka Srbije, preko kurs.resenje.org) – jednom dnevno u app_meta/kurs.
+// Ručni kurs (polje manual) se ne dira.
+async function kursUpdate(tok) {
+  try {
+    const today = localNow('Europe/Belgrade').date;
+    const cur = await getDoc(tok, 'app_meta/kurs');
+    if (cur && cur.date === today && cur.eur) return;
+    const r = await fetch(process.env.KURS_URL || 'https://kurs.resenje.org/api/v1/currencies/eur/rates/today', { headers: { accept: 'application/json' } });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    const v = parseFloat(String(j.exchange_middle).replace(',', '.'));
+    if (!(v > 50 && v < 500)) throw new Error('neočekivan kurs ' + j.exchange_middle);
+    if (cur && cur.eur === v && cur.date === j.date) return;
+    const w = await patch(tok, 'app_meta/kurs', { eur: v, date: String(j.date || today), at: Date.now(), src: 'NBS srednji kurs (kurs.resenje.org)' });
+    if (!w.ok) throw new Error('upis ' + w.status);
+    log('Kurs evra:', v, j.date);
+  } catch (e) { log('Kurs nije preuzet:', e.message); }
+}
+
 async function main() {
   const raw = process.env.FIREBASE_SA || '';
   if (!raw.trim()) { log('FIREBASE_SA nije podešen – preskačem (obaveštenja još nisu povezana).'); return { skip: true }; }
   let sa; try { sa = JSON.parse(raw); } catch (e) { throw new Error('FIREBASE_SA nije ispravan JSON – nalepi ceo sadržaj fajla'); }
   const tok = await accessToken(sa);
+  await kursUpdate(tok);
   const devices = (await listDocs(tok, 'naprave')).filter(d => d.on !== false && d.token);
   log('Uređaja sa obaveštenjima:', devices.length);
   const due = devices.filter(d => {
