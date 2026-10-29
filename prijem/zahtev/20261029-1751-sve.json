@@ -1,0 +1,11 @@
+{
+ "col": [
+  "*"
+ ],
+ "deep": true,
+ "priv": [
+  "troskovi_seed"
+ ],
+ "pub": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA2tUmolkAGSQp7VlQ2maO\nxD6Fdq78S8NbgPjIYBRz28+Mr2fOQUixa/Z1fkaTTnN5lKSAh1PrShX5kNmj/jYI\nqqmS5ijr2O6RCIzJv9TbTM/lpUBcbNT7XDVZwD8HqqvSU9TBb5VZJF0W8IRUNIS1\nrdOxDzdev6iiWnAWhVI8YfZTSYR51sntxjWcSi9316vvFNV41oFAz3BMNVuWJq5a\nMgmyWDGv/9p3LYM1yJolbNiWLXJ+v0czHObDASq22dpvTC3s/O8UVW0caiuH9pbd\nTq48qb2KdJHuaEy+ftEq2PRtH9szrt+Ykf+yZz224L6lMnQF6INdzkZx4eKKSh83\n2JDpvlecANoZfniO0EqDZ6nmzVmSLdlnVqBv9qP4o8u3PiRNZva77z+fUBuy2UoQ\nb0B4mdiMJIj/+Fty0aJp0IvY/5XsgjuxRxvoCJAbEuVgGaPsaJNFVKUZHBCr98uE\n4aVaIQfRJeQ0x1p6Uzd0ETxP/7SmMQRGh1LTg25SEWqDAgMBAAE=\n-----END PUBLIC KEY-----\n",
+ "at": "2026-10-29T16:49:25.422Z"
+}
