@@ -1,0 +1,15 @@
+{
+ "col": [
+  "izvodi",
+  "banka",
+  "manual",
+  "prijem",
+  "docs"
+ ],
+ "files": [
+  "izvod-RSD-2026-105",
+  "izvod-GBP-2026-2"
+ ],
+ "pub": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAh3L/ZjTXGRjM2IRb3pH1\nTOwsedmNgXZ71wU/K8ph4qO5IAwLi0lJO1YGoVkhkJToR48EZVdX7kn/ovJ28a31\nb0QMWdun18VcueTrjZpPZ1dXm6xNWb/xIZwOCeFXs/Ot/DPgT3rA0fjiDiQnD261\nVUZME0/7iefLEGbpzXcWSJ3TyIN9f5Q9PI0aHjCxCq8NDazxtcD0tDsl/jhToDAk\n+RAQPXdPR5oeoAa3rlMKE6X8s/PixdaJCNT7N1e/ObioVlWR/SLqafK4LQoBXEpv\n9YUNVOcJioha8gcr7HNh/4HpEH5IXcreC2juMyrDeCvLzwuGaUuHsZu6tA9MKx51\nfppC+HC1cWQf0RhOZZ56zb2fSKRsu4e+cNOfDTPler+phI8uAYQrdT1nsfiQIJPk\ngKVh5xAdoqNbley008W9JnTmlaVhCtMlkicjrgURF2peKWot2tN8FYUy7VDrvIwF\nAvBcuWiT2Fp2B8m49wsK4aJfBb/oxm/W1qQjpMG1Pp3bAgMBAAE=\n-----END PUBLIC KEY-----\n",
+ "at": "2026-10-29T17:11:41.521Z"
+}
