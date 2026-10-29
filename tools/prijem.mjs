@@ -154,7 +154,7 @@ async function applyPkg(tok, p) {
     for (let i = 1; i < n; i++) await add(upd(`private/${key}_${i}`, { z: s.slice(i * CH, (i + 1) * CH) }), CH);
     await add(upd(`private/${key}`, { z: s.slice(0, CH), n, at: Date.now() }), Math.min(CH, s.length) + 300);
   }
-  await add(upd(`prijem/${p.id}`, { id: p.id, title: String(p.title || ''), note: String(p.note || ''), at: Date.now(), docs: nd, files: nf, del: nx, by: 'claude' }), 1000);
+  await add(upd(`prijem/${p.id}`, { id: p.id, title: String(p.title || ''), note: String(p.note || ''), mod: String(p.mod || ''), at: Date.now(), docs: nd, files: nf, del: nx, by: 'claude' }), 1000);
   await flush();
   return { docs: nd, files: nf, del: nx };
 }

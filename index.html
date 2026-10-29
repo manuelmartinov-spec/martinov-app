@@ -3475,6 +3475,16 @@ function importDlg(auto){
       catch(e){info.textContent='Prenos nije uspeo'+(e&&e.code?' ('+e.code+')':'')+'. Proveri internet pa pokušaj ponovo.';go.disabled=false;cn.disabled=false;inp.disabled=false}});
   });
 }
+/* ---------- „Claude je dodao …“: paketi koje Claude pošalje preko robota „Claude prijem“ (kolekcija prijem) ---------- */
+(async()=>{try{const db=await window.claude.use('db');if(!db||!db.collection)return;
+  const K='mt.prijem.seen';let seen=0;try{seen=+localStorage.getItem(K)||0}catch(e){}
+  if(!seen)seen=Date.now()-3*864e5;
+  db.collection('prijem').onSnapshot(s=>{const N=s.docs.map(d=>d.data()).filter(x=>x&&+x.at>seen).sort((a,b)=>a.at-b.at);if(!N.length)return;
+    seen=Math.max(...N.map(x=>+x.at));try{localStorage.setItem(K,String(seen))}catch(e){}
+    const t=N.length===1?'Claude je dodao: '+N[0].title:'Claude je dodao '+N.length+' stvari: '+N.map(x=>x.title).join(' · ');
+    const mod=(N.slice().reverse().find(x=>x.mod)||{}).mod;
+    try{toast(t,mod?'Otvori':'',mod?()=>{try{openModule(mod)}catch(e){}}:null,{ok:true,ms:9000})}catch(e){}
+  },()=>{})}catch(e){}})();
 (async()=>{try{const u=await window.claude.use('db');if(!u||!window.__mtHasData)return;const h=await window.__mtHasData();if(h===false)setTimeout(()=>importDlg(true),600)}catch(e){}})();
 /* ================= JUTARNJI PODSETNIK: kratak spisak koji Claude robot čita svako jutro =================
    Spisak (otvoreni zadaci i kupovina) stoji na tajnoj adresi u bazi. Adresu zna samo onaj kome je daš. */
@@ -3751,7 +3761,7 @@ render();
   if(typeof subKurs==='function')subKurs();
 })();
 })();
-</script><script type="module" src="fb.js?v=1.5.4"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.5.5"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}

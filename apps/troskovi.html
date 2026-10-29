@@ -104,6 +104,22 @@ tr.cov td{opacity:.62}tr.cov td.num.o{text-decoration:line-through}
 #imgOv img{max-width:100%;max-height:100%;border-radius:8px}
 #imgOv button{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:12px;background:var(--panel);border:0;border-radius:50%;width:44px;height:44px;font-size:20px}
 .form .wide{grid-column:1/-1}
+/* dokumenti i provera */
+.izb{display:inline-flex;align-items:center;gap:4px;border:0;background:none;padding:2px 0;font:inherit;font-size:12px;color:var(--navy);text-decoration:underline;text-underline-offset:2px;min-height:0}
+.izb svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chkl{display:flex;flex-direction:column}
+.chkr{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+.chkr:first-child{border-top:0}
+.chkr .ic{flex:none;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;margin-top:1px}
+.chkr .ic.ok{background:var(--kuc-soft,#E2F1E8);color:var(--kuc-t,#276B4A)}
+.chkr .ic.w{background:var(--amb-soft,#F7E9D4);color:var(--amb-t,#7A4B0C)}
+.chkr .ic.n{background:var(--selbg,#E4E8EE);color:var(--muted)}
+.chkr .tx{flex:1;min-width:0}.chkr .tx b{display:block;font-size:14px}.chkr .tx span{display:block;font-size:12.5px;color:var(--muted);line-height:1.45}
+.chkr .tx span.w{color:var(--amb-t,#7A4B0C);font-weight:600}
+.chkr .v{font-family:var(--f-num);font-weight:600;white-space:nowrap;text-align:right;font-size:13px}
+.izsum{display:flex;flex-direction:column;gap:8px}
+.izsum .ln{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.45}
+td .docn{font-weight:700}td .docs{font-size:12px;color:var(--muted)}
 </style>
 <style id="dizajn-a">
 /* ==== Dizajn A: uloge boja (glavno dugme, izabrano, Radionica/Kuća, hitno, stanja) ==== */
@@ -164,6 +180,8 @@ html.emb header.top:not(:has(nav)){display:none}
   <nav class="tabs" id="tabs">
     <button data-v="sum" aria-current="true">Pregled</button>
     <button data-v="tx">Promene</button>
+    <button data-v="docs">Dokumenti</button>
+    <button data-v="chk">Provera</button>
     <button data-v="add">+ Trošak</button>
     <button data-v="rules">Pravila</button>
   </nav>
@@ -180,6 +198,7 @@ html.emb header.top:not(:has(nav)){display:none}
       <button class="ghost" id="clrMonth" hidden>Cela godina</button>
     </div>
     <button type="button" class="alertl" id="unpaid" hidden></button>
+    <button type="button" class="alertl" id="chkAlert" hidden></button>
     <div class="kpis">
       <div class="kpi"><span id="kOutL">Troškovi</span><b class="o" id="kOut">—</b></div>
       <div class="kpi"><span>Prihodi</span><b class="i" id="kIn">—</b></div>
@@ -218,6 +237,27 @@ html.emb header.top:not(:has(nav)){display:none}
     <div class="empty" id="txEmpty" hidden>Nema stavki za ovaj filter.</div></div>
   </section>
 
+  <section id="v-docs" hidden>
+    <h1>Dokumenti</h1>
+    <p class="sub">Svi izvodi iz banke i računi i fakture sa PDF-om, na jednom mestu. Dodir na dokument otvara PDF.</p>
+    <div class="card" id="izCheck" style="margin-bottom:14px"></div>
+    <div class="filters">
+      <input type="search" id="dq" placeholder="Traži: broj izvoda, dobavljač, broj fakture…" aria-label="Pretraga dokumenata">
+      <select id="dType" aria-label="Vrsta"><option value="">Svi dokumenti</option><option value="iz">Izvodi</option><option value="rac">Računi i fakture</option></select>
+      <select id="dYr" aria-label="Godina"></select>
+    </div>
+    <div class="tblw"><table class="list"><thead><tr><th>Dokument</th><th>Datum</th><th class="r">Iznos</th><th>Provera</th></tr></thead><tbody id="dBody"></tbody></table>
+    <div class="empty" id="dEmpty" hidden>Nema dokumenata za ovaj filter.</div></div>
+  </section>
+
+  <section id="v-chk" hidden>
+    <h1>Provera uplata i isplata</h1>
+    <p class="sub">Aplikacija sama upoređuje predračune i fakture iz Faktura sa uplatama na izvodu, i fakture dobavljača sa isplatama. Žuto = treba da pogledaš.</p>
+    <div class="card" style="margin-bottom:14px"><h3>Kupci – predračuni i fakture</h3><div id="chkIn"></div></div>
+    <div class="card" style="margin-bottom:14px"><h3>Dobavljači – fakture za plaćanje</h3><div id="chkOut"></div></div>
+    <div class="card"><h3 id="chkFreeT">Uplate kupaca bez dokumenta u aplikaciji</h3><div id="chkFree"></div></div>
+  </section>
+
   <section id="v-add" hidden>
     <h1>Unesi trošak</h1>
     <p class="sub">Keš, privatna kartica, privatni račun – ili faktura dobavljača koju plaćaš sa računa firme. Kad ta uplata stigne na izvod, aplikacija je sama spoji sa fakturom, da se ne računa dva puta.</p>
@@ -228,6 +268,7 @@ html.emb header.top:not(:has(nav)){display:none}
         <label class="f">Kategorija<select id="m-cat"></select></label>
         <label class="f">Podkategorija (posao / kupac)<input id="m-sub" list="subList" placeholder="npr. ime kupca ili posla" autocomplete="off"></label>
         <label class="f">Broj fakture / računa<input id="m-inv" placeholder="npr. 2843/26"></label>
+        <label class="f">Rok plaćanja (za fakturu)<input type="date" id="m-due"></label>
         <label class="f">Opis<input id="m-what" placeholder="npr. vijci 4×40, brusni papir"></label>
         <label class="f">Iznos<input id="m-amt" inputmode="decimal" placeholder="0,00"></label>
         <label class="f">Valuta<select id="m-cur"><option>RSD</option><option>EUR</option></select></label>
@@ -294,6 +335,8 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const MON=['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
 const dsr=d=>d?d.slice(8,10)+'.'+d.slice(5,7)+'.'+d.slice(0,4)+'.':'';
 let db=null,META={},MANUAL=[],RULES=[],view='sum',month=null;
+let BANKA=[],IZV={},DOCS=[],BASE=SEED;
+function rebase(){const m=new Map(SEED.map(t=>[t.id,t]));for(const b of BANKA)if(b&&b.id&&b.dt)m.set(b.id,{...b,amt:+b.amt||0,rsd:+(b.rsd??b.amt)||0,iz:+b.iz||0});BASE=[...m.values()]}
 let toastT;function toast(t,c){let e=$('#toast');if(!e){e=document.createElement('div');e.id='toast';document.body.appendChild(e)}e.className='toast '+(c||'');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,2600)}
 
 function autoCat(t){
@@ -314,10 +357,10 @@ function autoCat(t){
   return 'Nerazvrstano';
 }
 function all(){
-  const a=SEED.map(t=>{const m=META[t.id]||{};return {...t,cat:m.cat||autoCat(t),note:m.note||'',sub:m.sub||'',src:'banka'}});
+  const a=BASE.map(t=>{const m=META[t.id]||{};return {...t,cat:m.cat||autoCat(t),note:m.note||'',sub:m.sub||'',src:'banka'}});
   for(const m of MANUAL){const firm=m.pay==='račun firme';
     a.push({id:'m:'+m.id,mid:m.id,dt:m.dt,acc:firm?'RSD':'KES',dir:'out',amt:nz(m.amt),cur:m.cur,rsd:m.cur==='EUR'?nz(m.amt)*nz(m.kurs||117.2):nz(m.amt),who:m.who||'',what:m.what||'',pay:m.pay,cat:m.cat||'Nerazvrstano',note:m.note||'',
-      sub:m.sub||'',inv:m.inv||'',att:Array.isArray(m.att)?m.att:[],firm,key:firm?supKey(m.who):'',src:'keš'})}
+      sub:m.sub||'',inv:m.inv||'',due:m.due||'',att:Array.isArray(m.att)?m.att:[],firm,key:firm?supKey(m.who):'',src:'keš'})}
   link(a);
   return a;
 }
@@ -355,6 +398,7 @@ function computeDup(){DUP=new Set();const g={};
 function renderSum(){
   let A=scoped().filter(counts);
   const up=all().filter(t=>t.firm&&!t.paid),ue=$('#unpaid');ue.hidden=!up.length;
+  {const k=chkCount(),ca=$('#chkAlert');ca.hidden=!k;if(k)ca.innerHTML=`<span>Provera: ${k} ${k===1?'stvar treba':'stvari treba'} da pogledaš (uplate, fakture, izvodi)</span><span aria-hidden="true" style="flex:none">›</span>`}
   if(up.length){const n=up.length;ue.innerHTML=`<span>${n} ${plF(n)} dobavljača ${n===1?'čeka':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?'čekaju':'čeka'} uplatu</span><b>${fmt(up.reduce((x,t)=>x+t.rsd,0))} RSD</b><span aria-hidden="true" style="flex:none">›</span>`}
   const mA=month==null?A:A.filter(t=>+t.dt.slice(5,7)-1===month);
   const out=mA.filter(t=>t.dir==='out'),inn=mA.filter(t=>t.dir==='in');
@@ -404,7 +448,7 @@ function renderTx(){
   $('#txEmpty').hidden=L.length>0;
   $('#txBody').innerHTML=L.slice(0,600).map(t=>{
     const fx=t.cur!=='RSD'?`<div class="note">${fmt2(t.amt)} ${t.cur}</div>`:'';
-    return `<tr data-id="${esc(t.id)}" class="${t.cat==='Nerazvrstano'?'unc':''}${t.cov?' cov':''}"><td class="num">${dsr(t.dt)}${t.src==='keš'?`<div><span class="tag ${t.firm?'fak':'keš'}">${t.firm?'faktura':esc(t.pay||'keš')}</span></div>`:`<div class="note">izvod ${t.acc==='RSD'?'':t.acc+' '}${t.iz}</div>`}</td>
+    return `<tr data-id="${esc(t.id)}" class="${t.cat==='Nerazvrstano'?'unc':''}${t.cov?' cov':''}"><td class="num">${dsr(t.dt)}${t.src==='keš'?`<div><span class="tag ${t.firm?'fak':'keš'}">${t.firm?'faktura':esc(t.pay||'keš')}</span></div>`:izLink(t)}</td>
       <td><div class="who">${esc(t.who)||'—'}</div><div class="what">${esc(t.what)}${t.inv?` · br. ${esc(t.inv)}`:''}${t.ref?` · poziv ${esc(t.ref)}`:''}</div>${t.note?`<div class="what" style="color:var(--fg)">✎ ${esc(t.note)}</div>`:''}${tagsHTML(t)}</td>
       <td class="r num ${t.dir==='out'?'o':'i'}">${t.dir==='out'?'−':'+'}${fmt2(t.rsd)}${fx}${DUP.has(t.id)?'<div><span class="tag" style="background:var(--warn);color:var(--panel)">moguć duplikat</span></div>':''}</td>
       <td><select data-cat aria-label="Kategorija">${catOptions(t.dir,t.cat)}</select>
@@ -453,7 +497,7 @@ async function addRule(match,cat){
   const id='r'+Date.now().toString(36);
   try{await db.collection('rules').doc(id).set({id,match,cat,at:new Date().toISOString()});
     // pravilo važi i za već ručno razvrstane stavke tog primaoca
-    const ids=SEED.filter(t=>(t.who+' '+t.what).toUpperCase().includes(match)&&META[t.id]?.cat&&META[t.id].cat!==cat).map(t=>t.id);
+    const ids=BASE.filter(t=>(t.who+' '+t.what).toUpperCase().includes(match)&&META[t.id]?.cat&&META[t.id].cat!==cat).map(t=>t.id);
     for(const x of ids){const b={...META[x],cat};await db.collection('meta').doc(x).set(b);META[x]=b}
     toast(`Pravilo: „${match}“ → ${cat}`)}catch(_){toast('Pravilo nije sačuvano.','bad')}
 }
@@ -474,7 +518,7 @@ function renderManual(){
 $('#mBody').addEventListener('click',async e=>{if(attClick(e))return;const b=e.target.closest('[data-del]');if(!b)return;if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='Potvrdi';return}try{await db.collection('manual').doc(b.dataset.del).delete();toast('Obrisano')}catch(_){toast('Nije obrisano.','bad')}});
 $('#m-save').onclick=async()=>{
   if(!db)return toast('Bez baze – otvori u Claude-u.','bad');
-  const m={dt:$('#m-dt').value,who:$('#m-who').value.trim(),what:$('#m-what').value.trim(),cat:$('#m-cat').value,sub:$('#m-sub').value.trim(),inv:$('#m-inv').value.trim(),amt:$('#m-amt').value.trim(),cur:$('#m-cur').value,pay:$('#m-pay').value,kurs:$('#m-kurs').value.trim(),note:$('#m-note').value.trim()};
+  const m={dt:$('#m-dt').value,who:$('#m-who').value.trim(),what:$('#m-what').value.trim(),cat:$('#m-cat').value,sub:$('#m-sub').value.trim(),inv:$('#m-inv').value.trim(),due:$('#m-due').value,amt:$('#m-amt').value.trim(),cur:$('#m-cur').value,pay:$('#m-pay').value,kurs:$('#m-kurs').value.trim(),note:$('#m-note').value.trim()};
   if(!m.dt||!nz(m.amt)){$('#m-msg').textContent='Upiši datum i iznos.';return}
   if(m.pay==='račun firme'&&!m.who){$('#m-msg').textContent='Za fakturu upiši dobavljača (po imenu se spaja sa uplatom sa izvoda).';return}
   m.id='m'+Date.now().toString(36);m.at=new Date().toISOString();
@@ -493,7 +537,7 @@ $('#m-pend').addEventListener('click',e=>{const r=e.target.closest('[data-rm]');
 
 /* ---------- pravila ---------- */
 function renderRules(){
-  const cnt=r=>SEED.filter(t=>(t.who+' '+t.what).toUpperCase().includes(String(r[0]).toUpperCase())).length;
+  const cnt=r=>BASE.filter(t=>(t.who+' '+t.what).toUpperCase().includes(String(r[0]).toUpperCase())).length;
   const mine=RULES.map(r=>`<tr><td class="num">${esc(r.match)}</td><td>${esc(r.cat)}</td><td class="num">${cnt([r.match])}</td><td><button class="ghost danger" data-delr="${esc(r.id)}">Obriši</button></td></tr>`).join('');
   const built=BUILTIN.map(r=>`<tr><td class="num">${esc(r[0])}</td><td>${esc(r[1])}</td><td class="num">${cnt(r)}</td><td class="note">ugrađeno</td></tr>`).join('');
   $('#rBody').innerHTML=mine+built;
@@ -501,8 +545,98 @@ function renderRules(){
 $('#rBody').addEventListener('click',async e=>{const b=e.target.closest('[data-delr]');if(!b)return;try{await db.collection('rules').doc(b.dataset.delr).delete();toast('Pravilo obrisano')}catch(_){toast('Nije obrisano.','bad')}});
 $('#r-add').onclick=async()=>{const m=$('#r-match').value.trim().toUpperCase();if(!m)return;await addRule(m,$('#r-cat').value);$('#r-match').value=''};
 
+/* ---------- izvodi kao dokumenti (PDF) ---------- */
+const ACCN={RSD:'Dinarski račun',EUR:'Devizni EUR',GBP:'Devizni GBP'};
+const izKey=t=>t.acc+'-'+String(t.dt).slice(0,4)+'-'+t.iz;
+function izOf(t){const z=IZV[izKey(t)];if(z)return z;const y=+String(t.dt).slice(0,4);return IZV[t.acc+'-'+(y-1)+'-'+t.iz]&&String(t.dt).slice(5,10)<='01-10'?IZV[t.acc+'-'+(y-1)+'-'+t.iz]:null}
+function izLink(t){const z=izOf(t),lb=`izvod ${t.acc==='RSD'?'':t.acc+' '}${t.iz}`;
+  return z&&z.att&&z.att.length?`<div><button type="button" class="izb" data-izv="${esc(z.id)}" title="Otvori PDF izvoda">${icDoc}${lb}</button></div>`:`<div class="note">${lb}</div>`}
+function openIzv(id){const z=IZV[id];if(!z||!z.att||!z.att[0])return toast('PDF izvoda još nije dodat.','bad');openAtt({...z.att[0],label:`Izvod br. ${z.iz} · ${ACCN[z.acc]||z.acc} · ${dsr(z.dt)}`})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-izv]');if(b){e.preventDefault();e.stopPropagation();openIzv(b.dataset.izv)}},true);
+/* provera izvoda: svaki izvod sam (zbir stavki, staro → novo stanje) + lanac (novo stanje = sledeće staro, nijedan broj ne fali) */
+function izChecks(){const G={};for(const z of Object.values(IZV)){const y=String(z.dt||'').slice(0,4);(G[z.acc+'|'+y]=G[z.acc+'|'+y]||[]).push(z)}
+  return Object.entries(G).map(([k,L])=>{const [acc,y]=k.split('|');L.sort((a,b)=>a.iz-b.iz);const iss=[];
+    const nums=new Set(L.map(z=>z.iz));const mx=Math.max(...L.map(z=>z.iz)),mn=Math.min(...L.map(z=>z.iz));const miss=[];for(let i=mn<=3?1:mn;i<=mx;i++)if(!nums.has(i))miss.push(i);
+    if(miss.length)iss.push(`fali izvod br. ${miss.join(', ')}`);
+    for(const z of L)if(z.ok===false)iss.push(`izvod ${z.iz}: ${z.msg||'ne slaže se'}`);
+    for(let i=1;i<L.length;i++){const a=L[i-1],b=L[i];if(b.iz===a.iz+1&&a.novo!=null&&b.prev!=null&&Math.abs(a.novo-b.prev)>0.005)iss.push(`posle izvoda ${a.iz} stanje ${fmt2(a.novo)}, a izvod ${b.iz} počinje sa ${fmt2(b.prev)}`)}
+    return {acc,y,L,iss,first:L[0],last:L[L.length-1]}}).sort((a,b)=>b.y.localeCompare(a.y)||(a.acc==='RSD'?-1:1))}
+function renderDocs(){
+  const C=izChecks();
+  $('#izCheck').innerHTML=C.length?'<h3>Provera izvoda</h3><div class="izsum">'+C.map(c=>{const ok=!c.iss.length;const cur=c.acc==='RSD'?'':' '+c.acc;
+    return `<div class="ln"><span class="tag ${ok?'paid':'wait'}" style="flex:none">${ok?'✓ slaže se':'⚠ proveri'}</span><span><b>${ACCN[c.acc]||c.acc} ${c.y}</b> · ${c.L.length===1?'1 izvod (br. '+c.first.iz+')':c.L.length+' izvoda (br. '+c.first.iz+'–'+c.last.iz+')'} · stanje ${fmt2(c.first.prev??0)}${cur} → ${fmt2(c.last.novo??0)}${cur} na dan ${dsr(c.last.dt)}${ok?' · svaki izvod se slaže i nijedan ne fali':''}${c.iss.length?'<br><span style="color:var(--amb-t,#7A4B0C);font-weight:600">'+c.iss.map(esc).join('<br>')+'</span>':''}</span></div>`}).join('')+'</div>'
+    :'<h3>Provera izvoda</h3><p class="note" style="margin:0">Izvodi sa PDF-om još nisu dodati.</p>';
+  const q=$('#dq').value.trim().toLowerCase(),ty=$('#dType').value,yr=$('#dYr').value;
+  const R=[];
+  if(ty!=='rac')for(const z of Object.values(IZV)){const cur=z.acc==='RSD'?'':' '+z.acc;
+    R.push({dt:z.dt,txt:`izvod ${z.iz} ${ACCN[z.acc]} ${z.acc}`,html:`<tr><td><button type="button" class="izb docn" data-izv="${esc(z.id)}">${icDoc}Izvod br. ${z.iz}</button><div class="docs">${ACCN[z.acc]||z.acc}${z.n!=null?' · '+z.n+' '+((z.n%10>=2&&z.n%10<=4&&(z.n%100<10||z.n%100>=20))?'promene':'promena'):''}</div></td><td class="num">${dsr(z.dt)}</td><td class="r num"><span class="o">−${fmt2(z.dug||0)}</span> <span class="i">+${fmt2(z.pot||0)}</span><div class="note">stanje ${fmt2(z.novo??0)}${cur}</div></td><td>${z.ok===false?`<span class="tag wait">⚠ ${esc(z.msg||'ne slaže se')}</span>`:'<span class="tag paid">✓ slaže se</span>'}</td></tr>`})}
+  if(ty!=='iz')for(const t of all().filter(t=>t.src==='keš'&&t.att&&t.att.length)){
+    R.push({dt:t.dt,txt:`${t.who} ${t.what} ${t.inv} ${t.sub}`,html:`<tr data-id="${esc(t.id)}"><td><div class="docn">${t.firm?'Faktura':'Račun'}${t.inv?' br. '+esc(t.inv):''} · ${esc(t.who)}</div><div class="docs">${esc(t.what)}</div><div class="tags">${t.att.map((a,i)=>`<button type="button" class="att" data-att="${i}">${icDoc}<span>${esc(a.name||'PDF')}</span></button>`).join('')}${t.sub?`<span class="tag sub">${esc(t.sub)}</span>`:''}</div></td><td class="num">${dsr(t.dt)}</td><td class="r num o">−${fmt2(t.amt)}${t.cur!=='RSD'?' '+esc(t.cur):''}</td><td>${t.firm?(t.paid?`<span class="tag paid">plaćeno · izvod ${esc(t.paid.iz)}</span>`:'<span class="tag wait">čeka uplatu</span>'):`<span class="tag keš">${esc(t.pay||'keš')}</span>`}</td></tr>`})}
+  const L=R.filter(r=>(!yr||String(r.dt).startsWith(yr))&&(!q||r.txt.toLowerCase().includes(q)||dsr(r.dt).includes(q))).sort((a,b)=>String(b.dt).localeCompare(String(a.dt)));
+  $('#dBody').innerHTML=L.slice(0,400).map(r=>r.html).join('');$('#dEmpty').hidden=L.length>0}
+['#dq','#dType','#dYr'].forEach(s=>$(s).addEventListener('input',renderDocs));
+$('#dBody').addEventListener('click',e=>{attClick(e)});
+
+/* ---------- provera uplata (kupci) i isplata (dobavljači) ---------- */
+const r2=x=>Math.round((+x||0)*100)/100;
+const fold=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'dj');
+function docCalc(d){const rate=d.issuer==='privatno'?0:nz(d.vatRate??20);
+  const sub=r2((d.items||[]).reduce((a,it)=>a+r2(nz(it.q)*nz(it.p)*(1-nz(it.disc)/100)),0));
+  const base=r2(sub-sub*nz(d.extraDisc)/100+nz(d.shipping));const total=r2(base+r2(base*rate/100));
+  const avans=(d.type==='predracun'||d.type==='ponuda')?r2(total*nz(d.avansPct)/100):d.type==='avans'?r2(nz(d.avansAmount)):0;
+  return {total,avans}}
+const TYP={predracun:'Predračun',racun:'Račun',avans:'Avansni račun',ponuda:'Ponuda'};
+const STL={nacrt:'Nije poslato',poslato:'Poslato',avans:'Avans plaćen',placeno:'Plaćeno',izdato:'Izdato',otkucano:'Otkucan',prihvaceno:'Prihvaćeno'};
+function matchDocs(){
+  const IN=all().filter(t=>t.src==='banka'&&t.dir==='in'&&t.acc==='RSD'&&t.cat!==INTERNAL);
+  const used=new Set();const out=[];
+  const D=DOCS.filter(d=>['predracun','racun','avans'].includes(d.type)&&d.status!=='storno'&&(d.items||[]).some(it=>nz(it.p))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  for(const d of D){const c=docCalc(d),cl=d.client||{};
+    const names=fold(cl.name).split(/[^a-z0-9]+/).filter(w=>w.length>=4&&!['doo','d.o.o'].includes(w));
+    const numN=String(d.num||'').replace(/[^0-9A-Za-z]/g,'').toUpperCase();
+    const want=[c.avans,c.total,r2(c.total-c.avans),nz(d.avansAmount)].filter(x=>x>0);
+    const P=IN.filter(t=>!used.has(t.id)&&t.dt>=String(d.date||'').slice(0,10)&&(new Date(t.dt)-new Date(d.date))/864e5<=180).map(t=>{
+      const W=fold(t.who),ref=String((t.ref||'')+' '+(t.what||'')).replace(/[^0-9A-Za-z]/g,'').toUpperCase();
+      const nm=names.some(w=>W.includes(w)),rf=numN.length>=4&&ref.includes(numN),am=want.some(x=>Math.abs(x-t.rsd)<1);
+      return {t,nm,rf,am}}).filter(m=>(m.am&&(m.nm||m.rf))||(m.rf&&m.nm));
+    for(const m of P)used.add(m.t.id);
+    const paid=r2(P.reduce((a,m)=>a+m.t.rsd,0));const msgs=[];let lvl='n';
+    const priv=d.issuer==='privatno'||(d.payMethod&&d.payMethod!=='racun')||d.currency!=='RSD';
+    if(P.length){lvl='ok';
+      const full=Math.abs(paid-c.total)<1,av=c.avans&&Math.abs(paid-c.avans)<1;
+      msgs.push(`Stiglo ${fmt2(paid)} RSD${P.map(m=>` · ${dsr(m.t.dt)} izvod ${m.t.iz} (${esc(m.t.who.split(',')[0])})`).join('')} – ${full?'ceo iznos':av?'avans '+nz(d.avansPct)+'%':'deo iznosa'}.`);
+      const st=d.status;
+      if(full&&st!=='placeno'){lvl='w';msgs.push(`U Fakturama piše „${STL[st]||st}“ – može da se stavi „Plaćeno“.`)}
+      else if(!full&&d.type==='predracun'&&!['avans','placeno'].includes(st)){lvl='w';msgs.push(`U Fakturama piše „${STL[st]||st}“ – treba „Avans plaćen“.`)}
+      if(nz(d.avansAmount)&&Math.abs(nz(d.avansAmount)-paid)>=1&&!full){lvl='w';msgs.push(`U predračunu je upisan avans ${fmt2(nz(d.avansAmount))}, a stiglo je ${fmt2(paid)}.`)}
+    }else if(priv){msgs.push(d.currency!=='RSD'?'U evrima – plaća se keš, ne vidi se na izvodu.':'Plaća se na privatni račun ili keš – ne vidi se na izvodu firme.')}
+    else{const exp=c.avans||c.total;
+      if(['avans','placeno'].includes(d.status)){lvl='w';msgs.push(`U Fakturama piše „${STL[d.status]}“, a uplata od ${fmt2(exp)} nije nađena na izvodu.`)}
+      else msgs.push(`Još nije stiglo. Očekuje se ${d.type==='predracun'&&c.avans?'avans ':''}${fmt2(exp)} RSD.`)}
+    out.push({d,c,P,paid,lvl,msgs})}
+  const firstDoc=D.length?String(D[0].date).slice(0,10):'';
+  const free=firstDoc?IN.filter(t=>!used.has(t.id)&&t.dt>=firstDoc&&t.cat==='Uplate kupaca'):[];
+  return {out,free,firstDoc}}
+function supChecks(){const today=new Date().toISOString().slice(0,10);
+  return all().filter(t=>t.firm).sort((a,b)=>String(b.dt).localeCompare(String(a.dt))).map(t=>{
+    const late=!t.paid&&t.due&&t.due<today?Math.round((new Date(today)-new Date(t.due))/864e5):0;
+    return {t,late,lvl:t.paid?'ok':late?'w':'n'}})}
+function chkCount(){let n=0;try{n+=matchDocs().out.filter(x=>x.lvl==='w').length;n+=supChecks().filter(x=>x.lvl==='w').length;n+=izChecks().filter(c=>c.iss.length).length}catch(_){}return n}
+const icx=l=>`<span class="ic ${l}">${l==='ok'?'✓':l==='w'?'!':'·'}</span>`;
+function renderChk(){
+  const M=matchDocs();
+  $('#chkIn').innerHTML=M.out.length?'<div class="chkl">'+M.out.slice().reverse().map(x=>`<div class="chkr">${icx(x.lvl)}<div class="tx"><b>${TYP[x.d.type]||x.d.type} ${esc(x.d.num||'')} · ${esc((x.d.client||{}).name||'')}</b>${x.msgs.map((m,i)=>`<span class="${x.lvl==='w'&&i>0?'w':''}">${m}</span>`).join('')}</div><div class="v">${fmt2(x.c.total)}<div class="note">${x.c.avans&&x.d.type==='predracun'?'avans '+fmt2(x.c.avans):''}</div></div></div>`).join('')+'</div>'
+    :'<p class="note" style="margin:0">Nema predračuna ni faktura u Fakturama.</p>';
+  const S=supChecks();
+  $('#chkOut').innerHTML=S.length?'<div class="chkl">'+S.map(x=>{const t=x.t;return `<div class="chkr">${icx(x.lvl)}<div class="tx"><b>${esc(t.who)}${t.inv?' · br. '+esc(t.inv):''}</b><span class="${x.lvl==='w'?'w':''}">${t.paid?`Plaćeno – izvod ${esc(t.paid.iz)}, ${dsr(t.paid.dt)}.`:x.late?`Nije plaćeno, rok je bio ${dsr(t.due)} (kasni ${x.late} ${x.late===1?'dan':'dana'}).`:`Čeka uplatu${t.due?' – rok '+dsr(t.due):''}.`}${t.sub?' · '+esc(t.sub):''}</span></div><div class="v">${fmt2(t.amt)}</div></div>`}).join('')+'</div>'
+    :'<p class="note" style="margin:0">Nema faktura dobavljača za plaćanje. Dodaješ ih u „+ Trošak“ → Plaćeno: Račun firme.</p>';
+  $('#chkFreeT').textContent='Uplate kupaca bez dokumenta u aplikaciji'+(M.firstDoc?' (od '+dsr(M.firstDoc)+')':'');
+  $('#chkFree').innerHTML=M.free.length?'<div class="chkl">'+M.free.slice().sort((a,b)=>b.dt.localeCompare(a.dt)).map(t=>`<div class="chkr">${icx('n')}<div class="tx"><b>${esc(t.who.split(',')[0])}</b><span>${dsr(t.dt)} · izvod ${t.iz} · ${esc(t.what)}${t.ref?' · poziv '+esc(t.ref):''}</span></div><div class="v i">+${fmt2(t.rsd)}</div></div>`).join('')+'</div><p class="note" style="margin:8px 0 0">Ove uplate su stigle, ali u Fakturama nema predračuna ili računa sa tim iznosom (verovatno su pravljeni van aplikacije).</p>'
+    :'<p class="note" style="margin:0">Sve uplate kupaca imaju svoj dokument.</p>'}
+$('#chkAlert').addEventListener('click',()=>show('chk'));
+
 /* ---------- osnovno ---------- */
-function show(v){view=v;document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-current',String(b.dataset.v===v)));['sum','tx','add','rules'].forEach(x=>$('#v-'+x).hidden=x!==v);render();scrollTo(0,0)}
+function show(v){view=v;document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-current',String(b.dataset.v===v)));['sum','tx','docs','chk','add','rules'].forEach(x=>$('#v-'+x).hidden=x!==v);render();scrollTo(0,0)}
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)show(b.dataset.v)});
 let fltUnpaid=false;
 function subLists(){
@@ -513,18 +647,22 @@ function subLists(){
   const D=new Set(L);try{const J=window.parent&&window.parent!==window&&window.parent.__mtPdf?window.parent.__mtPdf.jobs():[];
     for(const j of J){if(j.name)D.add(j.name);const c=String(j.sub||'').split(' · ')[0];if(c&&!/^faktura /.test(c))D.add(c)}}catch(_){}
   $('#subList').innerHTML=[...D].map(c=>`<option value="${esc(c)}">`).join('')}
-function render(){subLists();computeDup();if(view==='sum')renderSum();if(view==='tx')renderTx();if(view==='add')renderManual();if(view==='rules')renderRules()}
+function render(){subLists();computeDup();if(view==='sum')renderSum();if(view==='tx')renderTx();if(view==='docs')renderDocs();if(view==='chk')renderChk();if(view==='add')renderManual();if(view==='rules')renderRules()}
 function initSelects(){
-  const yrs=[...new Set([...SEED.map(yearOf),new Date().getFullYear()])].sort((a,b)=>b-a);
-  $('#yr').innerHTML=yrs.map(y=>`<option>${y}</option>`).join('')+'<option value="all">Sve godine</option>';
+  updYears();
   $('#catSel').innerHTML='<option value="">Sve kategorije</option>'+[...CATS_OUT,...CATS_IN,INTERNAL].map(c=>`<option>${esc(c)}</option>`).join('');
   $('#moSel').innerHTML='<option value="">Svi meseci</option>'+MON.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
   $('#m-cat').innerHTML=CATS_OUT.filter(c=>c!=='Nerazvrstano').map(c=>`<option>${esc(c)}</option>`).join('');
   $('#r-cat').innerHTML=[...CATS_OUT,...CATS_IN,INTERNAL].map(c=>`<option>${esc(c)}</option>`).join('');
   $('#m-dt').value=new Date().toISOString().slice(0,10);
-  const last=SEED.filter(t=>t.acc==='RSD').reduce((a,t)=>t.dt>a.dt||(t.dt===a.dt&&t.iz>a.iz)?t:a,{iz:0,dt:''});
-  $('#srcNote').textContent=`Izvodi Banca Intesa iz mejla: ${SEED.length} stavki, poslednji dinarski izvod br. ${last.iz} od ${dsr(last.dt)} Keš troškove i fakture dobavljača dodaješ u „+ Trošak“.`;
+  updSrc();
 }
+function updYears(){const sel=$('#yr'),v=sel.value;const yrs=[...new Set([...BASE.map(yearOf),new Date().getFullYear()])].sort((a,b)=>b-a);
+  sel.innerHTML=yrs.map(y=>`<option>${y}</option>`).join('')+'<option value="all">Sve godine</option>';if(v&&[...sel.options].some(o=>o.value===v))sel.value=v;
+  const d=$('#dYr'),dv=d.value;const iy=[...new Set(Object.values(IZV).map(z=>String(z.dt||'').slice(0,4)).concat(MANUAL.map(m=>String(m.dt||'').slice(0,4))).filter(Boolean))].sort().reverse();
+  d.innerHTML='<option value="">Sve godine</option>'+iy.map(y=>`<option>${y}</option>`).join('');d.value=iy.includes(dv)?dv:''}
+function updSrc(){const last=BASE.filter(t=>t.acc==='RSD').reduce((a,t)=>t.dt>a.dt||(t.dt===a.dt&&t.iz>a.iz)?t:a,{iz:0,dt:''});
+  $('#srcNote').textContent=`Izvodi Banca Intesa iz mejla: ${BASE.length} stavki, poslednji dinarski izvod br. ${last.iz} od ${dsr(last.dt)} Keš troškove i fakture dobavljača dodaješ u „+ Trošak“; PDF-ovi su u „Dokumenti“.`}
 ['#yr','#accSel'].forEach(s=>$(s).addEventListener('input',()=>{month=null;render()}));
 initSelects();render();
 (async()=>{
@@ -534,6 +672,9 @@ initSelects();render();
   db.collection('meta').onSnapshot(s=>{META={};s.docs.forEach(d=>META[d.id]=d.data());render()},()=>{});
   db.collection('manual').onSnapshot(s=>{MANUAL=s.docs.map(d=>({...d.data(),id:d.id}));render()},()=>{});
   db.collection('rules').onSnapshot(s=>{RULES=s.docs.map(d=>({...d.data(),id:d.id}));render()},()=>{});
+  db.collection('banka').onSnapshot(s=>{BANKA=s.docs.map(d=>({...d.data(),id:d.id}));rebase();updYears();updSrc();render()},()=>{});
+  db.collection('izvodi').onSnapshot(s=>{IZV={};s.docs.forEach(d=>IZV[d.id]={...d.data(),id:d.id});updYears();render()},()=>{});
+  db.collection('docs').onSnapshot(s=>{DOCS=s.docs.map(d=>({...d.data(),id:d.id}));render()},()=>{});
 })();
 </script>
 

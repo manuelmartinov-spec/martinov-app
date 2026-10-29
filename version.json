@@ -1,7 +1,12 @@
 {
- "v": "1.5.4",
+ "v": "1.5.5",
  "date": "29.10.2026.",
  "log": [
+  {
+   "v": "1.5.5",
+   "date": "29.10.2026.",
+   "t": "Troškovi: nova kartica „Dokumenti“ – svi izvodi iz banke i računi/fakture sa PDF-om na jedan dodir, i provera izvoda (zbir, staro → novo stanje, da nijedan ne fali). Nova kartica „Provera“: predračuni i fakture se sami upoređuju sa uplatama na izvodu, a fakture dobavljača sa isplatama; šta ne slaže se piše žuto. U Promenama „izvod 105“ otvara PDF tog izvoda. Claude sada može sam da dodaje izvode, račune i fakture u aplikaciju – kad nešto doda, iskoči obaveštenje."
+  },
   {
    "v": "1.5.4",
    "date": "29.10.2026.",
