@@ -799,6 +799,10 @@ $('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b
 $('#back').onclick=()=>{if(dirty){msg('#saveMsg','Prvo sačuvajte ili kliknite ponovo za izlaz bez čuvanja.','bad');dirty=false;return}setView('list')};
 $('#newTypes').innerHTML=Object.entries(TYPES).map(([k,v])=>`<button class="card" data-new="${k}" style="text-align:left;display:flex;flex-direction:column;gap:6px;padding:16px"><span class="tag" style="align-self:flex-start">${v.label}</span><span style="font-weight:500;color:var(--muted);line-height:1.45">${TYPE_DESC[k]}</span></button>`).join('');
 $('#newTypes').addEventListener('click',e=>{const b=e.target.closest('[data-new]');if(b){cur=null;openDoc(blank(b.dataset.new))}});
+/* novi dokument iz Kalkulatora (glavna aplikacija poziva ovo) */
+window.__fakNew=o=>{try{if(typeof view!=='undefined'&&view==='edit'&&dirty)return'dirty';const d=blank((o&&o.type)||'predracun',null,(o&&o.issuer)||'firma');
+  if(o&&Array.isArray(o.items)&&o.items.length)d.items=o.items.map(it=>({d:String(it.d||''),q:it.q||1,u:it.u||'kom',p:String(it.p??''),disc:''}));
+  if(o&&o.note)d.note=(d.note?d.note+'\n':'')+o.note;cur=null;openDoc(d);try{markDirty()}catch(e){}return'ok'}catch(e){return'err'}};
 $('#typeChips').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b){filterType=b.dataset.t;renderChips();renderList()}});
 $('#q').addEventListener('input',renderList);$('#yearSel').addEventListener('change',renderList);
 $('#listBody').addEventListener('click',e=>{if(e.target.closest('select'))return;const tr=e.target.closest('tr[data-id]');if(tr){const d=DOCS.find(x=>x.id===tr.dataset.id);if(d)openDoc(d)}});

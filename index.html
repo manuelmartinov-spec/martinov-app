@@ -758,6 +758,60 @@ input,select,textarea{border-color:var(--fld-bd);border-radius:10px}
 .toast #toastT{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .toast #toastB2{background:none;border:0;color:var(--panel);opacity:.75;font-weight:700;min-height:32px;padding:4px 8px}
 @media (max-width:760px){#bAdd{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+/* ---- 1.6: Zadaci na Pregledu ---- */
+.dcard.qt{margin-top:2px}
+.dcard.qt h2 .lnk{margin-left:auto;border:0;background:none;color:var(--navy);font:600 13.5px var(--f-ui);padding:6px 2px;min-height:0;cursor:pointer}
+.qtf{display:flex;gap:6px;align-items:center;margin:0 0 6px}
+.qtf input{flex:1;min-width:0;min-height:46px;border-width:1.5px;border-radius:12px;padding:0 12px;font-size:15.5px}
+.qtf .qtc{width:auto;max-width:122px;min-height:46px;border-radius:12px;font-size:13.5px;padding:0 6px}
+.qtf .btn.pri{min-height:46px;width:48px;padding:0;justify-content:center;border-radius:12px}
+.qtf .btn.pri .ic{width:20px;height:20px;stroke-width:2.4}
+.qtr{display:flex;align-items:flex-start;gap:4px;border-top:1px solid var(--grid)}
+.qtr .qck{flex:none;width:44px;min-height:46px;border:0;background:none;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.qtr .qck span{width:24px;height:24px;border-radius:50%;border:2px solid var(--muted);display:block;transition:background .12s}
+.qtr .qck:hover span{background:var(--kuc-soft);border-color:var(--kuc)}
+.qtr.hot .qck span{border-color:var(--hit)}
+.qtr .qtx{flex:1;min-width:0;border:0;background:none;text-align:left;padding:10px 4px 9px 0;display:flex;flex-direction:column;gap:2px;font:inherit;color:var(--fg);cursor:pointer}
+.qtr .qtt{font-weight:700;font-size:15px;line-height:1.3}
+.qtr .qtm{font-size:12.5px;color:var(--muted)}.qtr .qtm.bad{color:var(--hit);font-weight:600}
+.qmore{border:0;background:none;color:var(--navy);font:600 13.5px var(--f-ui);padding:8px 0 2px;cursor:pointer}
+/* „+ Dodaj“ na Pregledu i mali meni */
+#qFab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:30;border-radius:99px;min-height:52px;padding:0 20px 0 16px;font-size:15px;box-shadow:0 6px 20px var(--lift);display:inline-flex;align-items:center;gap:6px}
+#qFab[hidden]{display:none}
+#qFab .ic{width:20px;height:20px;stroke-width:2.4}
+@media (max-width:760px){#qFab{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+.qmenu{display:flex;flex-direction:column;gap:6px}
+.qmi{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);background:var(--panel);border-radius:14px;padding:10px 12px;text-align:left;font:inherit;color:var(--fg);min-height:58px;cursor:pointer}
+.qmi:hover{background:var(--hover)}
+.qmic{width:38px;height:38px;border-radius:11px;background:var(--act-soft);color:var(--on-act-soft);display:flex;align-items:center;justify-content:center;flex:none}
+.qmic .ic{width:21px;height:21px}
+.qmt{display:flex;flex-direction:column;gap:1px}.qmt b{font-size:15.5px}.qmt small{font-size:12.5px;color:var(--muted)}
+.qtd .chips{gap:6px}
+.qtd .chip.hot[aria-pressed="true"]{background:var(--hit-soft);border-color:var(--hit);color:var(--hit)}
+/* izveštaj o korišćenju */
+.dcard.rep{background:var(--act-soft);border-color:var(--act)}
+.dcard.rep .rept p{margin:4px 0;font-size:14px;line-height:1.45}
+.dcard.rep .rept p.li{padding-left:14px;position:relative}.dcard.rep .rept p.li::before{content:"•";position:absolute;left:2px;color:var(--on-act-soft)}
+.dcard.rep .btn{margin:8px 0 4px}
+/* tabela na telefonu kao lista kartica */
+.plist{display:flex;flex-direction:column;padding:8px 10px 110px;gap:0}
+.plist>*{flex:none}
+.plist .pgh{display:flex;align-items:center;gap:8px;border:0;background:none;font:800 14.5px var(--f-ui);color:var(--fg);padding:16px 4px 6px;text-align:left;cursor:pointer}
+.plist .pgh .car{color:var(--muted);transition:transform .15s}.plist .pgh[aria-expanded="false"] .car{transform:rotate(-90deg)}
+.plist .pgh .cnt{color:var(--muted);font-weight:600;font-size:13px}
+.plist .pcards{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+.plist .prow{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:4px;width:100%;border:0;border-top:1px solid var(--grid);background:none;text-align:left;padding:11px 14px;font:inherit;color:var(--fg);cursor:pointer;min-height:52px}
+.plist .prow:first-child{border-top:0}
+.plist .prow:hover{background:var(--hover)}
+.plist .pt{display:flex;align-items:flex-start;justify-content:flex-start;text-align:left;gap:6px;font-weight:700;font-size:15.5px;line-height:1.3}
+.plist .pt .pcs{flex:none;margin-top:1px}
+.plist .pm{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:13px;color:var(--muted);align-items:center}
+.plist .pm .pv{display:inline-flex;align-items:center;gap:4px;max-width:100%}
+.plist .pm .pv>b{font-weight:600;color:var(--muted)}
+.plist .padd{border:0;border-top:1px solid var(--grid);background:none;color:var(--navy);font:600 14px var(--f-ui);padding:11px 14px;text-align:left;display:flex;align-items:center;gap:6px;cursor:pointer;width:100%}
+.plist .padd .ic{width:17px;height:17px}
+.plist .pfoot{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;padding:12px 4px}
+.plist .pfoot button{border:0;background:none;color:var(--navy);font:600 13px var(--f-ui);padding:6px 2px;cursor:pointer}
 </style>
 
 <div id="app">
@@ -1357,11 +1411,12 @@ function openView(vid){if(ui.edit)commitEdit();ui.v=vid;ui.sel=null;saveUi();ren
 
 function render(){
   if(!ui.t||(!isMod(ui.t)&&loadedT&&!T.has(ui.t)))ui.t='m:pregled';
-  if(isMod(ui.t)){renderSide();headModule();renderModule();return}
+  if(isMod(ui.t)){renderSide();headModule();renderModule();renderAfter();return}
   $('content').hidden=false;$('appHost').hidden=true;
   const t=curT();if(t&&!t.views.some(v=>v.id===ui.v))ui.v=t.views[0].id;
-  renderSide();renderHead();renderContent();
+  renderSide();renderHead();renderContent();renderAfter();
 }
+function renderAfter(){try{if(typeof syncQFab==='function')syncQFab();if(typeof usePageView==='function')usePageView()}catch(e){}}
 function setTb(id,icon,label,on,extra){const b=$(id);b.innerHTML=ic(icon)+'<span class="lb">'+label+'</span>'+(extra?'<span class="lb2">'+extra+'</span>':'');b.classList.toggle('on',!!on)}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function renderHead(){
@@ -1398,7 +1453,36 @@ function emptyBox(text,html){const e=el('div','empty');if(html)e.innerHTML=html;
 
 /* ================= TABELA (grid) ================= */
 function visFields(t,v){return t.fields.filter((f,i)=>i===0||!v.hidden.includes(f.id))}
+/* telefon uspravno: tabela kao lista kartica (ceo naziv + najvažnija polja); „Prikaži kao tabelu“ vraća mrežu */
+let PGRID={};try{PGRID=JSON.parse(localStorage.getItem('mt.pgrid')||'{}')||{}}catch(e){}
+function setPGrid(id,on){if(on)PGRID[id]=1;else delete PGRID[id];try{localStorage.setItem('mt.pgrid',JSON.stringify(PGRID))}catch(e){}render()}
+const isEmptyV=v=>v==null||v===''||v===false||(Array.isArray(v)&&!v.length);
+function renderPList(c,t,v){
+  const fs=visFields(t,v);const rows=rowsOf(t,v);const gf=fieldOf(t,v.group);const jobT=PT()===t;const f0=fs[0];
+  const wrap=el('div','plist');
+  const card=x=>{const b=el('button','prow');b.type='button';b.dataset.r=x.id;
+    const tl=el('span','pt');if(jobT){const pc=piecesNode(jobPieces(t,x.r),{max:3,qty:false});pc.classList.add('pcs');tl.appendChild(pc)}
+    tl.appendChild(el('span',null,(f0?String(txt(t,f0,x.r)||''):'')||'(bez naziva)'));b.appendChild(tl);
+    const m=el('span','pm');let n=0;
+    for(const f of fs.slice(1)){if(n>=4)break;if(gf&&f.id===gf.id)continue;const vv=val(t,f,x.r);if(isEmptyV(vv))continue;
+      const pv=el('span','pv');if(f.type==='check'){pv.textContent='✓ '+f.name}else{pv.appendChild(el('b',null,f.name+':'));pv.appendChild(cellNode(t,f,x.r))}m.appendChild(pv);n++}
+    if(n)b.appendChild(m);b.addEventListener('click',()=>openRec(t.id,x.id,f0?f0.id:null));return b};
+  const addB=(preset,label)=>{const a=el('button','padd');a.type='button';a.innerHTML=ic('plus');a.appendChild(el('span',null,label||'Novi zapis'));a.addEventListener('click',()=>addRecord(preset,true));return a};
+  if(gf){
+    for(const g of groupsOf(t,gf,rows)){const key=v.id+':'+g.key;const open=!ui.collapsed[key];
+      const h=el('button','pgh');h.type='button';h.setAttribute('aria-expanded',String(open));h.appendChild(el('span','car','▾'));h.appendChild(groupLabel(t,gf,g));h.appendChild(el('span','cnt',String(g.rows.length)));
+      h.addEventListener('click',()=>{if(open)ui.collapsed[key]=1;else delete ui.collapsed[key];saveUi();render()});wrap.appendChild(h);
+      if(open){const box=el('div','pcards');for(const x of g.rows)box.appendChild(card(x));box.appendChild(addB(presetFor(gf,g.key),'Novi zapis ovde'));wrap.appendChild(box)}}
+    if(!rows.length){const box=el('div','pcards');box.appendChild(addB({}));wrap.appendChild(box)}
+  }else{const box=el('div','pcards');for(const x of rows)box.appendChild(card(x));box.appendChild(addB({}));wrap.appendChild(box)}
+  const ft=el('div','pfoot');ft.appendChild(el('span',null,rows.length+(rows.length%10===1&&rows.length%100!==11?' zapis':' zapisa')+(rows.length!==recsOf(t.id).size?' od '+recsOf(t.id).size:'')));
+  const tg=el('button',null,'Prikaži kao tabelu');tg.type='button';tg.addEventListener('click',()=>setPGrid(t.id,true));ft.appendChild(tg);wrap.appendChild(ft);
+  const keep=c.scrollTop;c.replaceChildren(wrap);c.scrollTop=keep;
+  if(!recsOf(t.id).size)c.appendChild(emptyBox('','<b>Tabela je prazna.</b><br>Klikni „+ Zapis“ dole desno.'));
+  else if(!rows.length)c.appendChild(emptyBox('','<b>Nijedan zapis ne odgovara.</b><br>Promeni pretragu ili filter.'));
+}
 function renderGrid(c,t,v){
+  if(narrow()&&!PGRID[t.id])return renderPList(c,t,v);
   const fs=visFields(t,v);const rows=rowsOf(t,v);const gf=fieldOf(t,v.group);
   const wrap=el('div','gwrap');const tb=el('table','g');tb.id='grid';
   const cg=el('colgroup');const c0=el('col');c0.style.width='64px';cg.appendChild(c0);
@@ -1445,6 +1529,7 @@ function renderGrid(c,t,v){
     fr.appendChild(td)});
   fr.appendChild(el('td'));tf.appendChild(fr);tb.appendChild(tf);
   wrap.appendChild(tb);
+  if(narrow()){const bk=el('div','pfoot');bk.style.padding='10px 12px';const tg=el('button',null,'Prikaži kao listu');tg.type='button';tg.style.cssText='border:0;background:none;color:var(--navy);font:600 13px var(--f-ui);padding:6px 2px';tg.addEventListener('click',()=>setPGrid(t.id,false));bk.appendChild(tg);wrap.appendChild(bk)}
   const keep={x:c.scrollLeft,y:c.scrollTop};c.replaceChildren(wrap);c.scrollLeft=keep.x;c.scrollTop=keep.y;
   if(!recsOf(t.id).size){const e=emptyBox('',`<b>Tabela je prazna.</b><br>Klikni „+ Zapis“ ili „Novi zapis“ ispod zaglavlja. Kolone dodaješ dugmetom „+“ desno, a naziv i vrstu kolone menjaš klikom na njen naslov.`);c.appendChild(e)}
   else if(!rows.length)c.appendChild(emptyBox('',`<b>Nijedan zapis ne odgovara.</b><br>Promeni pretragu ili filter.`));
@@ -2115,12 +2200,14 @@ const MODS={
   zadaci:{n:'Zadaci',i:'check',cat:'Poslovi',app:'zadaci',tab:'tabT'},
   cenovnik:{n:'Cenovnik',i:'tag',cat:'Proizvodi'},
   krojenje:{n:'Krojenje ploča',i:'nest',cat:'Proizvodi',app:'nesting'},
+  kalkulator:{n:'Kalkulator',i:'calc',cat:'Proizvodi',app:'kalkulator'},
   kupovina:{n:'Kupovina',i:'cart',cat:'Nabavka',app:'zadaci',tab:'tabS'},
   fakture:{n:'Fakture',i:'doc',cat:'Novac',app:'fakture'},
   troskovi:{n:'Troškovi',i:'coins',cat:'Novac',app:'troskovi'},
   pdf:{n:'PDF',i:'pdf',cat:'',fn:()=>{if(typeof pdfOpen==='function')pdfOpen()}}
 };
-const APPS={zadaci:'apps/zadaci.html',fakture:'apps/fakture.html',troskovi:'apps/troskovi.html',nesting:'apps/nesting.html'};
+const APPS={zadaci:'apps/zadaci.html',fakture:'apps/fakture.html',troskovi:'apps/troskovi.html',nesting:'apps/nesting.html',kalkulator:'apps/kalkulator.html'};
+const APPN={zadaci:'Zadaci',fakture:'Fakture',troskovi:'Troškovi',nesting:'Krojenje ploča',kalkulator:'Kalkulator'};
 const BASECATS=['Poslovi','Kupci','Proizvodi','Nabavka','Novac'];
 const DEFCAT={poslovi:'Poslovi',kupci:'Kupci',proizvodi:'Proizvodi',stakupiti:'Nabavka'};
 const isMod=k=>typeof k==='string'&&k.startsWith('m:');
@@ -2130,7 +2217,7 @@ function allCats(){const c=[...BASECATS];for(const t of T.values()){const x=tabl
 const ntxt=s=>String(s==null?'':s).toLowerCase().replace(/đ/g,'dj').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
 
 /* ---------- podaci drugih delova aplikacije (fakture, kupci, zadaci, kupovina, događaji) ---------- */
-const X={docs:new Map(),clients:new Map(),auto:new Map(),events:new Map(),tasks:new Map(),shopping:new Map(),settings:new Map(),kupljeno:new Map(),nesting:new Map()};
+const X={docs:new Map(),clients:new Map(),auto:new Map(),events:new Map(),tasks:new Map(),shopping:new Map(),settings:new Map(),kupljeno:new Map(),nesting:new Map(),izvestaji:new Map()};
 const XL=new Set();
 function subX(col){
   if(!db)return;
@@ -2156,7 +2243,7 @@ function tabIcon(t){const i=el('span','tico',t.name.trim().charAt(0)||'T');i.sty
 function renderSide(){
   const box=$('tlist');box.innerHTML='';
   const pend=pendingProposals().length;
-  for(const k of ['pregled','kal','pdf'])if(MODS[k]&&(k!=='pdf'||window.__mtFiles))box.appendChild(navBtn(MODS[k].n,ui.t==='m:'+k,()=>openModule(k),modIcon(k),null,k==='pregled'?pend:0));
+  for(const k of ['pregled','kal'])if(MODS[k])box.appendChild(navBtn(MODS[k].n,ui.t==='m:'+k,()=>openModule(k),modIcon(k),null,k==='pregled'?pend:0));
   for(const c of allCats()){
     const items=[];
     for(const k in MODS)if(MODS[k].cat===c)items.push({k,mod:true});
@@ -2190,14 +2277,17 @@ function renderModule(){
 
 /* ---------- ugrađene aplikacije (Fakture, Zadaci i Kupovina, Troškovi) ---------- */
 const frames={};
-const BRIDGE='<script>(function(){try{var p=window.parent;window.claude={use:function(n){return p.claude.use(n)}};window.__inTabele=true;document.documentElement.classList.add("emb")}catch(e){}})();<\/script>';
+const BRIDGE='<script>(function(){try{var p=window.parent;window.claude={use:function(n){return p.claude.use(n)}};window.__inTabele=true;document.documentElement.classList.add("emb");'+
+  'document.addEventListener("click",function(e){try{var b=e.target.closest&&e.target.closest("button,a,[role=button],select,.chip");if(!b||!p.__mtUse)return;var t=b.getAttribute("aria-label")||b.getAttribute("title")||(b.dataset&&b.dataset.v)||String(b.innerText||b.textContent||"").split("\\n").map(function(x){return x.trim()}).filter(Boolean)[0]||"";t=t.replace(/\\s+/g," ").replace(/\\s*\\d+$/,"").trim();'+
+  'if(b.closest(".task,.srow,tr[data-id],tr[data-r],.cat,.chkr,.sg,.drow,.part,.svc"))t="stavka u listi";if(t.length>34)t=b.id||t.slice(0,34);var tab=document.querySelector("#tabs [aria-current=true],nav.seg [aria-current=true]");'+
+  'p.__mtUse((window.__appName||document.title)+(tab?" · "+tab.textContent.replace(/\\s+/g," ").trim():""),t)}catch(x){}},true)}catch(e){}})();<\/script>';
 function showApp(app,tab){
   const host=$('appHost');for(const k in frames)frames[k].hidden=k!==app;
   let fr=frames[app];
   if(!fr){fr=el('iframe','appframe');fr.title=app;frames[app]=fr;host.appendChild(fr);
     const ld=el('div','apploading','Otvaram…');ld.dataset.app=app;host.appendChild(ld);
     fetch(APPS[app]).then(r=>{if(!r.ok)throw 0;return r.text()}).then(h=>Promise.resolve(window.__mtAppPre?window.__mtAppPre(app):'').then(pre=>[h,pre||''])).then(([h,pre])=>{
-      const inj=BRIDGE+pre;const i=h.search(/<head[^>]*>/i);const html=i>=0?h.replace(/<head[^>]*>/i,m=>m+inj):inj+h;
+      const inj='<script>window.__appName='+JSON.stringify(APPN[app]||app)+'<\/script>'+BRIDGE+pre;const i=h.search(/<head[^>]*>/i);const html=i>=0?h.replace(/<head[^>]*>/i,m=>m+inj):inj+h;
       fr.addEventListener('load',()=>{ld.remove();try{if(typeof installCap==='function')installCap(fr.contentWindow)}catch(e){}if(fr.dataset.tab)clickTab(fr,fr.dataset.tab)},{once:true});
       fr.srcdoc=html}).catch(()=>{ld.textContent='Ovaj deo nije mogao da se učita. Osveži stranicu.'})}
   for(const l of host.querySelectorAll('.apploading'))l.hidden=l.dataset.app!==app;
@@ -2233,9 +2323,11 @@ function renderPregled(c){
   qb('cal','Događaj',()=>eventDlg(null,todayISO()));
   qb('doc','Faktura',()=>invoiceMenu());
   qb('cart','Kupovina',()=>openModule('kupovina'));
-  if(window.__mtFiles&&MODS.pdf)qb('pdf','PDF',()=>openModule('pdf'));
+  qb('todo','Zadatak',()=>quickTask());
   qb('print','Štampaj mesec',()=>printDlg());
   w.appendChild(qa);
+  {const rc=reportCard();if(rc)w.appendChild(rc)}
+  w.appendChild(taskCard());
   /* predlozi iz faktura */
   const pp=pendingProposals();
   if(pp.length){const bx=el('div','prop');bx.appendChild(el('div','ph',pp.length===1?'Uplaćen avans — napravi posao':'Uplaćen avans — '+pp.length+' nova posla čekaju'));
@@ -3075,11 +3167,12 @@ async function makeJobPdf(rid,o){
 }
 
 /* ================= TELEFON: donja traka ================= */
-const TABS=[['m:pregled','Pregled','home'],['m:fakture','Fakture','doc'],['poslovi','Poslovi','check'],['m:kal','Kalendar','cal'],['m:kupovina','Kupovina','cart']];
+const TABS=[['m:pregled','Pregled','home'],['poslovi','Poslovi','check'],['m:zadaci','Zadaci','todo'],['m:kal','Kalendar','cal'],['m:kupovina','Kupovina','cart']];
 function renderTabbar(){
   const nb=$('tabbar');if(!nb)return;nb.innerHTML='';const pt=PT();
   for(const [k,n,i] of TABS){const id=k==='poslovi'?(pt&&pt.id):k;if(!id)continue;const b=el('button','tab');b.type='button';b.setAttribute('aria-current',String(ui.t===id));b.innerHTML=ic(i);b.appendChild(el('span',null,n));
     if(k==='m:pregled'){const pc=pendingProposals().length;if(pc)b.appendChild(el('i','tbadge',String(pc)))}
+    if(k==='m:zadaci'&&XL.has('tasks')){const c=[...X.tasks.values()].filter(s=>s&&!s.done).length;if(c)b.appendChild(el('i','tbadge soft',String(c)))}
     if(k==='m:kupovina'&&XL.has('shopping')){const c=[...X.shopping.values()].filter(s=>!s.bought).length;if(c)b.appendChild(el('i','tbadge soft',String(c)))}
     b.addEventListener('click',()=>{if(isMod(id))openModule(modKey(id));else openTable(id)});nb.appendChild(b)}
 }
@@ -3364,6 +3457,129 @@ window.__mtPdf={
   jobs:()=>kupJobs().map(j=>({id:j.id,name:j.name,sub:[j.client,j.inv?'faktura '+j.inv:''].filter(Boolean).join(' · '),active:j.active})),
   attachJob:(jid,bytes,name)=>{const t=PT();if(!t)throw new Error('nema tabele Poslovi');const f=F(t,'f_slike','Slike')||t.fields.find(x=>x.type==='att');
     if(!f||f.type!=='att')throw new Error('Poslovi nemaju polje za fajlove');return attachPdf(t,f,jid,bytes,name)}};
+/* ================= BRZO: zadaci na Pregledu, „+“ meni, prečice, brojač upotrebe, izveštaj ================= */
+Object.assign(P,{
+  todo:'<path d="M9 5.5h7.5M9 10h7.5M9 14.5h7.5"/><path d="M3.3 5.6l1.2 1.2 2.1-2.3M3.3 10.1l1.2 1.2 2.1-2.3M3.3 14.6l1.2 1.2 2.1-2.3"/>',
+  calc:'<rect x="4.2" y="2.8" width="11.6" height="14.4" rx="1.8"/><path d="M6.9 6h6.2M7.2 10h.01M10 10h.01M12.8 10h.01M7.2 13.4h.01M10 13.4h.01M12.8 13.4h.01"/>'
+});
+const TCATS=[['radionica','Radionica'],['kuca','Kuća'],['posao','Poslovi'],['nabavka','Nabavka'],['cnc','CNC i mašine'],['papiri','Papiri i novac'],['sajt','Sajt i reklame'],['ostalo','Ostalo']];
+const tcatN=id=>(TCATS.find(c=>c[0]===id)||TCATS[TCATS.length-1])[1];
+const devName=()=>{try{return(localStorage.getItem('mz.device')||'').slice(0,30)}catch(e){return''}};
+let qCat='radionica';try{const c=localStorage.getItem('mt.qtask.cat');if(c&&TCATS.some(x=>x[0]===c))qCat=c}catch(e){}
+function setQCat(c){qCat=c;try{localStorage.setItem('mt.qtask.cat',c)}catch(e){}}
+function newTaskId(){try{if(db)return db.collection('tasks').doc().id}catch(e){}return't'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function addTask(o){
+  if(readonly){toastRO();return null}
+  const now=Date.now(),id=newTaskId();
+  xput('tasks',id,{title:o.title,cat:o.cat||qCat,due:o.due||'',hot:!!o.hot,who:'',note:'',steps:[],done:false,doneAt:null,by:myId||null,byName:devName(),createdAt:now,updatedAt:now});
+  toast('Dodato: '+o.title,'Otvori',()=>openModule('zadaci'),{ok:true});return id}
+function setTaskDone(id,done){const t=X.tasks.get(id);if(!t)return;
+  xpatch('tasks',id,{done,doneAt:done?Date.now():null,doneByName:done?devName():'',updatedAt:Date.now()});
+  if(done)toast('Urađeno: '+(t.title||'zadatak'),'',null,{ok:true,ms:6000,alt:['Vrati',()=>setTaskDone(id,false)]})}
+const taskSort=(a,b)=>(b[1].hot?1:0)-(a[1].hot?1:0)||String(a[1].due||'9').localeCompare(String(b[1].due||'9'))||(b[1].createdAt||0)-(a[1].createdAt||0);
+function openTasks(){const L=[...X.tasks.entries()].filter(([,t])=>t&&!t.done&&t.title);L.sort(taskSort);return L}
+
+/* kartica „Zadaci“ na vrhu Pregleda: jedan red za unos + otvoreni zadaci sa kružićem */
+function taskCard(){
+  const s=el('section','dcard qt');const h=el('h2',null,'Zadaci');const L=openTasks();h.appendChild(el('small',null,'· '+L.length));
+  const all=el('button','lnk','Svi zadaci');all.type='button';all.addEventListener('click',()=>openModule('zadaci'));h.appendChild(all);s.appendChild(h);
+  const f=el('form','qtf');f.autocomplete='off';const inp=el('input');inp.placeholder='Novi zadatak…';inp.setAttribute('aria-label','Novi zadatak');inp.enterKeyHint='done';
+  const cs=el('select','qtc');cs.setAttribute('aria-label','Za šta');for(const [k,n] of TCATS){const o=el('option',null,n);o.value=k;cs.appendChild(o)}cs.value=qCat;cs.addEventListener('change',()=>setQCat(cs.value));
+  const go=el('button','btn pri');go.type='submit';go.innerHTML=ic('plus');go.setAttribute('aria-label','Dodaj zadatak');
+  f.append(inp,cs,go);f.addEventListener('submit',e=>{e.preventDefault();const v=inp.value.trim();if(!v){inp.focus();return}addTask({title:v,cat:cs.value});inp.value='';inp.focus()});
+  s.appendChild(f);
+  if(!XL.has('tasks'))s.appendChild(el('p','mute','Učitavam zadatke…'));
+  else if(!L.length)s.appendChild(el('p','mute','Nema otvorenih zadataka. Upiši prvi gore i pritisni Enter.'));
+  const td=todayISO();
+  for(const [id,t] of L.slice(0,5)){const r=el('div','qtr'+(t.hot?' hot':''));
+    const ck=el('button','qck');ck.type='button';ck.setAttribute('aria-label','Urađeno: '+t.title);ck.appendChild(el('span'));ck.addEventListener('click',()=>setTaskDone(id,true));
+    const b=el('button','qtx');b.type='button';b.appendChild(el('span','qtt',t.title));
+    const meta=[tcatN(t.cat)];if(t.due){const n=dayDiff(td,t.due);meta.push(n<0?'kasni '+(-n)+(n===-1?' dan':' dana'):n===0?'danas':n===1?'sutra':fmtD(t.due).slice(0,-5))}if(t.hot)meta.unshift('hitno');
+    b.appendChild(el('span','qtm'+(t.due&&t.due<td?' bad':''),meta.join(' · ')));b.addEventListener('click',()=>openModule('zadaci'));
+    r.append(ck,b);s.appendChild(r)}
+  if(L.length>5){const m=el('button','qmore','+ još '+(L.length-5));m.type='button';m.addEventListener('click',()=>openModule('zadaci'));s.appendChild(m)}
+  return s}
+
+/* brzi unos zadatka (prečica na ikoni, „+“ meni) */
+function quickTask(){
+  openDlg('Novi zadatak',b=>{b.classList.add('qtd');
+    const ta=el('input');ta.placeholder='Šta treba uraditi?';ta.setAttribute('aria-label','Zadatak');b.appendChild(fld('Zadatak',ta));
+    let cat=qCat,due='',hot=false;
+    const cr=el('div','chips');const drawC=()=>{cr.innerHTML='';for(const [k,n] of TCATS){const c=el('button','chip',n);c.type='button';c.setAttribute('aria-pressed',String(cat===k));c.addEventListener('click',()=>{cat=k;drawC()});cr.appendChild(c)}};drawC();b.appendChild(fld('Za šta',cr));
+    const dr=el('div','chips');const td=todayISO();const opts=[['','Bez roka'],[td,'Danas'],[addDays(td,1),'Sutra']];
+    const drawD=()=>{dr.innerHTML='';for(const [k,n] of opts){const c=el('button','chip',n);c.type='button';c.setAttribute('aria-pressed',String(due===k));c.addEventListener('click',()=>{due=k;drawD()});dr.appendChild(c)}
+      const di=el('input');di.type='date';di.value=opts.some(o=>o[0]===due)?'':due;di.setAttribute('aria-label','Datum roka');di.style.maxWidth='170px';di.addEventListener('change',()=>{due=di.value||'';drawD()});dr.appendChild(di);
+      const h=el('button','chip hot','Hitno');h.type='button';h.setAttribute('aria-pressed',String(hot));h.addEventListener('click',()=>{hot=!hot;drawD()});dr.appendChild(h)};drawD();b.appendChild(fld('Rok',dr));
+    const bot=el('div','ebot');const ok=el('button','btn pri','Dodaj zadatak');ok.type='button';const cn=el('button','btn','Otkaži');cn.type='button';cn.addEventListener('click',closeDlg);
+    const save=()=>{const v=ta.value.trim();if(!v){ta.focus();return}setQCat(cat);addTask({title:v,cat,due,hot});closeDlg()};
+    ok.addEventListener('click',save);ta.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save()}});bot.append(ok,cn);b.appendChild(bot);
+    setTimeout(()=>{try{ta.focus()}catch(e){}},120)})}
+
+/* novi trošak: Troškovi → „+ Trošak“ */
+function quickTrosak(){openModule('troskovi');const t0=Date.now();
+  const go=()=>{let ok=false;try{const fr=frames.troskovi;const dd=fr&&fr.contentDocument;if(dd&&dd.readyState==='complete'){const b=dd.querySelector('#tabs [data-v="add"]');if(b){b.click();ok=true;setTimeout(()=>{try{dd.getElementById('m-who').focus()}catch(e){}},200)}}}catch(e){}
+    if(!ok&&Date.now()-t0<9000)setTimeout(go,250)};setTimeout(go,120)}
+function quickShop(){openModule('kupovina');const t0=Date.now();
+  const go=()=>{let ok=false;try{const fr=frames.zadaci;const dd=fr&&fr.contentDocument;const i=dd&&dd.getElementById('sName');if(i&&fr.offsetParent!==null){i.focus();ok=true}}catch(e){}
+    if(!ok&&Date.now()-t0<6000)setTimeout(go,250)};setTimeout(go,400)}
+
+/* „+“ dole desno na Pregledu: mali izbor šta dodaješ */
+function quickMenu(){
+  openDlg('Dodaj',b=>{b.classList.add('qmenu');
+    const it=(icon,label,sub,fn)=>{const x=el('button','qmi');x.type='button';const i=el('span','qmic');i.innerHTML=ic(icon);const t=el('span','qmt');t.append(el('b',null,label),el('small',null,sub));x.append(i,t);x.addEventListener('click',()=>{closeDlg();fn()});b.appendChild(x)};
+    it('todo','Zadatak','šta treba uraditi',quickTask);
+    it('cart','Kupovina','šta treba kupiti',quickShop);
+    it('plus','Posao','novi posao za kupca',()=>newJob());
+    it('cal','Događaj','sastanak, isporuka, montaža',()=>eventDlg(null,todayISO()));
+    it('coins','Trošak','keš, kartica ili faktura dobavljača',quickTrosak);
+    it('calc','Kalkulator','cena drveta i nameštaja',()=>openModule('kalkulator'))})}
+function syncQFab(){const b=$('qFab');if(!b)return;b.hidden=!(ui.t==='m:pregled'&&!readonly)}
+(function(){const b=el('button','btn pri');b.id='qFab';b.type='button';b.innerHTML=ic('plus')+'<span>Dodaj</span>';b.setAttribute('aria-label','Dodaj');b.title='Dodaj: zadatak, kupovina, posao, događaj, trošak';b.hidden=true;b.addEventListener('click',quickMenu);document.body.appendChild(b)})();
+
+/* prečice sa ikone aplikacije i linkovi iz obaveštenja (?m=…) */
+window.__mtGo=m=>{if(m==='zadatak'){openModule('pregled');setTimeout(quickTask,300);return true}
+  if(m==='trosak'){quickTrosak();return true}if(m==='kupovina-novo'){quickShop();return true}
+  if(m==='dodaj'){openModule('pregled');setTimeout(quickMenu,300);return true}return false};
+
+/* ---------- izveštaj o korišćenju (Claude ga napiše jednom nedeljno) ---------- */
+function reportCard(){
+  const L=[...X.izvestaji.entries()].filter(([,r])=>r&&r.title).sort((a,b)=>(b[1].at||0)-(a[1].at||0));if(!L.length)return null;
+  const [id,r]=L[0];let seen='';try{seen=localStorage.getItem('mt.rep.seen')||''}catch(e){}if(seen===id)return null;
+  const s=el('section','dcard rep');const h=el('h2',null,r.title);s.appendChild(h);
+  const tx=el('div','rept');for(const line of String(r.text||'').split('\n')){if(!line.trim())continue;const p=el('p',/^\s*[-•]/.test(line)?'li':null,line.replace(/^\s*[-•]\s*/,''));tx.appendChild(p)}s.appendChild(tx);
+  const ok=el('button','btn','U redu, sakrij');ok.type='button';ok.addEventListener('click',()=>{try{localStorage.setItem('mt.rep.seen',id)}catch(e){}s.remove()});s.appendChild(ok);
+  return s}
+
+/* ---------- brojač upotrebe: samo koliko puta je šta dodirnuto (bez sadržaja) ---------- */
+const USE={c:{},n:0,t:null};
+function weekKey(d){d=d||new Date();const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-day);const y0=new Date(Date.UTC(x.getUTCFullYear(),0,1));return x.getUTCFullYear()+'-W'+String(Math.ceil(((x-y0)/864e5+1)/7)).padStart(2,'0')}
+function useDev(){try{let k=localStorage.getItem('mt.use.dev');if(!k){k=Math.random().toString(36).slice(2,10);localStorage.setItem('mt.use.dev',k)}return k}catch(e){return'x'}}
+try{const s=JSON.parse(localStorage.getItem('mt.use')||'null');if(s&&s.w===weekKey())USE.c=s.c||{}}catch(e){}
+const cleanKey=s=>String(s||'').replace(/\s+/g,' ').replace(/[.#$\[\]\/`~*]/g,' ').replace(/\b\d+([.,]\d+)?\b/g,'').replace(/\s+/g,' ').trim().slice(0,60);
+function pageName(){const t=ui.t;if(!t)return'?';if(isMod(t)){const k=modKey(t);return(MODS[k]&&MODS[k].n)||k}const tb=T.get(t);return tb?'Tabela '+tb.name:'?'}
+window.__mtUse=(page,label)=>{page=cleanKey(page);label=cleanKey(label);if(!page||!label)return;const k=page+' › '+label;USE.c[k]=(USE.c[k]||0)+1;USE.n++;
+  try{localStorage.setItem('mt.use',JSON.stringify({w:weekKey(),c:USE.c}))}catch(e){}clearTimeout(USE.t);USE.t=setTimeout(useFlush,USE.n>40?2000:45000)};
+function useFlush(){if(!db||readonly||!Object.keys(USE.c).length)return;const w=weekKey();USE.n=0;
+  const d={week:w,dev:useDev(),name:devName(),at:Date.now(),counts:Object.assign({},USE.c)};
+  let first=0;try{first=+localStorage.getItem('mt.use.first')||0;if(!first){first=Date.now();localStorage.setItem('mt.use.first',String(first))}}catch(e){}d.from=first;
+  write('upotreba/'+w+'_'+useDev(),{k:'set',d})}
+addEventListener('pagehide',useFlush);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')useFlush()});
+/* šta je „kontrola“: dugme, kartica, meni; ime = oznaka (aria-label, title) ili kratak tekst; zapisi iz lista se ne broje po imenu */
+function ctlLabel(e){const b=e.target.closest&&e.target.closest('button,a,[role="button"],[role="tab"],select,label.chip,.tab,.titem');if(!b)return'';
+  if(b.closest('.drow,.qtr,tr[data-r],.task,.srow,.list,.kb .card,.gal .card'))return(b.closest('.drow,.qtr')?'stavka u listi':'zapis');
+  const a=b.getAttribute('aria-label')||b.getAttribute('title')||b.dataset.v||'';let t=a||String(b.innerText||b.textContent||'').split('\n').map(x=>x.trim()).filter(Boolean)[0]||'';t=t.replace(/\s+/g,' ').replace(/\s*\d+$/,'').trim();
+  if(!t)t=b.id||'';if(t.length>34)t=b.id||t.slice(0,34);return t}
+document.addEventListener('click',e=>{try{const l=ctlLabel(e);if(l)window.__mtUse(pageName(),l)}catch(x){}},true);
+let usePage='';function usePageView(){const p=pageName();if(p&&p!==usePage){usePage=p;window.__mtUse(p,'otvoreno')}}
+
+/* predračun iz Kalkulatora: otvori Fakture i napravi novi predračun sa stavkom */
+window.__mtNewPred=o=>{closePop();if(!$('dlg').hidden)closeDlg();openModule('fakture');const t0=Date.now();
+  const go=()=>{const fr=frames.fakture;let res='wait';
+    try{const w=fr&&fr.contentWindow;if(w&&w.document&&w.document.readyState==='complete'&&typeof w.__fakNew==='function')res=w.__fakNew(o)}catch(e){res='wait'}
+    if(res==='ok'){toast('Predračun je otvoren u Fakturama – dodaj kupca i sačuvaj.');return}
+    if(res==='dirty'){toast('U Fakturama imaš nesačuvane izmene. Sačuvaj ih, pa probaj ponovo.');return}
+    if(Date.now()-t0<9000){setTimeout(go,250);return}toast('Predračun nije napravljen. Otvori Fakture → + Novi.')};
+  setTimeout(go,150)};
 /* Tekst jutarnjeg obaveštenja — isti u aplikaciji (dugme „Probaj“) i u programu koji šalje obaveštenja.
    data = {tasks:[{title,due,hot,next}], shop:[{name,qty,unit,store,hot,for}]}  (samo otvorene stavke)
    o    = {tasks:true|false, shop:'sve'|'kuca'|'radionica'|'ne'}
@@ -3542,7 +3758,7 @@ function pushCard(){
       r.appendChild(rm);lw.appendChild(r)}},()=>{})};
   draw();drawList();return wrap}
 /* klik na obaveštenje otvara Zadatke ili Kupovinu */
-(function(){const go=m=>{if(!m||!MODS[m])return;let n=0;const t=setInterval(()=>{if(loadedT){clearInterval(t);try{openModule(m)}catch(e){}}else if(++n>60)clearInterval(t)},300)};
+(function(){const go=m=>{if(!m)return;const sp=['zadatak','trosak','kupovina-novo','dodaj'].includes(m);if(!sp&&!MODS[m])return;let n=0;const t=setInterval(()=>{if(loadedT){clearInterval(t);try{if(!(window.__mtGo&&window.__mtGo(m)))openModule(m)}catch(e){}}else if(++n>60)clearInterval(t)},300)};
   try{const q=new URLSearchParams(location.search);const m=q.get('m');if(m){history.replaceState(null,'',location.pathname);go(m)}}catch(e){}
   if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='mt-open')go(e.data.m)})})();
 /* PDF iz drugih aplikacija: telefon „Podeli → Martinov“, računar „Otvori pomoću → Martinov“ */
@@ -3757,11 +3973,11 @@ render();
     onData();
   },e=>{if(e&&e.code==='unavailable'){setTimeout(sub,2000);return}loadedT=true;setConn('off');showBanner('Veza sa bazom je prekinuta. Osveži stranicu.');onData()})}catch(e){loadedT=true;onData()}};
   sub();
-  for(const c of ['docs','clients','auto','events','tasks','shopping','settings','kupljeno','nesting'])subX(c);
+  for(const c of ['docs','clients','auto','events','tasks','shopping','settings','kupljeno','nesting','izvestaji'])subX(c);
   if(typeof subKurs==='function')subKurs();
 })();
 })();
-</script><script type="module" src="fb.js?v=1.5.5"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.6.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}

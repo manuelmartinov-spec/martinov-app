@@ -406,6 +406,9 @@ h2.g.late{color:var(--hit)}h2.g.today{color:var(--amb-t)}h2.g.pin{color:var(--hi
 .toast.tap{cursor:pointer}
 .toast #toastT{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .toast #toastB2{background:none;border:0;color:var(--panel);opacity:.75;font-weight:700;min-height:32px;padding:4px 8px}
+/* kupljeno danas */
+.scard.today .shead h2{color:var(--kuc-t)}
+.scard.today .shead{background:var(--kuc-soft)}
 </style>
 
 <header class="top"><div class="hin">
@@ -497,7 +500,7 @@ h2.g.late{color:var(--hit)}h2.g.today{color:var(--amb-t)}h2.g.pin{color:var(--hi
 
     <div id="sGroups"><div class="empty">Učitavam spisak…</div></div>
 
-    <button type="button" class="dtog" id="sTog" aria-expanded="false" hidden>Kupljeno <span id="sCount"></span></button>
+    <button type="button" class="dtog" id="sTog" aria-expanded="false" hidden>Sve kupljeno <span id="sCount"></span></button>
     <div id="sDone" hidden></div>
 
     <p class="hint">Svi koji imaju pristup aplikaciji vide isti spisak. Kad neko doda ili čekira stavku, promena se odmah vidi na svim telefonima i na laptopu. Hitne stavke su uvek na vrhu. Svaka prodavnica ima svoju boju; promeniš je kad otvoriš stavku iz te prodavnice. Ako ostaviš prodavnicu praznu, stavka ide pod „Bilo gde“. Kod svake prodavnice su dugmad „Pošalji“ (prvo tekst, pa slike – za Viber), „Kopiraj“ i „Kupljeno“ (upišeš račun: cena, plaćanje, za koji posao – ide u Troškove i u istoriju).</p>
@@ -896,6 +899,10 @@ function renderShop(){
       if(!readonly&&!noDb){const f=el('div','sfoot');const b=el('button');b.type='button';b.innerHTML=IC.ok+'<span>Kupljeno – upiši cenu</span>';b.addEventListener('click',()=>openBuy(storeItems(store).map(s=>s.id)));f.appendChild(b);c.appendChild(f)}
       g.appendChild(c)}
   }
+  /* kupljeno danas: vidi se odmah, štiklirano i precrtano; dodir na kvačicu vraća na spisak */
+  {const d0=new Date();d0.setHours(0,0,0,0);const today=bought.filter(s=>(!fFor||s.for===fFor)&&(s.boughtAt||0)>=d0.getTime()).sort((a,b)=>(b.boughtAt||0)-(a.boughtAt||0));
+    if(loaded.shopping&&today.length){const c=el('section','scard today');c.appendChild(sHead('Kupljeno danas',String(today.length),'var(--kuc)',null,null));
+      const l=el('div','list');for(const s of today.slice(0,40))l.appendChild(srow(s,'done'));c.appendChild(l);g.appendChild(c)}}
   const bv=bought.filter(s=>!fFor||s.for===fFor).sort((a,b)=>(b.boughtAt||0)-(a.boughtAt||0));
   $('sTog').hidden=!loaded.shopping||!bought.length;$('sCount').textContent=String(bv.length);$('sTog').setAttribute('aria-expanded',String(showBought));
   const box=$('sDone');box.innerHTML='';box.hidden=!showBought||!bv.length;

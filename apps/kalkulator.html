@@ -1,0 +1,466 @@
+<!doctype html><html lang="sr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Kalkulator</title>
+<style>
+/* Layout: levo unos (šablon, delovi, obrada, okov, rad), desno rezultat koji ostaje na ekranu; na telefonu rezultat ide na dno i ima traku sa cenom */
+:root{--bg:#F4F1EC;--panel:#FFFFFF;--fg:#232B36;--muted:#6E7682;--line:#E2DCD2;--navy:#333F50;--gold:#B99C71;--gold-soft:#F3ECE1;--ok:#2F7D57;--warn:#A86B12;--bad:#B0412E;--field:#FBFAF7;--lift:rgba(35,43,54,.10);
+  --f-ui:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;--f-num:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#171B21;--panel:#1F252D;--fg:#E7E3DC;--muted:#9AA2AD;--line:#323A45;--navy:#C9D3E0;--gold:#CDB089;--gold-soft:#2B2A26;--field:#252C35;--lift:rgba(0,0,0,.4)}}
+:root[data-theme="dark"]{--bg:#171B21;--panel:#1F252D;--fg:#E7E3DC;--muted:#9AA2AD;--line:#323A45;--navy:#C9D3E0;--gold:#CDB089;--gold-soft:#2B2A26;--field:#252C35;--lift:rgba(0,0,0,.4)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px var(--f-ui);-webkit-text-size-adjust:100%;font-variant-numeric:tabular-nums}
+header.top{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.hin{display:flex;align-items:center;gap:10px;padding:8px max(12px,env(safe-area-inset-left,0px));max-width:1400px;margin:0 auto;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px;color:var(--navy)}.brand small{font-weight:500;letter-spacing:.06em;color:var(--gold);text-transform:none;font-size:12px;margin-left:6px}
+nav.tabs{display:flex;gap:4px}
+nav.tabs button{border:0;background:none;color:var(--muted);font:600 14px var(--f-ui);padding:9px 12px;border-radius:9px;min-height:40px}
+nav.tabs button[aria-current="true"]{background:var(--gold-soft);color:var(--fg);font-weight:700}
+.sp{flex:1}.msg{font-size:12px;color:var(--muted)}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;padding:14px max(12px,env(safe-area-inset-left,0px)) 120px;max-width:1400px;margin:0 auto;align-items:start}
+@media (max-width:980px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+h3{margin:0;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
+h3 small{font-weight:600;color:var(--muted);font-size:13px}
+h3 .sp{flex:1}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0;font-weight:600}
+button{font:600 14px var(--f-ui);border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:8px 12px;cursor:pointer;min-height:40px;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+button.pri{background:#D2B587;border-color:#D2B587;color:#1F2733;font-weight:800}
+button.ghost{background:none}button.lnk{border:0;background:none;color:var(--navy);padding:4px 2px;min-height:0}
+button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+input,select{font:15px var(--f-ui);color:var(--fg);background:var(--field);border:1px solid #D9D2C6;border-radius:10px;padding:7px 9px;min-height:42px;min-width:0;width:100%}
+input.num{text-align:right;font-variant-numeric:tabular-nums}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) input,:root:not([data-theme="light"]) select{border-color:#3A434F}}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:38px;border-radius:99px;padding:6px 14px;border:1.5px solid var(--line);background:var(--panel);font-weight:600}
+.chip[aria-pressed="true"]{background:#E4E8EE;border-color:#333F50;color:#232B36;font-weight:700}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip[aria-pressed="true"]{background:#2A3442;border-color:#C9D3E0;color:#E7E3DC}}
+.note{font-size:12.5px;color:var(--muted);line-height:1.45}
+.warnb{background:#F7E9D4;color:#7A4B0C;border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:600;line-height:1.4}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .warnb{background:#352A1A;color:#E8B66A}}
+/* delovi */
+.parts{display:flex;flex-direction:column;gap:8px}
+.part{border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.1fr) 70px 70px 70px 58px 34px;gap:6px;align-items:end;background:var(--field)}
+.part label.f{font-size:11px}
+.part input,.part select{min-height:40px;padding:6px 8px;font-size:15px;background:var(--panel)}
+.part .x{border:0;background:none;color:var(--muted);font-size:20px;min-height:40px;width:34px;padding:0}
+.part .calc{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font-size:12.5px;color:var(--muted)}
+.part .calc b{color:var(--fg);font-weight:700}
+.part .calc select{width:auto;min-height:30px;padding:2px 6px;font-size:12.5px;border-radius:8px}
+@media (max-width:640px){.part{grid-template-columns:repeat(4,minmax(0,1fr)) 34px}.part .pn{grid-column:1/5}.part .pv{grid-column:1/6}.part .x{grid-column:5;grid-row:1}
+  .part .pL{grid-column:1/2}.part .pW{grid-column:2/3}.part .pT{grid-column:3/4}.part .pQ{grid-column:4/6}}
+/* stavke (okov, ostalo, iz cenovnika) */
+.lines{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ln{display:grid;grid-template-columns:minmax(0,1fr) 70px 100px 96px 34px;gap:6px;align-items:center;padding:6px 8px;border-top:1px solid var(--line)}
+.ln:first-child{border-top:0}.ln.h{background:var(--gold-soft);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding-block:7px}
+.ln input{min-height:38px;padding:5px 8px;font-size:14.5px}.ln .t{text-align:right;font-weight:700}.ln .x{border:0;background:none;color:var(--muted);font-size:20px;min-height:36px;width:34px;padding:0}
+.ln small{display:block;font-size:11px;color:var(--muted)}
+@media (max-width:560px){.ln{grid-template-columns:minmax(0,1fr) 56px 84px 34px}.ln .t{grid-column:1/4;text-align:left;font-size:12.5px;color:var(--muted);font-weight:600}.ln.h{display:none}}
+.srch{position:relative}
+.sres{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);max-height:320px;overflow-y:auto}
+.sres button{display:flex;width:100%;justify-content:space-between;gap:10px;border:0;border-top:1px solid var(--line);border-radius:0;background:none;text-align:left;padding:10px 12px;font-weight:500;min-height:48px}
+.sres button:first-child{border-top:0}.sres button b{white-space:nowrap}.sres button small{display:block;color:var(--muted);font-size:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.seg{display:inline-flex;background:#F1EDE6;border-radius:10px;padding:3px;gap:3px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg{background:#252C35}}
+.seg button{border:0;background:none;min-height:36px;padding:0 14px;border-radius:8px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--fg);font-weight:700;box-shadow:0 1px 2px var(--lift)}
+/* rezultat */
+.res{position:sticky;top:64px}
+@media (max-width:980px){.res{position:static}}
+table.rt{width:100%;border-collapse:collapse;font-size:14px}
+table.rt td{padding:7px 2px;border-top:1px solid var(--line);vertical-align:top}
+table.rt tr:first-child td{border-top:0}
+table.rt td.v{text-align:right;font-weight:700;white-space:nowrap}
+table.rt td small{display:block;color:var(--muted);font-size:12px;font-weight:500}
+table.rt tr.sum td{font-weight:800;border-top:2px solid var(--fg)}
+.price{border-radius:14px;background:var(--gold-soft);padding:12px;display:flex;flex-direction:column;gap:6px}
+.price .pl{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.price .pl span{font-size:13px;color:var(--muted);font-weight:600}
+.price .pl b{font-size:22px;font-weight:800}
+.price .pl small{font-size:12px;color:var(--muted)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acts button{min-height:46px}
+.acts .wide{grid-column:1/-1}
+/* traka sa cenom na telefonu */
+.pbar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--panel);border-top:1px solid var(--line);padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px));display:none;align-items:center;gap:10px;box-shadow:0 -4px 14px var(--lift)}
+.pbar .pt{flex:1;min-width:0;display:flex;flex-direction:column}.pbar .pt b{font-size:18px}.pbar .pt small{color:var(--muted);font-size:12px}
+@media (max-width:980px){.pbar{display:flex}}
+html.emb .pbar{bottom:0}
+/* sačuvano */
+.slist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.srow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--line)}
+.srow:first-child{border-top:0}.srow .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.srow .tx b{font-size:15px}.srow .tx small{color:var(--muted);font-size:12.5px}
+.srow .v{font-weight:700;white-space:nowrap}
+/* cene */
+table.gt{width:100%;border-collapse:collapse;font-size:14px}
+table.gt th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px;border-bottom:1px solid var(--line)}
+table.gt td{padding:4px 6px;border-bottom:1px solid var(--line)}
+table.gt input{min-height:36px;padding:4px 8px;width:110px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);transform:translateX(-50%);z-index:90;background:#333F50;color:#fff;padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 10px 30px var(--lift);max-width:calc(100vw - 32px)}
+html.emb .brand{display:none}
+</style>
+<style id="dizajn-a">
+/* ==== Dizajn A: uloge boja (glavno dugme, izabrano, Radionica/Kuća, hitno, stanja) ==== */
+:root{
+  --muted:#5F6672;
+  --act:#D2B587; --act-h:#C6A675; --on-act:#1F2733;
+  --act-soft:#F3ECE1; --on-act-soft:#5B4421;
+  --selbg:#E4E8EE; --sel-bd:#333F50; --sel-fg:#232B36;
+  --track:#F1EDE6; --fld-bd:#D9D2C6;
+  --rad:#3466AF; --rad-t:#2E5A9A; --rad-soft:#E5EDF8;
+  --kuc:#2F7D57; --kuc-t:#276B4A; --kuc-soft:#E2F1E8;
+  --hit:#9A3324; --hit-soft:#F6E4DF;
+  --amb-t:#7A4B0C; --amb-soft:#F7E9D4;
+  --r-card:16px; --r-btn:12px; --toast-act:#E3C99B;
+  --f-num:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --muted:#A3ABB6;
+  --act:#CDB089; --act-h:#D9BF9B; --on-act:#171B21;
+  --act-soft:#2E2A22; --on-act-soft:#E3CFAE;
+  --selbg:#2A3442; --sel-bd:#C9D3E0; --sel-fg:#E7E3DC;
+  --track:#252C35; --fld-bd:#3A434F;
+  --rad:#6FA3E8; --rad-t:#8DB7EE; --rad-soft:#1F2C3D;
+  --kuc:#5DBB8C; --kuc-t:#7FCCA3; --kuc-soft:#1C3127;
+  --hit:#F0907E; --hit-soft:#3A2622;
+  --amb-t:#E8B66A; --amb-soft:#352A1A; --toast-act:#6B4E1F;
+}}
+:root[data-theme="dark"]{
+  --muted:#A3ABB6;
+  --act:#CDB089; --act-h:#D9BF9B; --on-act:#171B21;
+  --act-soft:#2E2A22; --on-act-soft:#E3CFAE;
+  --selbg:#2A3442; --sel-bd:#C9D3E0; --sel-fg:#E7E3DC;
+  --track:#252C35; --fld-bd:#3A434F;
+  --rad:#6FA3E8; --rad-t:#8DB7EE; --rad-soft:#1F2C3D;
+  --kuc:#5DBB8C; --kuc-t:#7FCCA3; --kuc-soft:#1C3127;
+  --hit:#F0907E; --hit-soft:#3A2622;
+  --amb-t:#E8B66A; --amb-soft:#352A1A; --toast-act:#6B4E1F;
+}
+body{font-variant-numeric:tabular-nums}
+.toast button{color:var(--toast-act);font-weight:800}
+.toast button{white-space:nowrap;flex:none}
+
+/* ==== Dizajn A: Fakture, Troškovi, Krojenje (zajedničko) ==== */
+button{border-radius:10px}
+button.pri{background:var(--act);border-color:var(--act);color:var(--on-act);font-weight:800}
+button.pri:hover{background:var(--act-h);border-color:var(--act-h)}
+input,select,textarea{border-color:var(--fld-bd);border-radius:10px}
+.chip[aria-pressed="true"],.chipb[aria-pressed="true"]{background:var(--selbg);color:var(--sel-fg);border-color:var(--sel-bd);font-weight:700}
+nav.tabs button[aria-current="true"]{background:var(--act-soft);color:var(--fg);font-weight:700}
+.seg{background:var(--track)}
+.seg button[aria-pressed="true"]{font-weight:700}
+html.emb .brand{display:none}
+html.emb header.top:not(:has(nav)){display:none}
+</style></head><body>
+<header class="top"><div class="hin"><div class="brand">Martinov <small>kalkulator</small></div>
+  <nav class="tabs" id="tabs"><button type="button" data-v="calc" aria-current="true">Proračun</button><button type="button" data-v="saved">Sačuvano</button><button type="button" data-v="set">Cene</button></nav>
+  <span class="sp"></span><span class="msg" id="state"></span></div></header>
+
+<div class="wrap" id="v-calc">
+  <div class="col">
+    <div class="warnb" id="noPrices" hidden>Cene drveta još nisu upisane. Upiši ih u „Cene“ (ili javi Claude-u).</div>
+    <section class="card">
+      <h3>Šta računaš?</h3>
+      <div class="chips" id="tpls"></div>
+      <div class="g3">
+        <label class="f" style="grid-column:span 2">Naziv<input id="cName" placeholder="npr. Sto Ophelia 180×90"></label>
+        <label class="f">Drvo za sve delove<select id="cWood"></select></label>
+      </div>
+    </section>
+    <section class="card">
+      <h3>Drvo – delovi <small id="partsN"></small><span class="sp"></span></h3>
+      <p class="note" style="margin:-4px 0 0">Mere gotovog dela u mm. Kubikaža se računa po debljini građe iz koje se deo pravi (col 27, 50 ili 80 mm), sa +<span id="nDod">100</span> mm na dužinu i <span id="nOtp">20</span>% otpada.</p>
+      <div class="parts" id="parts"></div>
+      <div class="row"><button type="button" id="addPart"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Deo</button></div>
+    </section>
+    <section class="card">
+      <h3>Završna obrada<span class="sp"></span><small id="finArea"></small></h3>
+      <div class="seg" id="finSeg"><button type="button" data-f="">Bez</button><button type="button" data-f="ulje">Ulje</button><button type="button" data-f="lak">Lak</button></div>
+      <p class="note" id="finNote" style="margin:0"></p>
+    </section>
+    <section class="card">
+      <h3>Okov, materijal i ostalo</h3>
+      <div class="lines" id="lines"></div>
+      <div class="row">
+        <button type="button" id="addLine"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Stavka</button>
+        <button type="button" id="fromCen"><svg viewBox="0 0 24 24"><path d="M4 5h9l7 7-7 7H4z"/></svg>Iz cenovnika</button>
+        <button type="button" id="fromBuy"><svg viewBox="0 0 24 24"><path d="M3 4h2l2 11h11l2-8H6"/></svg>Iz kupovine</button>
+      </div>
+      <div class="srch" id="srchBox" hidden><input type="search" id="srchQ" placeholder="Traži…" autocomplete="off"><div class="sres" id="srchRes"></div></div>
+    </section>
+    <section class="card">
+      <h3>Rad</h3>
+      <div class="g3">
+        <label class="f">Sati rada<input id="hours" class="num" inputmode="decimal" placeholder="0"></label>
+        <label class="f">€ po satu<input id="rate" class="num" inputmode="decimal"></label>
+        <label class="f">Marža %<input id="marza" class="num" inputmode="decimal"></label>
+      </div>
+      <label class="f">Poveži sa poslom (nije obavezno)<select id="cJob"></select></label>
+    </section>
+  </div>
+  <div class="col res" id="resCol">
+    <section class="card">
+      <h3>Rezultat</h3>
+      <table class="rt" id="rt"></table>
+      <div class="price" id="price"></div>
+      <div class="acts">
+        <button type="button" class="pri wide" id="save">Sačuvaj proračun</button>
+        <button type="button" id="toPred">Napravi predračun</button>
+        <button type="button" id="toShop">Drvo u Kupovinu</button>
+        <button type="button" id="asTpl">Sačuvaj kao šablon</button>
+        <button type="button" id="newCalc">Novi proračun</button>
+      </div>
+      <p class="note" id="resNote" style="margin:0"></p>
+    </section>
+  </div>
+</div>
+<div class="pbar" id="pbar"><div class="pt"><b id="pbV">—</b><small id="pbS"></small></div><button type="button" id="pbGo">Detalji</button></div>
+
+<div class="wrap" id="v-saved" hidden style="grid-template-columns:minmax(0,1fr)">
+  <section class="card"><h3>Sačuvani proračuni</h3><input type="search" id="sQ" placeholder="Traži po nazivu ili poslu…"><div class="slist" id="sList"></div></section>
+  <section class="card"><h3>Moji šabloni</h3><div class="slist" id="tList"></div></section>
+</div>
+
+<div class="wrap" id="v-set" hidden style="grid-template-columns:minmax(0,1fr)">
+  <section class="card">
+    <h3>Opšte</h3>
+    <div class="g3">
+      <label class="f">Rad € po satu<input id="s-rad" class="num" inputmode="decimal"></label>
+      <label class="f">Otpad %<input id="s-otpad" class="num" inputmode="decimal"></label>
+      <label class="f">Marža % (predlog)<input id="s-marza" class="num" inputmode="decimal"></label>
+      <label class="f">Dodatak na dužinu (mm)<input id="s-dodDuz" class="num" inputmode="decimal"></label>
+      <label class="f">Duga građa od (mm)<input id="s-dugaOd" class="num" inputmode="decimal"></label>
+      <label class="f">Dodatak na debljinu – rendisanje (mm)<input id="s-dodDeb" class="num" inputmode="decimal"></label>
+      <label class="f">Poskupljenje drveta %<input id="s-posk" class="num" inputmode="decimal"></label>
+      <label class="f">PDV %<input id="s-pdv" class="num" inputmode="decimal"></label>
+      <label class="f">Zaokruži keš cenu na (€)<input id="s-zaok" class="num" inputmode="decimal"></label>
+    </div>
+  </section>
+  <section class="card">
+    <h3>Završna obrada</h3>
+    <div class="g3">
+      <label class="f">Ulje € po litru<input id="s-uljeL" class="num" inputmode="decimal"></label>
+      <label class="f">Ulje m² po litru (jedan sloj)<input id="s-uljeM" class="num" inputmode="decimal"></label>
+      <label class="f">Ulje – slojeva<input id="s-uljeS" class="num" inputmode="decimal"></label>
+      <label class="f">Lak € po litru<input id="s-lakL" class="num" inputmode="decimal"></label>
+      <label class="f">Lak m² po litru (jedan sloj)<input id="s-lakM" class="num" inputmode="decimal"></label>
+      <label class="f">Lak – slojeva<input id="s-lakS" class="num" inputmode="decimal"></label>
+      <label class="f">Lak – puta materijal (rad lakiranja)<input id="s-lakX" class="num" inputmode="decimal"></label>
+    </div>
+    <p class="note" style="margin:0">Potrošnja u m² po litru je procena – proveri na svojoj kanti i ispravi.</p>
+  </section>
+  <section class="card">
+    <h3>Cene građe (€/m³)<span class="sp"></span><small id="gDate"></small></h3>
+    <div style="overflow-x:auto"><table class="gt"><thead><tr><th>Građa</th><th>Drvo</th><th>Debljina</th><th>Dužina</th><th>€/m³</th></tr></thead><tbody id="gBody"></tbody></table></div>
+    <div class="row"><button type="button" class="pri" id="sSave">Sačuvaj cene</button><span class="note" id="sMsg"></span></div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const nz=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.'));return isFinite(n)?n:0};
+const r2=x=>Math.round((+x||0)*100)/100;
+const fE=(x,d=0)=>new Intl.NumberFormat('sr-Latn-RS',{minimumFractionDigits:d,maximumFractionDigits:d}).format(x)+' €';
+const fN=(x,d=2)=>new Intl.NumberFormat('sr-Latn-RS',{minimumFractionDigits:d,maximumFractionDigits:d}).format(x);
+const fM3=x=>new Intl.NumberFormat('sr-Latn-RS',{minimumFractionDigits:3,maximumFractionDigits:4}).format(x)+' m³';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+let tT=null;function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(tT);tT=setTimeout(()=>e.hidden=true,3000)}
+const P=()=>{try{return window.parent&&window.parent!==window?window.parent:null}catch(e){return null}};
+const HK=()=>{const p=P();try{return p&&p.__mtKup||null}catch(e){return null}};
+const kurs=()=>{try{const h=HK();return h&&h.kurs?(h.kurs().eur||117.2):117.2}catch(e){return 117.2}};
+
+/* ---------- podešavanja (cene su u bazi: settings/kalkulator) ---------- */
+const DEFSET={rad:10,otpad:20,marza:40,dodDuz:100,dugaOd:2000,dodDeb:5,posk:0,pdv:20,zaok:10,uljeL:90,uljeM:30,uljeS:2,lakL:25,lakM:9,lakS:3,lakX:3,gradja:[]};
+let SET=JSON.parse(JSON.stringify(DEFSET));
+const WOODS=()=>[...new Set(SET.gradja.map(g=>g.vrsta))];
+/* izbor građe za deo: najmanja ukupna debljina (jedan komad ili lepljeno od više), pa kratka/duga po dužini */
+function stockFor(p){
+  const need=nz(p.T)+nz(SET.dodDeb),L2=nz(p.L)+nz(SET.dodDuz),long=L2>=nz(SET.dugaOd);
+  const rows=SET.gradja.filter(g=>g.vrsta===p.v&&nz(g.cena)>0);if(!rows.length||!need)return null;
+  const pick=t=>{const c=rows.filter(g=>nz(g.deb)===t);return c.find(g=>g.duz===(long?'duga':'kratka'))||c.find(g=>!g.duz)||c[0]};
+  let g=p.g?rows.find(x=>x.id===p.g):null;let layers;
+  if(g){layers=Math.max(1,Math.ceil(need/nz(g.deb)))}
+  else{let best=null;for(const t of [...new Set(rows.map(x=>nz(x.deb)))]){const k=Math.max(1,Math.ceil(need/t)),tot=k*t,gg=pick(t);const cost=tot*nz(gg.cena);
+      if(!best||tot<best.tot||(tot===best.tot&&cost<best.cost))best={t,k,tot,g:gg,cost}}
+    g=best.g;layers=best.k}
+  const t=nz(g.deb)*layers,m3=L2/1000*nz(p.W)/1000*t/1000*Math.max(0,nz(p.Q)||0);
+  const m3o=m3*(1+nz(SET.otpad)/100),cena=nz(g.cena)*(1+nz(SET.posk)/100);
+  return {g,layers,t,L2,long,m3,m3o,cena,eur:m3o*cena}}
+const area=p=>{const L=nz(p.L)/1000,W=nz(p.W)/1000,T=nz(p.T)/1000;return 2*(L*W+L*T+W*T)*Math.max(0,nz(p.Q))};
+
+/* ---------- šabloni ---------- */
+const TPL={
+  sto:{n:'Sto',name:'Trpezarijski sto 180×90',parts:[['Ploča',1800,900,40,1],['Noge',720,80,80,4],['Carga duža',1600,100,25,2],['Carga kraća',700,100,25,2]]},
+  ploca:{n:'Ploča',name:'Ploča 180×90',parts:[['Ploča',1800,900,40,1]]},
+  komoda:{n:'Komoda',name:'Komoda 160×45',parts:[['Gornja ploča',1600,450,25,1],['Stranice',700,450,20,2],['Dno',1560,450,20,1],['Pregrade',660,430,20,2],['Fronte fioka',500,200,20,6],['Noge',150,40,40,4]],lines:[['Klizači (par)',6,0]]},
+  postolje:{n:'Postolje',name:'Postolje za sto',parts:[['Noge',720,80,80,4],['Carga duža',1600,100,25,2],['Carga kraća',700,100,25,2]]},
+  stolica:{n:'Stolica',name:'Stolica',parts:[['Zadnje noge',850,60,40,2],['Prednje noge',450,40,40,2],['Sedište',450,450,30,1],['Naslon',420,80,20,1],['Carge',400,60,20,4]]},
+  polica:{n:'Polica',name:'Polica 80×90',parts:[['Stranice',900,250,25,2],['Police',800,250,25,4]]},
+  svoje:{n:'Svoje',name:'',parts:[['',0,0,0,1]]}
+};
+let MYT=new Map();
+
+/* ---------- trenutni proračun ---------- */
+let C=null,dirty=false;
+function blankCalc(){return{id:null,name:'',tpl:'',wood:(WOODS().includes('Hrast')?'Hrast':WOODS()[0])||'Hrast',parts:[],lines:[],fin:'ulje',hours:'',rate:'',marza:'',job:''}}
+function fromTpl(k){const t=TPL[k]||MYT.get(k);if(!t)return;const w=C?C.wood:blankCalc().wood;
+  C=Object.assign(blankCalc(),{tpl:k,name:t.name||'',wood:w,fin:t.fin??'ulje',
+    parts:(t.parts||[]).map(p=>Array.isArray(p)?{id:uid(),n:p[0],L:p[1]||'',W:p[2]||'',T:p[3]||'',Q:p[4]||1,v:w,g:''}:{...p,id:uid(),v:p.v||w}),
+    lines:(t.lines||[]).map(l=>Array.isArray(l)?{id:uid(),n:l[0],q:l[1],p:l[2]||'',k:'kost'}:{...l,id:uid()}),hours:t.hours??'',marza:t.marza??''});
+  dirty=true;drawAll()}
+
+/* ---------- prikaz ---------- */
+function drawTpls(){const b=$('tpls');b.innerHTML='';
+  const add=(k,n)=>{const c=el('button','chip',n);c.type='button';c.setAttribute('aria-pressed',String(C&&C.tpl===k));c.addEventListener('click',()=>{if(dirty&&C&&C.parts.some(p=>nz(p.L))&&!confirm('Zameniti trenutni proračun šablonom „'+n+'“?'))return;fromTpl(k)});b.appendChild(c)};
+  for(const k in TPL)add(k,TPL[k].n);for(const [k,t] of MYT)add(k,'★ '+t.n)}
+function woodOpts(sel,cur){sel.innerHTML='';for(const w of WOODS()){const o=el('option',null,w);o.value=w;sel.appendChild(o)}if(!WOODS().length){const o=el('option',null,'(nema cena)');o.value='';sel.appendChild(o)}sel.value=WOODS().includes(cur)?cur:(WOODS()[0]||'')}
+function drawParts(){const box=$('parts');box.innerHTML='';
+  C.parts.forEach((p,i)=>{const d=el('div','part');
+    const inp=(cls,lab,key,ph,num)=>{const l=el('label','f '+cls,lab);const x=el('input',num?'num':'');x.value=p[key]??'';if(ph)x.placeholder=ph;if(num)x.inputMode='numeric';x.addEventListener('input',()=>{p[key]=x.value;dirty=true;calcPart(d,p);drawRes()});l.appendChild(x);return l};
+    d.appendChild(inp('pn','Deo','n','npr. Ploča'));
+    const vl=el('label','f pv','Drvo');const vs=el('select');woodOpts(vs,p.v);vs.addEventListener('change',()=>{p.v=vs.value;p.g='';dirty=true;calcPart(d,p);drawRes()});vl.appendChild(vs);d.appendChild(vl);
+    d.appendChild(inp('pL','Dužina','L','mm',1));d.appendChild(inp('pW','Širina','W','mm',1));d.appendChild(inp('pT','Debljina','T','mm',1));d.appendChild(inp('pQ','Kom','Q','1',1));
+    const x=el('button','x','×');x.type='button';x.setAttribute('aria-label','Ukloni deo');x.addEventListener('click',()=>{C.parts.splice(i,1);dirty=true;drawParts();drawRes()});d.appendChild(x);
+    const c=el('div','calc');d.appendChild(c);calcPart(d,p);box.appendChild(d)});
+  $('partsN').textContent=C.parts.length?'· '+C.parts.length:''}
+function calcPart(d,p){const c=d.querySelector('.calc');c.innerHTML='';const s=stockFor(p);
+  if(!s){c.appendChild(el('span',null,nz(p.T)?'Nema cene za ovo drvo – upiši u „Cene“.':'Upiši mere.'));return}
+  const gs=el('select');gs.setAttribute('aria-label','Građa');const o0=el('option',null,'Građa: '+s.g.naziv+(s.layers>1?' ×'+s.layers+' lepljeno':''));o0.value='';gs.appendChild(o0);
+  for(const g of SET.gradja.filter(g=>g.vrsta===p.v&&nz(g.cena)>0)){const o=el('option',null,g.naziv+' · '+fN(nz(g.cena),0)+' €/m³');o.value=g.id;gs.appendChild(o)}
+  gs.value=p.g||'';gs.addEventListener('change',()=>{p.g=gs.value;dirty=true;calcPart(d,p);drawRes()});c.appendChild(gs);
+  const t=el('span');t.innerHTML=`${fN(s.cena,0)} €/m³ · ${s.long?'duga':'kratka'} (${fN(s.L2/1000,2)} m) · <b>${fM3(s.m3o)}</b> · <b>${fE(s.eur,0)}</b>`;c.appendChild(t)}
+function drawLines(){const box=$('lines');box.innerHTML='';
+  if(C.lines.length){const h=el('div','ln h');h.append(el('span',null,'Stavka'),el('span',null,'Kom'),el('span',null,'€ po kom'),el('span',null,'Ukupno'),el('span'));box.appendChild(h)}
+  C.lines.forEach((l,i)=>{const r=el('div','ln');
+    const n=el('div');const ni=el('input');ni.value=l.n||'';ni.placeholder='npr. Tandem klizači (par)';ni.addEventListener('input',()=>{l.n=ni.value;dirty=true;drawRes()});n.appendChild(ni);
+    if(l.k==='cen')n.appendChild(el('small',null,'iz cenovnika – već prodajna cena, bez marže'));else if(l.src)n.appendChild(el('small',null,l.src));
+    const q=el('input','num');q.inputMode='decimal';q.value=l.q??1;q.addEventListener('input',()=>{l.q=q.value;dirty=true;tt.textContent=fE(nz(l.q)*nz(l.p),2);drawRes()});
+    const pp=el('input','num');pp.inputMode='decimal';pp.value=l.p??'';pp.placeholder='0';pp.addEventListener('input',()=>{l.p=pp.value;dirty=true;tt.textContent=fE(nz(l.q)*nz(l.p),2);drawRes()});
+    const tt=el('span','t',fE(nz(l.q)*nz(l.p),2));
+    const x=el('button','x','×');x.type='button';x.setAttribute('aria-label','Ukloni stavku');x.addEventListener('click',()=>{C.lines.splice(i,1);dirty=true;drawLines();drawRes()});
+    r.append(n,q,pp,tt,x);box.appendChild(r)});
+  if(!C.lines.length)box.appendChild(el('div','ln',null)).appendChild(el('span','note','Nema stavki. Dodaj okov, staklo, metal, dostavu…'))}
+function drawFin(){for(const b of $('finSeg').children)b.setAttribute('aria-pressed',String((C.fin||'')===b.dataset.f));
+  const A=C.parts.reduce((a,p)=>a+area(p),0);$('finArea').textContent=A?fN(A,2)+' m² površine':'';
+  const f=finCost();$('finNote').textContent=C.fin==='ulje'?`Ulje: ${fN(nz(SET.uljeS),0)} sloja · ${fN(nz(SET.uljeL),0)} €/L · oko ${fN(nz(SET.uljeM),0)} m² po litru → ${fE(f,2)}`:C.fin==='lak'?`Lak: ${fN(nz(SET.lakS),0)} sloja · ${fN(nz(SET.lakL),0)} €/L · oko ${fN(nz(SET.lakM),0)} m² po litru, ×${fN(nz(SET.lakX),1)} (rad lakiranja) → ${fE(f,2)}`:'Bez završne obrade.'}
+function finCost(){const A=C.parts.reduce((a,p)=>a+area(p),0);if(C.fin==='ulje')return A*nz(SET.uljeS)/Math.max(1,nz(SET.uljeM))*nz(SET.uljeL);if(C.fin==='lak')return A*nz(SET.lakS)/Math.max(1,nz(SET.lakM))*nz(SET.lakL)*Math.max(1,nz(SET.lakX));return 0}
+function totals(){const P=C.parts.map(p=>({p,s:stockFor(p)}));
+  const by={};let m3=0,wood=0;for(const x of P){if(!x.s)continue;m3+=x.s.m3o;wood+=x.s.eur;const k=x.s.g.naziv;(by[k]=by[k]||{m3:0,eur:0,g:x.s.g});by[k].m3+=x.s.m3o;by[k].eur+=x.s.eur}
+  const fin=finCost();const kost=C.lines.filter(l=>l.k!=='cen').reduce((a,l)=>a+nz(l.q)*nz(l.p),0);const cen=C.lines.filter(l=>l.k==='cen').reduce((a,l)=>a+nz(l.q)*nz(l.p),0);
+  const rate=C.rate!==''&&C.rate!=null?nz(C.rate):nz(SET.rad);const rad=nz(C.hours)*rate;const cost=wood+fin+kost+rad;
+  const mz=C.marza!==''&&C.marza!=null?nz(C.marza):nz(SET.marza);const prod=cost*(1+mz/100)+cen;
+  const z=Math.max(1,nz(SET.zaok));const kes=Math.ceil(prod/z)*z;const K=kurs();const osn=Math.round(prod*K/100)*100;const pdv=Math.round(osn*nz(SET.pdv)/100);
+  return {by,m3,wood,fin,kost,cen,rad,rate,cost,mz,prod,kes,K,osn,pdv,rac:osn+pdv,missing:P.filter(x=>!x.s&&nz(x.p.L)).length}}
+function drawRes(){const t=totals();const rt=$('rt');rt.innerHTML='';
+  const row=(a,b,v,cls)=>{const tr=el('tr',cls);const td=el('td');td.textContent=a;if(b)td.appendChild(el('small',null,b));tr.append(td,el('td','v',v));rt.appendChild(tr)};
+  row('Drvo',Object.values(t.by).map(x=>x.g.naziv+': '+fM3(x.m3)).join(' · ')||'—',fE(t.wood,0));
+  row('Završna obrada',C.fin==='ulje'?'ulje':C.fin==='lak'?'lak':'bez',fE(t.fin,0));
+  row('Okov i ostalo',C.lines.filter(l=>l.k!=='cen').length+' stavki',fE(t.kost,0));
+  row('Rad',fN(nz(C.hours),1)+' h × '+fN(t.rate,0)+' €',fE(t.rad,0));
+  row('Trošak ukupno','drvo '+fM3(t.m3),fE(t.cost,0),'sum');
+  row('Marža '+fN(t.mz,0)+'%','',fE(t.cost*t.mz/100,0));
+  if(t.cen)row('Iz cenovnika','već prodajne cene',fE(t.cen,0));
+  $('price').innerHTML=`<div class="pl"><span>Keš (bez PDV)</span><b>${fE(t.kes,0)}</b></div><div class="pl"><span>Račun (sa PDV)</span><b>${fN(t.rac,0)} RSD</b></div><div class="pl"><small>osnovica ${fN(t.osn,0)} + PDV ${fN(t.pdv,0)} · kurs ${fN(t.K,2)}</small><small>bez zaokruž. ${fE(t.prod,0)}</small></div>`;
+  $('resNote').textContent=t.missing?'⚠ '+t.missing+' deo nema cenu drveta – vidi „Cene“.':(C.hours===''||!nz(C.hours)?'Upiši sate rada da cena bude potpuna.':'');
+  $('pbV').textContent=fE(t.kes,0)+' keš';$('pbS').textContent=fN(t.rac,0)+' RSD sa PDV · trošak '+fE(t.cost,0)}
+function drawAll(){if(!C)C=blankCalc();drawTpls();$('cName').value=C.name||'';woodOpts($('cWood'),C.wood);drawParts();drawFin();drawLines();
+  $('hours').value=C.hours??'';$('rate').value=C.rate!==''&&C.rate!=null?C.rate:'';$('rate').placeholder=fN(nz(SET.rad),0);$('marza').value=C.marza!==''&&C.marza!=null?C.marza:'';$('marza').placeholder=fN(nz(SET.marza),0);
+  drawJobs();$('nDod').textContent=fN(nz(SET.dodDuz),0);$('nOtp').textContent=fN(nz(SET.otpad),0);$('noPrices').hidden=SET.gradja.some(g=>nz(g.cena)>0);drawRes()}
+function drawJobs(){const s=$('cJob');s.innerHTML='<option value="">— bez posla —</option>';let J=[];try{const h=HK();J=h&&h.jobs?h.jobs():[]}catch(e){}
+  for(const j of J){const o=el('option',null,j.name+(j.client?' – '+j.client:''));o.value=j.id;s.appendChild(o)}s.value=C.job||''}
+
+/* ---------- unos ---------- */
+$('cName').addEventListener('input',e=>{C.name=e.target.value;dirty=true});
+$('cWood').addEventListener('change',e=>{const w=e.target.value;const old=C.wood;C.wood=w;for(const p of C.parts)if(!p.v||p.v===old){p.v=w;p.g=''}dirty=true;drawParts();drawRes()});
+$('addPart').addEventListener('click',()=>{C.parts.push({id:uid(),n:'',L:'',W:'',T:'',Q:1,v:C.wood,g:''});dirty=true;drawParts();const ins=$('parts').querySelectorAll('.part');const last=ins[ins.length-1];if(last)last.querySelector('input').focus()});
+$('finSeg').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;C.fin=b.dataset.f;dirty=true;drawFin();drawRes()});
+$('addLine').addEventListener('click',()=>{C.lines.push({id:uid(),n:'',q:1,p:'',k:'kost'});dirty=true;drawLines();const ins=$('lines').querySelectorAll('.ln:not(.h) input');if(ins.length)ins[ins.length-3].focus()});
+['hours','rate','marza'].forEach(k=>$(k).addEventListener('input',e=>{C[k]=e.target.value;dirty=true;drawRes()}));
+$('cJob').addEventListener('change',e=>{C.job=e.target.value;dirty=true});
+$('pbGo').addEventListener('click',()=>$('resCol').scrollIntoView({behavior:'smooth'}));
+/* pretraga: cenovnik (prodajne cene) ili kupovina (plaćene cene) */
+let SRC='',CEN=null,BUY=null;
+async function openSearch(kind){SRC=kind;$('srchBox').hidden=false;$('srchQ').value='';$('srchQ').placeholder=kind==='cen'?'Traži u cenovniku… npr. postolje, cortez 80':'Traži u kupovini… npr. tandem, ulje';$('srchQ').focus();
+  if(kind==='cen'&&!CEN){try{const p=P();CEN=p&&p.__mtCen?(await p.__mtCen()).map(x=>({c:x[0],n:x[1],p:x[2]})):[]}catch(e){CEN=[]}}
+  if(kind==='buy'&&!BUY)BUY=await loadBuy();doSearch()}
+async function loadBuy(){if(!db)return[];try{const q=await db.collection('kupljeno').get();const m=new Map();const K=kurs();
+  for(const d of q.docs){const r=d.data()||{};for(const it of (r.items||[])){if(!it||!it.name)continue;const eur=it.unitEUR!=null?it.unitEUR:(it.unitRSD!=null?it.unitRSD/K:(it.lineEUR!=null&&it.qty?it.lineEUR/it.qty:null));if(eur==null)continue;
+    const k=String(it.name).toLowerCase().trim();const prev=m.get(k);if(!prev||(r.at||0)>prev.at)m.set(k,{n:it.name,p:eur,u:it.unit||'kom',at:r.at||0,store:r.store||'',date:r.date||''})}}
+  return [...m.values()].sort((a,b)=>b.at-a.at)}catch(e){return[]}}
+function doSearch(){const q=$('srchQ').value.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');const box=$('srchRes');box.innerHTML='';
+  const L=(SRC==='cen'?CEN:BUY)||[];const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const words=q.split(/\s+/).filter(Boolean);const hit=L.filter(x=>words.every(w=>norm((x.c||'')+' '+x.n).includes(w))).slice(0,30);
+  if(!hit.length){box.appendChild(el('div','note',L.length?'Ništa nije nađeno.':(SRC==='cen'?'Cenovnik nije dostupan.':'Još nema kupovine sa upisanom cenom.'))).style.padding='12px';return}
+  for(const x of hit){const b=el('button');b.type='button';const tx=el('span');tx.appendChild(document.createTextNode(x.n));tx.appendChild(el('small',null,SRC==='cen'?x.c:[x.store,x.date].filter(Boolean).join(' · ')));
+    b.append(tx,el('b',null,fE(nz(x.p),SRC==='cen'?0:2)+(SRC==='buy'&&x.u?' / '+x.u:'')));
+    b.addEventListener('click',()=>{C.lines.push({id:uid(),n:x.n,q:1,p:r2(nz(x.p)),k:SRC==='cen'?'cen':'kost',src:SRC==='buy'?'cena iz kupovine'+(x.store?' – '+x.store:''):''});dirty=true;$('srchBox').hidden=true;drawLines();drawRes();toast('Dodato: '+x.n)});box.appendChild(b)}}
+$('fromCen').addEventListener('click',()=>openSearch('cen'));$('fromBuy').addEventListener('click',()=>openSearch('buy'));$('srchQ').addEventListener('input',doSearch);
+
+/* ---------- čuvanje ---------- */
+let db=null,readonly=false,SAVED=new Map();
+const calcDoc=()=>{const t=totals();return{...JSON.parse(JSON.stringify(C)),at:Date.now(),sum:{cost:r2(t.cost),kes:t.kes,rac:t.rac,m3:Math.round(t.m3*10000)/10000}}};
+function saveCalc(silent){if(!db){toast('Bez baze – ne može da se sačuva.');return false}if(!C.name){C.name=(TPL[C.tpl]?TPL[C.tpl].n:'Proračun')+' '+new Date().toLocaleDateString('sr-RS');$('cName').value=C.name}
+  if(!C.id)C.id='k'+uid();const d=calcDoc();SAVED.set(C.id,d);try{db.collection('kalk').doc(C.id).set(d)}catch(e){toast('Nije sačuvano.');return false}dirty=false;if(!silent)toast('Sačuvano: '+C.name);return true}
+$('save').addEventListener('click',()=>saveCalc());
+$('newCalc').addEventListener('click',()=>{if(dirty&&!confirm('Početi novi proračun? Nesačuvane izmene se gube.'))return;C=blankCalc();dirty=false;fromTpl('sto')});
+$('asTpl').addEventListener('click',()=>{if(!db)return;const n=prompt('Ime šablona (npr. Moj sto 180×90):',C.name||'');if(!n)return;const id='t'+uid();
+  const d={n,name:C.name,fin:C.fin,hours:C.hours,marza:C.marza,parts:C.parts.map(p=>({n:p.n,L:p.L,W:p.W,T:p.T,Q:p.Q,v:p.v})),lines:C.lines.map(l=>({n:l.n,q:l.q,p:l.p,k:l.k})),at:Date.now()};
+  try{db.collection('kalk_sabloni').doc(id).set(d);MYT.set(id,d);drawTpls();toast('Šablon sačuvan: '+n)}catch(e){toast('Šablon nije sačuvan.')}});
+$('toShop').addEventListener('click',()=>{if(!db)return;const t=totals();const items=Object.values(t.by);if(!items.length){toast('Nema drveta za kupovinu.');return}
+  let jobInfo={};try{const h=HK();const j=h&&h.jobs?h.jobs().find(x=>x.id===C.job):null;if(j)jobInfo={job:j.id,jobName:j.name,client:j.client||'',inv:j.inv||''}}catch(e){}
+  const now=Date.now();for(const x of items){const id='s'+uid();
+    db.collection('shopping').doc(id).set({name:x.g.naziv,qty:Math.round(x.m3*1000)/1000,unit:'m³',price:r2(x.g.cena*(1+nz(SET.posk)/100)),store:'',for:'radionica',hot:false,note:'Kalkulator: '+(C.name||''),bought:false,boughtAt:null,by:null,byName:'Kalkulator',createdAt:now,updatedAt:now,photos:[],...jobInfo})}
+  toast('U Kupovini: '+items.map(x=>x.g.naziv+' '+fM3(x.m3)).join(', '))});
+$('toPred').addEventListener('click',()=>{const t=totals();if(!t.prod){toast('Prvo izračunaj cenu.');return}saveCalc(true);
+  const dims=C.parts[0]&&nz(C.parts[0].L)?' · '+fN(nz(C.parts[0].L)/10,0)+'×'+fN(nz(C.parts[0].W)/10,0)+' cm':'';
+  const item={d:(C.name||'Nameštaj')+(C.name&&/\d/.test(C.name)?'':dims)+(C.wood?' · '+C.wood:''),q:1,u:'kom',p:String(t.osn)};
+  const p=P();if(p&&p.__mtNewPred){p.__mtNewPred({type:'predracun',items:[item]});return}toast('Predračun može da se napravi samo u aplikaciji.')});
+
+/* ---------- sačuvano ---------- */
+function drawSaved(){const q=$('sQ').value.trim().toLowerCase();const box=$('sList');box.innerHTML='';
+  const L=[...SAVED.values()].filter(d=>!q||String(d.name||'').toLowerCase().includes(q)).sort((a,b)=>(b.at||0)-(a.at||0));
+  if(!L.length)box.appendChild(el('div','srow')).appendChild(el('span','note','Još nema sačuvanih proračuna.'));
+  for(const d of L.slice(0,200)){const r=el('div','srow');const tx=el('div','tx');tx.append(el('b',null,d.name||'Proračun'),el('small',null,[new Date(d.at).toLocaleDateString('sr-RS'),d.wood,d.sum?fM3(d.sum.m3):''].filter(Boolean).join(' · ')));
+    const v=el('span','v',d.sum?fE(d.sum.kes,0):'');const o=el('button',null,'Otvori');o.type='button';o.addEventListener('click',()=>{if(dirty&&!confirm('Otvoriti „'+(d.name||'proračun')+'“? Nesačuvane izmene se gube.'))return;C=JSON.parse(JSON.stringify(d));delete C.sum;delete C.at;dirty=false;show('calc');drawAll()});
+    const x=el('button','ghost','Obriši');x.type='button';x.style.color='var(--bad)';x.addEventListener('click',()=>{if(x.dataset.arm!=='1'){x.dataset.arm='1';x.textContent='Potvrdi';return}SAVED.delete(d.id);try{db.collection('kalk').doc(d.id).delete()}catch(e){}drawSaved()});
+    r.append(tx,v,o,x);box.appendChild(r)}
+  const tb=$('tList');tb.innerHTML='';if(!MYT.size)tb.appendChild(el('div','srow')).appendChild(el('span','note','Nema tvojih šablona. U proračunu klikni „Sačuvaj kao šablon“.'));
+  for(const [id,t] of MYT){const r=el('div','srow');const tx=el('div','tx');tx.append(el('b',null,'★ '+t.n),el('small',null,(t.parts||[]).length+' delova'));
+    const x=el('button','ghost','Obriši');x.type='button';x.style.color='var(--bad)';x.addEventListener('click',()=>{if(x.dataset.arm!=='1'){x.dataset.arm='1';x.textContent='Potvrdi';return}MYT.delete(id);try{db.collection('kalk_sabloni').doc(id).delete()}catch(e){}drawSaved();drawTpls()});
+    r.append(tx,x);tb.appendChild(r)}}
+$('sQ').addEventListener('input',drawSaved);
+
+/* ---------- cene i podešavanja ---------- */
+const SK=['rad','otpad','marza','dodDuz','dugaOd','dodDeb','posk','pdv','zaok','uljeL','uljeM','uljeS','lakL','lakM','lakS','lakX'];
+function fillSet(){for(const k of SK)$('s-'+k).value=String(SET[k]??'').replace('.',',');const b=$('gBody');b.innerHTML='';
+  for(const g of SET.gradja){const tr=el('tr');tr.append(el('td',null,g.naziv),el('td',null,g.vrsta),el('td',null,g.deb+' mm'),el('td',null,g.duz||'—'));const td=el('td');const i=el('input','num');i.inputMode='decimal';i.value=g.cena??'';i.dataset.id=g.id;td.appendChild(i);tr.appendChild(td);b.appendChild(tr)}
+  if(!SET.gradja.length){const tr=el('tr');const td=el('td',null,'Cene građe još nisu upisane.');td.colSpan=5;tr.appendChild(td);b.appendChild(tr)}
+  $('gDate').textContent=SET.at?'izmenjeno '+new Date(SET.at).toLocaleDateString('sr-RS'):''}
+$('sSave').addEventListener('click',()=>{if(!db||readonly){toast('Ovde ne može da se sačuva.');return}
+  for(const k of SK)SET[k]=nz($('s-'+k).value);for(const i of $('gBody').querySelectorAll('input[data-id]')){const g=SET.gradja.find(x=>x.id===i.dataset.id);if(g)g.cena=nz(i.value)}
+  SET.at=Date.now();try{db.doc('settings/kalkulator').set(JSON.parse(JSON.stringify(SET)));$('sMsg').textContent='Sačuvano.';toast('Cene sačuvane')}catch(e){toast('Nije sačuvano.')}drawAll()});
+
+/* ---------- navigacija ---------- */
+function show(v){['calc','saved','set'].forEach(k=>$('v-'+k).hidden=k!==v);for(const b of $('tabs').children)b.setAttribute('aria-current',String(b.dataset.v===v));$('pbar').style.display=v==='calc'?'':'none';
+  if(v==='saved')drawSaved();if(v==='set')fillSet();scrollTo(0,0)}
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)show(b.dataset.v)});
+window.__kalkOpen=id=>{const d=SAVED.get(id);if(d){C=JSON.parse(JSON.stringify(d));dirty=false;show('calc');drawAll()}};
+
+/* ---------- početak ---------- */
+fromTpl('sto');dirty=false;
+(async()=>{try{db=window.claude&&window.claude.use?await window.claude.use('db'):null}catch(e){db=null}
+  if(!db){$('state').textContent='Bez baze – ništa se ne čuva';return}
+  db.doc('settings/kalkulator').onSnapshot(s=>{const d=s.exists?s.data():null;SET=Object.assign(JSON.parse(JSON.stringify(DEFSET)),d||{});if(!Array.isArray(SET.gradja))SET.gradja=[];
+    if(C&&!dirty&&!C.id){const tk=C.tpl||'sto';const w=WOODS().includes(C.wood)?C.wood:(WOODS().includes('Hrast')?'Hrast':WOODS()[0]);C.wood=w;for(const p of C.parts){p.v=w;p.g=''}}
+    drawAll();if(!$('v-set').hidden)fillSet()},()=>{});
+  db.collection('kalk').onSnapshot(q=>{SAVED=new Map(q.docs.map(d=>[d.id,{...d.data(),id:d.id}]));if(!$('v-saved').hidden)drawSaved()},()=>{});
+  db.collection('kalk_sabloni').onSnapshot(q=>{MYT=new Map(q.docs.map(d=>[d.id,d.data()]));drawTpls();if(!$('v-saved').hidden)drawSaved()},()=>{});
+})();
+})();
+</script></body></html>

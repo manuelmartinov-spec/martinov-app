@@ -1,7 +1,12 @@
 {
- "v": "1.5.5",
+ "v": "1.6.0",
  "date": "29.10.2026.",
  "log": [
+  {
+   "v": "1.6.0",
+   "date": "29.10.2026.",
+   "t": "Novo: Kalkulator (meni → Proizvodi) – izabereš šta računaš (sto, ploča, komoda, postolje, stolica, polica ili svoje), upišeš mere, a on računa kubikažu po debljini građe, cenu drveta po tvom spisku (kratka/duga od 2 m, +10 cm, 20% otpada), ulje ili lak, okov, rad i maržu, pa daje cenu u € za keš i u RSD sa PDV za račun; stavke iz cenovnika i iz kupovine, „Napravi predračun“, „Drvo u Kupovinu“ i tvoji šabloni. Zadaci: kartica na vrhu Pregleda za brzi unos i štikliranje, Zadaci u donjoj traci (umesto Faktura), dugme „+ Dodaj“ na Pregledu, a dugo pritisni ikonu aplikacije za „Novi zadatak“, „Kupovina“, „Trošak“, „Kalkulator“. Kupovina: „Kupljeno danas“ se vidi štiklirano. Tabele na telefonu (Šta kupiti, Poslovi…) su lista sa celim nazivom. PDF je sklonjen iz menija (otvara se dodirom na fajl). Aplikacija broji šta koristiš, a Claude jednom nedeljno napiše izveštaj šta se retko koristi."
+  },
   {
    "v": "1.5.5",
    "date": "29.10.2026.",

@@ -1,7 +1,7 @@
 /* Martinov aplikacija — rad bez interneta i samo-ažuriranje */
-const V='1.5.5';
+const V='1.6.0';
 const SHELL='mt-shell-'+V, RUN='mt-run-v1';
-const CORE=['./','index.html','fb.js','config.js','manifest.webmanifest','version.json','lib/firebase-app.js','lib/firebase-auth.js','lib/firebase-firestore.js','apps/fakture.html','apps/zadaci.html','apps/troskovi.html','apps/nesting.html','apps/pdf.html','icons/m-icon-192.png','icons/m-icon-512.png','icons/m-maskable-512.png','icons/m-favicon-64.png','icons/m-apple-180.png','icons/m-badge-96.png'];
+const CORE=['./','index.html','fb.js','config.js','manifest.webmanifest','version.json','lib/firebase-app.js','lib/firebase-auth.js','lib/firebase-firestore.js','apps/fakture.html','apps/zadaci.html','apps/troskovi.html','apps/nesting.html','apps/pdf.html','apps/kalkulator.html','icons/m-icon-192.png','icons/m-icon-512.png','icons/m-maskable-512.png','icons/m-favicon-64.png','icons/m-apple-180.png','icons/m-badge-96.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(SHELL).then(c=>c.addAll(CORE.map(u=>new Request(u,{cache:'reload'})))))});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k.startsWith('mt-shell-')&&k!==SHELL)await caches.delete(k);await self.clients.claim()})())});
 self.addEventListener('message',e=>{if(e.data&&e.data.type==='skip')self.skipWaiting()});

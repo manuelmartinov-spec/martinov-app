@@ -38,6 +38,12 @@ Claude ne može direktno u bazu. Zato: Claude zaključa paket javnim ključem i 
   PDF u `files/izvod-<acc>-<godina>-<broj>`, opis u `izvodi/<acc>-<godina>-<broj>`. Uvek proveri `ok` i lanac stanja pre slanja.
   Stanje 29.10.2026: u bazi su svi izvodi 2026 (RSD 1–105, EUR 1–4, GBP 1–2) i 2025/141; ostali 2025 PDF-ovi još nisu.
 - `docs/<id>` dokumenti iz Faktura (ponuda, predračun, avans, račun) – Troškovi → Provera ih upoređuje sa uplatama.
+- `settings/kalkulator` cene građe (`gradja:[{id,naziv,vrsta,deb,duz:"kratka|duga|",cena}]`) i parametri Kalkulatora (rad €/h, otpad %, marža %, +mm na dužinu, duga od mm…);
+  `kalk/<id>` sačuvani proračuni, `kalk_sabloni/<id>` Manuelovi šabloni.
+- `upotreba/<GGGG-Www>_<uređaj>` brojač korišćenja: `{week, dev, name, from, counts:{"Strana › kontrola":broj}}` (samo brojevi, bez sadržaja).
+- `izvestaji/<id>` izveštaj koji Claude napiše (`{title, text, at, week}`); Pregled ga prikaže dok ga Manuel ne sakrije.
+  Nedeljni izveštaj o korišćenju pravi zakazani zadatak (ponedeljak ujutru): čita `upotreba` kroz most, piše `izvestaji/upotreba-<GGGG-Www>`.
+  Samo predlozi – aplikacija se ne menja bez Manuelovog odobrenja.
 - `meta/<id stavke>` kategorija/beleška/podkategorija koju je Manuel izabrao: `{cat, note, sub}` — ne pregazi.
 
 ## Objava
