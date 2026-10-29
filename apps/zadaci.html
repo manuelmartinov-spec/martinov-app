@@ -285,6 +285,7 @@ h2.g.late{color:var(--bad)}h2.g.today{color:var(--warn)}h2.g.store{color:var(--f
 }
 body{font-variant-numeric:tabular-nums}
 .toast button{color:var(--toast-act);font-weight:800}
+.toast button{white-space:nowrap;flex:none}
 
 /* ==== Dizajn A: Zadaci i Kupovina ==== */
 button{border-radius:10px;min-height:40px}
@@ -399,6 +400,12 @@ h2.g.late{color:var(--hit)}h2.g.today{color:var(--amb-t)}h2.g.pin{color:var(--hi
 .pend .pda svg{width:22px;height:22px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round}
 .sgi{width:40px;height:40px;border-radius:8px;overflow:hidden;flex:none;background:var(--bg)}
 .sgi img{width:100%;height:100%;object-fit:cover;display:block}
+/* oblačić posle dodavanja / završavanja */
+.toast .tk{display:none}
+.toast.ok .tk{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--kuc);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:none;margin-left:-4px}
+.toast.tap{cursor:pointer}
+.toast #toastT{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.toast #toastB2{background:none;border:0;color:var(--panel);opacity:.75;font-weight:700;min-height:32px;padding:4px 8px}
 </style>
 
 <header class="top"><div class="hin">
@@ -601,7 +608,7 @@ h2.g.late{color:var(--hit)}h2.g.today{color:var(--amb-t)}h2.g.pin{color:var(--hi
 <!-- slika preko celog ekrana -->
 <div id="lbox" hidden><img id="lbImg" alt=""><div id="lbCap"></div><button type="button" id="lbP" aria-label="Prethodna">‹</button><button type="button" id="lbN" aria-label="Sledeća">›</button><button type="button" id="lbX" aria-label="Zatvori">×</button></div>
 
-<div class="toast" id="toast" hidden role="status"><span id="toastT"></span><button type="button" id="toastB" hidden></button></div>
+<div class="toast" id="toast" hidden role="status"><span class="tk" aria-hidden="true">✓</span><span id="toastT"></span><button type="button" id="toastB2" hidden></button><button type="button" id="toastB" hidden></button></div>
 <div class="copybox" id="copybox" hidden><div class="msg">Telefon nije dozvolio automatsko kopiranje. Označi tekst i kopiraj ga ručno.</div><textarea id="copyT" readonly></textarea><button type="button" id="copyX">Zatvori</button></div>
 
 <script>
@@ -707,8 +714,11 @@ function removeDoc(col,id){data[col].delete(id);dirty.add(col+'/'+id);renderAll(
 function showBanner(t){const b=$('banner');b.textContent=t;b.hidden=false}
 
 let tTimer=null;
-function toast(text,label,fn,ms){const t=$('toast'),b=$('toastB');$('toastT').textContent=text;b.hidden=!label;
-  if(label){b.textContent=label;b.onclick=()=>{t.hidden=true;fn()}}else b.onclick=null;
+/* oblačić: o.ok = kvačica; dodir bilo gde na oblačiću = glavna radnja (otvori/izmeni); o.alt = drugo dugme (Vrati) */
+function toast(text,label,fn,ms,o){o=o||{};const t=$('toast'),b=$('toastB'),b2=$('toastB2');$('toastT').textContent=text;b.hidden=!label;
+  t.classList.toggle('ok',!!o.ok);t.classList.toggle('tap',!!(label&&fn));
+  if(label){b.textContent=label;b.onclick=e=>{e.stopPropagation();t.hidden=true;fn()};t.onclick=()=>{t.hidden=true;fn()}}else{b.onclick=null;t.onclick=null}
+  if(b2){b2.hidden=!o.alt;if(o.alt){b2.textContent=o.alt[0];b2.onclick=e=>{e.stopPropagation();t.hidden=true;o.alt[1]()}}else b2.onclick=null}
   t.hidden=false;clearTimeout(tTimer);tTimer=setTimeout(()=>{t.hidden=true},ms||(label?5000:2200))}
 function copyText(s,ok){const fb=()=>{const box=$('copybox'),ta=$('copyT');ta.value=s;box.hidden=false;ta.focus();ta.select()};
   try{navigator.clipboard.writeText(s).then(()=>toast(ok),fb)}catch(e){fb()}}
@@ -796,7 +806,7 @@ function renderTasks(){
   if(showDone&&dv.length){const l=el('div','list');for(const t of dv.slice(0,60))l.appendChild(trow(t,'done'));dl.appendChild(l)}
 }
 function toggleDone(id){const t=data.tasks.get(id);if(!t)return;const n=normT(clone(t));n.done=!n.done;n.doneAt=n.done?Date.now():null;n.doneByName=n.done?deviceName:'';n.updatedAt=Date.now();put('tasks',id,n);
-  if(n.done)toast('Urađeno: '+(n.title||'zadatak'),'Vrati',()=>toggleDone(id));else toast('Vraćeno u otvorene')}
+  if(n.done)toast('Urađeno: '+(n.title||'zadatak'),'Otvori',()=>openT(id),6000,{ok:true,alt:['Vrati',()=>toggleDone(id)]});else toast('Vraćeno u otvorene')}
 
 function syncAdd(){$('addCat').value=addCat;const t=todayISO();
   $('addToday').setAttribute('aria-pressed',String(addDue===t));$('addTom').setAttribute('aria-pressed',String(addDue===addDays(t,1)));
@@ -810,7 +820,7 @@ function syncAdd(){$('addCat').value=addCat;const t=todayISO();
   $('add').addEventListener('submit',e=>{e.preventDefault();const title=$('addT').value.trim();if(!title){$('addT').focus();return}if(needName())return;
     const now=Date.now(),id=newId('tasks');
     put('tasks',id,{title,cat:addCat,due:addDue,hot:addHot,who:fWho||'',note:'',steps:[],done:false,doneAt:null,by:myId,byName:deviceName,createdAt:now,updatedAt:now});
-    $('addT').value='';addDue='';addHot=false;syncAdd();toast('Dodato u „'+catName(addCat)+'“','Otvori',()=>openT(id))});
+    $('addT').value='';addDue='';addHot=false;syncAdd();toast('Dodato u „'+catName(addCat)+'“','Izmeni',()=>openT(id),6000,{ok:true})});
   syncAdd();
 })();
 $('q').addEventListener('input',e=>{fQ=e.target.value.trim().toLowerCase();renderTasks()});
@@ -900,7 +910,7 @@ function renderShop(){
 }
 function toggleBought(id){const s=data.shopping.get(id);if(!s)return;const n=Object.assign(clone(s),normS(clone(s)));n.bought=!n.bought;n.boughtAt=n.bought?Date.now():null;n.boughtByName=n.bought?deviceName:'';n.updatedAt=Date.now();
   if(!n.bought){n.kup='';n.paid=null}put('shopping',id,n);
-  if(n.bought)toast('Kupljeno: '+(n.name||'stavka'),readonly||noDb?'':'Upiši cenu',()=>openBuy([id]),6000);else toast('Vraćeno na spisak')}
+  if(n.bought)toast('Kupljeno: '+(n.name||'stavka'),readonly||noDb?'':'Upiši cenu',()=>openBuy([id]),6000,{ok:true,alt:['Vrati',()=>toggleBought(id)]});else toast('Vraćeno na spisak')}
 function clearBought(ids){const copies=ids.map(id=>[id,clone(data.shopping.get(id))]).filter(x=>x[1]);confirmClear=false;
   for(const [id] of copies){data.shopping.delete(id);dirty.add('shopping/'+id);write('shopping',id,DEL)}renderAll();
   toast('Obrisano: '+copies.length,'Vrati',()=>{for(const [id,d] of copies){data.shopping.set(id,d);dirty.add('shopping/'+id);write('shopping',id,d)}renderAll()})}
@@ -920,7 +930,7 @@ function fillUnits(sel){sel.innerHTML='';for(const u of UNITS){const o=el('optio
     const item={name,qty:num($('sQty').value),unit:$('sUnit').value,price:'',store:$('sStore').value.trim(),for:sFor,hot:sHot,note:$('sNote').value.trim(),bought:false,boughtAt:null,by:myId,byName:deviceName,createdAt:now,updatedAt:now,photos:pendPh.slice()};
     put('shopping',id,item);pendPh=[];syncCam();$('sLast').hidden=true;
     $('sName').value='';$('sQty').value='';$('sUnit').value='kom';$('sNote').value='';sHot=false;syncSAdd();if(window.__sOptsReset)window.__sOptsReset();$('sName').focus();
-    toast('Dodato'+(item.store?' – '+item.store:''),'Izmeni / slika',()=>openS(id),6000)});
+    toast('Dodato: '+name+(item.store?' – '+item.store:''),'Izmeni',()=>openS(id),6000,{ok:true})});
   syncSAdd();
 })();
 $('sTog').addEventListener('click',()=>{showBought=!showBought;confirmClear=false;renderShop()});
@@ -1272,7 +1282,7 @@ $('bSave').addEventListener('click',()=>{
   /* nauči cenu u šablon „Šta kupiti“ (cena po jedinici u €) */
   const h=HK();if(h&&h.learnPrice)for(const l of lines){if(l.unitEUR==null)continue;try{h.learnPrice({sid:l.sid,name:l.name,unit:l.unit,unitEUR:l.unitEUR,store})}catch(e){}}
   buildPrices();closeSheetB('bSheet');renderAll();
-  toast((ids.length===1?'Kupljeno':'Kupljeno: '+ids.length+' stavki')+(total!=null?' · '+fmtR(total):'')+(doExp?' · upisano u Troškove':''),'Istorija',()=>openHist(),5000)});
+  toast((ids.length===1?'Kupljeno':'Kupljeno: '+ids.length+' stavki')+(total!=null?' · '+fmtR(total):'')+(doExp?' · upisano u Troškove':''),'Istorija',()=>openHist(),5000,{ok:true})});
 
 /* ---------- istorija i cene ---------- */
 const H={tab:'r',q:'',store:'',per:'90',arm:''};

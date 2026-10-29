@@ -1,7 +1,12 @@
 {
- "v": "1.5.2",
+ "v": "1.5.3",
  "date": "28.10.2026.",
  "log": [
+  {
+   "v": "1.5.3",
+   "date": "29.10.2026.",
+   "t": "Posle svakog dodavanja ili završavanja iskoči oblačić sa kvačicom (✓ Dodato…, ✓ Kupljeno…, ✓ Urađeno…, ✓ Posao dodat…). Dodir na oblačić otvara tu stavku za izmenu; kod Kupljeno/Urađeno ima i „Vrati“. Na telefonu dugme „+ Zapis“ više ne prekriva donju traku."
+  },
   {
    "v": "1.5.2",
    "date": "29.10.2026.",

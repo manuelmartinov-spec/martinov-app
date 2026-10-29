@@ -665,6 +665,7 @@ table.rnt{width:100%;border-collapse:collapse;font-size:12.5px}
 }
 body{font-variant-numeric:tabular-nums}
 .toast button{color:var(--toast-act);font-weight:800}
+.toast button{white-space:nowrap;flex:none}
 
 /* ==== Dizajn A: glavna aplikacija ==== */
 /* dugmad: zlatno = radnja; izabrano = svetla podloga + okvir; navigacija = zlatna svetla podloga */
@@ -750,6 +751,13 @@ input,select,textarea{border-color:var(--fld-bd);border-radius:10px}
 /* ime gore levo: M znak + Martinov Design */
 .sbrand .brand{align-items:center}
 .brand .blogo{width:28px;height:28px;border-radius:8px;flex:none;margin-right:2px}
+/* oblačić posle dodavanja / završavanja: kvačica, ceo se može dodirnuti */
+.toast .tk{display:none}
+.toast.ok .tk{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--kuc);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:none;margin-left:-4px}
+.toast.tap{cursor:pointer}
+.toast #toastT{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.toast #toastB2{background:none;border:0;color:var(--panel);opacity:.75;font-weight:700;min-height:32px;padding:4px 8px}
+@media (max-width:760px){#bAdd{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
 </style>
 
 <div id="app">
@@ -826,7 +834,7 @@ input,select,textarea{border-color:var(--fld-bd);border-radius:10px}
 
 <div id="lb" hidden><header><span id="lbT"></span><a id="lbA" href="#" target="_blank" rel="noopener">Otvori</a><button type="button" id="lbX">Zatvori</button></header><div class="lbi"><img id="lbI" alt=""></div></div>
 <input type="file" id="fileAtt" multiple accept="image/*,application/pdf,.pdf" hidden>
-<div class="toast" id="toast" hidden role="status"><span id="toastT"></span><button type="button" id="toastB" hidden></button></div>
+<div class="toast" id="toast" hidden role="status"><span class="tk" aria-hidden="true">✓</span><span id="toastT"></span><button type="button" id="toastB2" hidden></button><button type="button" id="toastB" hidden></button></div>
 <div class="copybox" id="copybox" hidden><div class="mute">Pregledač nije dozvolio automatsko kopiranje. Označi tekst i kopiraj ga ručno.</div><textarea id="copyT" readonly></textarea><button type="button" class="btn" id="copyX">Zatvori</button></div>
 <script>(function(){
 'use strict';
@@ -1728,8 +1736,9 @@ function dropFresh(pred){const keep=[];for(const fr of ui.fresh||[]){if(!pred(fr
   if(r&&Object.keys(r.c).every(k=>isEmpty(r.c[k])||JSON.stringify(r.c[k])===JSON.stringify(pre[k])))deleteRec(fr.t,fr.r,true)}ui.fresh=keep.length?keep:null}
 function linkMeta(lt,lr,f){const out=[];for(const g of lt.fields.slice(1)){if(out.length>=5)break;if(['link','att','long','created'].includes(g.type))continue;const v=val(lt,g,lr);if(isEmpty(v))continue;
   const s=txt(lt,g,lr);if(!s)continue;out.push(g.type==='check'?g.name:(kindOf(lt,g)==='num'&&g.type!=='rating'?g.name+' '+s:s))}return out.join(' · ')}
-function closeRec(){flushRec();recStack.length=0;$('recSheet').hidden=true;closePop();
-  dropFresh(()=>true);onData();try{if($('grid'))$('content').focus({preventScroll:true})}catch(e){}}
+function closeRec(){flushRec();const top=recStack[0];const fresh=!!(top&&(ui.fresh||[]).some(x=>x.r===top.r));recStack.length=0;$('recSheet').hidden=true;closePop();
+  dropFresh(()=>true);onData();
+  if(fresh&&recsOf(top.t).has(top.r)){const t0=T.get(top.t);toast('Dodato u „'+(t0?t0.name:'tabelu')+'“: '+recName(top.t,top.r),'Otvori',()=>openRec(top.t,top.r),{ok:true})}try{if($('grid'))$('content').focus({preventScroll:true})}catch(e){}}
 function recBack(){flushRec();const top=recStack.pop();if(!recStack.length)return closeRec();if(top)dropFresh(x=>x.r===top.r);$('recBox').scrollTop=0;renderRec()}
 function flushRec(){for(const k in recTimers){const x=recTimers[k];clearTimeout(x.tm);x.fn()}recTimers={}}
 function later(key,fn,ms){if(recTimers[key])clearTimeout(recTimers[key].tm);const o={fn:()=>{delete recTimers[key];fn()}};o.tm=setTimeout(o.fn,ms||600);recTimers[key]=o}
@@ -1856,9 +1865,12 @@ document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!$('lb').h
 
 /* ================= poruke ================= */
 let tTimer=null;
-function toast(text,label,fn){const t=$('toast'),b=$('toastB');$('toastT').textContent=text;b.hidden=!label;
-  if(label){b.textContent=label;b.onclick=()=>{t.hidden=true;fn()}}else b.onclick=null;
-  t.hidden=false;clearTimeout(tTimer);tTimer=setTimeout(()=>{t.hidden=true},label?6000:2600)}
+/* oblačić: o.ok = kvačica; ako ima radnju, dodir bilo gde na oblačiću je pokreće; o.alt = [natpis, radnja] drugo dugme (npr. Vrati) */
+function toast(text,label,fn,o){o=o||{};const t=$('toast'),b=$('toastB'),b2=$('toastB2');$('toastT').textContent=text;b.hidden=!label;
+  t.classList.toggle('ok',!!o.ok);t.classList.toggle('tap',!!(label&&fn));
+  if(label){b.textContent=label;b.onclick=e=>{e.stopPropagation();t.hidden=true;fn()};t.onclick=()=>{t.hidden=true;fn()}}else{b.onclick=null;t.onclick=null}
+  if(b2){b2.hidden=!o.alt;if(o.alt){b2.textContent=o.alt[0];b2.onclick=e=>{e.stopPropagation();t.hidden=true;o.alt[1]()}}else b2.onclick=null}
+  t.hidden=false;clearTimeout(tTimer);tTimer=setTimeout(()=>{t.hidden=true},o.ms||(label?6000:2600))}
 function copyText(s,ok){const fb=()=>{$('copyT').value=s;$('copybox').hidden=false;$('copyT').focus();$('copyT').select()};
   try{navigator.clipboard.writeText(s).then(()=>toast(ok||'Kopirano'),fb)}catch(e){fb()}}
 $('copyX').addEventListener('click',()=>{$('copybox').hidden=true});
@@ -2400,7 +2412,7 @@ function eventDlg(id,date){
     b.appendChild(bot);
     sv.addEventListener('click',()=>{if(!nm.value.trim()){nm.focus();return}if(!di.value){di.focus();return}
       const d={title:nm.value.trim(),date:di.value,time:ti.value||'',kind:cur.kind,note:no.value,job:js?js.value:'',by:myId||null,up:Date.now(),at:cur.at||Date.now()};
-      const nid=id||newId('events');xput('events',nid,d);closeDlg();toast(id?'Događaj sačuvan':'Događaj dodat u kalendar')});
+      const nid=id||newId('events');xput('events',nid,d);closeDlg();toast((id?'Događaj sačuvan: ':'Događaj dodat: ')+(d.title||''),'Izmeni',()=>eventDlg(nid),{ok:true})});
     nm.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sv.click()}});
   });
 }
@@ -2645,7 +2657,7 @@ function openProposal(p){
       const mf=MATF();if(mf&&buy.length)c[mf.id]=buy.map((x,i)=>{const j=chosenIdx.indexOf(i);return lineOut({k:'t'+x.sid+'_'+x.pid,n:x.name,q:x.qty,u:x.unit,p:x.price,g:x.store,pid:x.pid,sid:x.sid,sh:j>=0?shIds[j]:''})});
       const jid=createRec(t.id,c);
       xput('auto','d-'+p.key,{state:'published',job:jid,at:Date.now(),doc:p.key});
-      closeDlg();toast('Posao objavljen'+(n?' · '+n+(n===1?' stavka':' stavki')+' u kupovini':''),'Otvori',()=>openJob(jid));
+      closeDlg();toast('Posao objavljen'+(n?' · '+n+(n===1?' stavka':' stavki')+' u kupovini':''),'Otvori',()=>openJob(jid),{ok:true});
       setTimeout(checkProposals,800);
     });
   },()=>{setTimeout(checkProposals,300)});
@@ -2818,7 +2830,7 @@ function jobMatBox(t,f,rid){
   const sb=el('button','btn pri');sb.type='button';sb.innerHTML=ic('cart')+'<span>'+(unsent.length?'Pošalji u kupovinu ('+unsent.length+')':'Sve je u kupovini')+'</span>';sb.disabled=readonly||!unsent.length;
   sb.addEventListener('click',()=>{const cur=matLines(t,f,recsOf(t.id).get(rid));const idx=cur.map((l,i)=>i).filter(i=>!cur[i].sh&&!cur[i].b&&cur[i].n.trim());
     const ids=addToShopping(idx.map(i=>({name:cur[i].n,qty:cur[i].q,unit:cur[i].u,price:cur[i].p,store:cur[i].g,note:cur[i].note||tmplNote(cur[i].sid),sid:cur[i].sid,pid:cur[i].pid,photos:tmplPhotos(cur[i].sid)})),recName(t.id,rid),jobMeta(t,rid));
-    commit(c=>idx.forEach((i,j)=>{if(c[i])c[i].sh=ids[j]}));toast('U kupovini: '+ids.length+(ids.length===1?' stavka':' stavki')+' · vidi i porodica','Otvori',()=>{closeJob();openModule('kupovina')})});
+    commit(c=>idx.forEach((i,j)=>{if(c[i])c[i].sh=ids[j]}));toast('U kupovini: '+ids.length+(ids.length===1?' stavka':' stavki')+' · vidi i porodica','Otvori',()=>{closeJob();openModule('kupovina')},{ok:true})});
   bot.appendChild(sb);box.appendChild(bot);
   return box}
 /* šablon proizvoda: šta ide za 1 komad (zapisi u tabeli Šta kupiti) */
@@ -2850,7 +2862,9 @@ function openJob(rid,focus){
   job.rid=rid;job.focus=focus||null;$('jobSheet').hidden=false;sheetUp($('jobSheet'));document.body.style.overflow='hidden';
   if(!same)$('jobBox').scrollTop=0;renderJob();
 }
-function closeJob(){if($('jobSheet').hidden)return;flushRec();const rid=job.rid;$('jobSheet').hidden=true;job.rid=null;closePop();if(rid)dropFresh(x=>x.r===rid);onData()}
+function closeJob(){if($('jobSheet').hidden)return;flushRec();const rid=job.rid;$('jobSheet').hidden=true;job.rid=null;closePop();
+  const fresh=!!(rid&&(ui.fresh||[]).some(x=>x.r===rid));if(rid)dropFresh(x=>x.r===rid);onData();
+  const pt=PT();if(fresh&&pt&&recsOf(pt.id).has(rid))toast('Posao dodat: '+recName(pt.id,rid),'Otvori',()=>openJob(rid),{ok:true})}
 function refreshJob(){if($('jobSheet').hidden||!job.rid)return;const t=PT();if(!t)return;const a=document.activeElement;
   if(a&&$('jobBody').contains(a)&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&!/^(checkbox|radio|button|file)$/.test(a.type)))){$('jobTitle').textContent=recName(t.id,job.rid);return}renderJob()}
 function newJob(pre){const t=PT();if(!t)return;if(readonly)return toastRO();const c=Object.assign({},pre||{});const id=createRec(t.id,c);(ui.fresh=ui.fresh||[]).push({t:t.id,r:id,c:JSON.stringify(c)});openJob(id,'name');return id}
@@ -3733,7 +3747,7 @@ render();
   if(typeof subKurs==='function')subKurs();
 })();
 })();
-</script><script type="module" src="fb.js?v=1.5.2"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.5.3"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}
