@@ -389,6 +389,16 @@ h2.g.late{color:var(--hit)}h2.g.today{color:var(--amb-t)}h2.g.pin{color:var(--hi
 .sgt b{font-size:15.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sgt small{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sgt small.on{color:var(--kuc-t);font-weight:700}
+/* opis i slike za novu stavku */
+#sNote{flex:1 1 100%;min-height:64px;font-size:15px}
+.pend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.pend .pd{position:relative;width:64px;height:64px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--bg)}
+.pend .pd img{width:100%;height:100%;object-fit:cover;display:block}
+.pend .pd .x{position:absolute;top:2px;right:2px;width:24px;height:24px;min-height:0;padding:0;border-radius:50%;border:0;background:rgba(20,24,30,.66);color:#fff;font-size:15px;line-height:1}
+.pend .pda{width:64px;height:64px;min-height:0;border:1.5px dashed var(--fld-bd);border-radius:10px;background:none;display:flex;align-items:center;justify-content:center;padding:0}
+.pend .pda svg{width:22px;height:22px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round}
+.sgi{width:40px;height:40px;border-radius:8px;overflow:hidden;flex:none;background:var(--bg)}
+.sgi img{width:100%;height:100%;object-fit:cover;display:block}
 </style>
 
 <header class="top"><div class="hin">
@@ -466,7 +476,9 @@ h2.g.late{color:var(--hit)}h2.g.today{color:var(--amb-t)}h2.g.pin{color:var(--hi
         <input id="sQty" type="text" inputmode="decimal" placeholder="Kol." aria-label="Količina">
         <select id="sUnit" aria-label="Jedinica mere"></select>
         <input id="sStore" type="text" list="storeList" placeholder="Gde (prodavnica)" aria-label="Prodavnica">
+        <textarea id="sNote" rows="2" placeholder="Opis – marka, mere, šifra… Red sa „• “ je tačka." aria-label="Opis"></textarea>
       </div>
+      <div class="pend" id="sPend" hidden></div>
       <div class="lastp" id="sLast" hidden></div>
       <input type="file" id="sCamF" accept="image/*" multiple hidden>
     </form>
@@ -905,10 +917,10 @@ function fillUnits(sel){sel.innerHTML='';for(const u of UNITS){const o=el('optio
   window.__sOptsReset=()=>{if(!moreOpen)showOpts(false)};
   $('sAdd').addEventListener('submit',e=>{e.preventDefault();const name=$('sName').value.trim();if(!name){$('sName').focus();return}if(needName())return;
     const now=Date.now(),id=newId('shopping');
-    const item={name,qty:num($('sQty').value),unit:$('sUnit').value,price:'',store:$('sStore').value.trim(),for:sFor,hot:sHot,note:'',bought:false,boughtAt:null,by:myId,byName:deviceName,createdAt:now,updatedAt:now,photos:pendPh.slice()};
+    const item={name,qty:num($('sQty').value),unit:$('sUnit').value,price:'',store:$('sStore').value.trim(),for:sFor,hot:sHot,note:$('sNote').value.trim(),bought:false,boughtAt:null,by:myId,byName:deviceName,createdAt:now,updatedAt:now,photos:pendPh.slice()};
     put('shopping',id,item);pendPh=[];syncCam();$('sLast').hidden=true;
-    $('sName').value='';$('sQty').value='';$('sUnit').value='kom';sHot=false;syncSAdd();if(window.__sOptsReset)window.__sOptsReset();$('sName').focus();
-    toast('Dodato'+(item.store?' – '+item.store:''),'Otvori',()=>openS(id))});
+    $('sName').value='';$('sQty').value='';$('sUnit').value='kom';$('sNote').value='';sHot=false;syncSAdd();if(window.__sOptsReset)window.__sOptsReset();$('sName').focus();
+    toast('Dodato'+(item.store?' – '+item.store:''),'Izmeni / slika',()=>openS(id),6000)});
   syncSAdd();
 })();
 $('sTog').addEventListener('click',()=>{showBought=!showBought;confirmClear=false;renderShop()});
@@ -1048,7 +1060,11 @@ async function uploadPhotos(files){const out=[];const a=await assetsApi();if(!a)
     try{const {blob,w,h}=await shrink(f);const r=await a.upload(blob,{type:'image/jpeg'});out.push({id:String(r.id),url:String(r.url||''),w,h})}catch(e){toast('Slika nije sačuvana'+(e&&e.code==='too_large'?' (prevelika)':'')+'.')}}
   return out}
 let pendPh=[];
-function syncCam(){$('sCamN').textContent=pendPh.length?String(pendPh.length):'';$('sCam').setAttribute('aria-label',pendPh.length?'Slike za novu stavku: '+pendPh.length:'Dodaj sliku')}
+function syncCam(){$('sCamN').textContent=pendPh.length?String(pendPh.length):'';$('sCam').setAttribute('aria-label',pendPh.length?'Slike za novu stavku: '+pendPh.length:'Dodaj sliku');
+  const box=$('sPend');box.innerHTML='';box.hidden=!pendPh.length;
+  pendPh.forEach((ph,i)=>{const w=el('span','pd');const im=el('img');im.alt='';photoInto(im,ph);w.appendChild(im);
+    const x=el('button','x','×');x.type='button';x.setAttribute('aria-label','Ukloni sliku '+(i+1));x.addEventListener('click',()=>{pendPh.splice(i,1);syncCam()});w.appendChild(x);box.appendChild(w)});
+  if(pendPh.length){const a=el('button','pda');a.type='button';a.innerHTML='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>';a.setAttribute('aria-label','Još slika');a.addEventListener('click',()=>$('sCamF').click());box.appendChild(a)}}
 $('sCam').addEventListener('click',()=>$('sCamF').click());
 $('sCamF').addEventListener('change',async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length)return;toast('Čuvam sliku…');const ph=await uploadPhotos(fs);pendPh=pendPh.concat(ph);syncCam();
   if(ph.length)toast(ph.length===1?'Slika je spremna – upiši šta je i klikni Dodaj':'Slike su spremne – upiši šta je i klikni Dodaj');$('sName').focus()});
@@ -1123,7 +1139,7 @@ let lastT=null;$('sName').addEventListener('input',()=>{clearTimeout(lastT);last
 function suggIndex(){const m=new Map();
   const add=(k,o)=>{if(!k)return;const p=m.get(k);if(!p||(o.at||0)>=(p.at||0))m.set(k,Object.assign({},p||{},o,{openId:(p&&p.openId)||o.openId||''}));else if(o.openId&&!p.openId)p.openId=o.openId};
   for(const [id,x0] of data.shopping){const x=normS(x0);if(!x.name)continue;const k=ikey(x.name);
-    add(k,{name:x.name,store:x.store,unit:x.unit,qty:x.qty,for:x.for,at:x.bought?(x.boughtAt||x.updatedAt||0):(x.createdAt||0),openId:x.bought?'':id})}
+    add(k,{name:x.name,store:x.store,unit:x.unit,qty:x.qty,for:x.for,photos:x.photos||[],note:x.note||'',at:x.bought?(x.boughtAt||x.updatedAt||0):(x.createdAt||0),openId:x.bought?'':id})}
   for(const [k,v] of PRICES){const p=m.get(k);const at=v.at?Date.parse(v.at)||0:0;
     if(!p)m.set(k,{name:v.name,store:v.store,unit:v.unit,qty:v.qty,at,price:v});else{p.price=v;if(at>(p.at||0)&&v.store)p.store=v.store}}
   return m}
@@ -1138,7 +1154,9 @@ function showSugg(){const q=$('sName').value;const box=$('sSugg');const list=sug
   for(const v of list){const b=el('button','sg');b.type='button';b.setAttribute('role','option');
     const tx=el('span','sgt');tx.appendChild(el('b',null,v.name));
     const sub=[];if(v.openId)sub.push('već je na spisku – otvori');else{if(v.store)sub.push(v.store);if(v.price)sub.push('poslednje '+priceText(v.price)+(v.price.date?' · '+fmtDate(v.price.date):''))}
-    tx.appendChild(el('small',v.openId?'on':null,sub.join(' · ')||(v.unit?'jedinica: '+v.unit:'ranije dodato')));b.appendChild(tx);
+    tx.appendChild(el('small',v.openId?'on':null,sub.join(' · ')||(v.unit?'jedinica: '+v.unit:'ranije dodato')));
+    if(v.photos&&v.photos.length){const w=el('span','sgi');const im=el('img');im.alt='';photoInto(im,v.photos[0]);w.appendChild(im);b.appendChild(w)}
+    b.appendChild(tx);
     if(!v.openId&&v.for)b.appendChild(el('i','dt '+(v.for==='kuca'?'k':'r')));
     b.addEventListener('pointerdown',e=>e.preventDefault());
     b.addEventListener('click',()=>pickSugg(v));box.appendChild(b)}
@@ -1147,6 +1165,9 @@ function pickSugg(v){hideSugg();
   if(v.openId&&data.shopping.has(v.openId)){$('sName').value='';$('sLast').hidden=true;if(window.__sOptsReset)window.__sOptsReset();openS(v.openId);toast('Već je na spisku – otvorio sam je');return}
   $('sName').value=v.name;if(v.store)$('sStore').value=v.store;if(v.unit&&UNITS.includes(v.unit))$('sUnit').value=v.unit;
   $('sQty').value='';$('sQty').placeholder=v.qty!==''&&v.qty!=null?'Kol. ('+fmtN(v.qty)+')':'Kol.';
+  if(v.note&&!$('sNote').value.trim())$('sNote').value=v.note;
+  if(v.photos&&v.photos.length){const have=new Set(pendPh.map(x=>x&&x.id));pendPh=pendPh.concat(v.photos.filter(x=>x&&!have.has(x.id)));syncCam()}
+  if((v.photos&&v.photos.length)||v.note)toast('Uzete su '+[v.photos&&v.photos.length?'slike':'',v.note?'opis':''].filter(Boolean).join(' i ')+' od prošlog puta – možeš da ih izmeniš');
   if(v.for==='kuca'||v.for==='radionica'){sFor=v.for;syncSAdd()}
   $('sOpts').hidden=false;$('sMore').setAttribute('aria-expanded','true');showLast('sLast',v.name,true);
   try{$('sQty').focus()}catch(e){}}

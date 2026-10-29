@@ -1,7 +1,12 @@
 {
- "v": "1.5.1",
+ "v": "1.5.2",
  "date": "28.10.2026.",
  "log": [
+  {
+   "v": "1.5.2",
+   "date": "29.10.2026.",
+   "t": "Kupovina: pod „Više“ je i Opis (marka, mere, šifra), a slike za novu stavku se vide pre dodavanja i mogu da se uklone. Kad izabereš predlog, uzmu se i slike i opis od prošlog puta – možeš da ih izmeniš pre „Dodaj“. Posle dodavanja dugme „Izmeni / slika“ otvara stavku. Gore levo piše „Martinov Design“ sa M znakom."
+  },
   {
    "v": "1.5.1",
    "date": "29.10.2026.",
