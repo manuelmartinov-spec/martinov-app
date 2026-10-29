@@ -1,7 +1,12 @@
 {
- "v": "1.4.0",
+ "v": "1.5.0",
  "date": "28.10.2026.",
  "log": [
+  {
+   "v": "1.5.0",
+   "date": "29.10.2026.",
+   "t": "Novi izgled (predlog A): glavno dugme je zlatno (Dodaj, Sačuvaj, Gotovo), a uključen izbor je svetla podloga sa okvirom – više se ne mešaju. Radionica plava, Kuća zelena, hitno crveno. Kupovina: jedan naslov, kartica po prodavnici sa ikonicama Pošalji i Kopiraj i dugmetom „Kupljeno – upiši cenu“; količina i prodavnica pod „Više“ (otvore se same dok kucaš); „Ovaj uređaj“ je dole. Pregled: pozdrav, brza dugmad (Posao, Događaj, Faktura, Kupovina, PDF, Štampaj mesec), crvena kartica za posao koji kasni, Aktivni poslovi sa kupcem, rokom i stanjem. Isti stil u Fakturama, Troškovima, Krojenju i PDF-u, i u tamnom režimu. Brojevi u istom fontu kao tekst."
+  },
   {
    "v": "1.4.0",
    "date": "28.10.2026.",

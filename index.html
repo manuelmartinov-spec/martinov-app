@@ -6,7 +6,7 @@
 #login p{margin:0;min-height:20px;color:#6E7682;font-size:14px;line-height:1.45}
 #login small{color:#9AA3AD;font-size:12px}
 #login button{font:600 15px "Figtree",system-ui,sans-serif;border-radius:10px;padding:11px 18px;min-height:46px;cursor:pointer;border:1px solid #E2DCD2;background:#fff;color:#232B36}
-#login #loginBtn{background:#333F50;border-color:#333F50;color:#fff;width:100%}
+#login #loginBtn{background:#D2B587;border-color:#D2B587;color:#1F2733;font-weight:800;width:100%}
 #login[data-s="wait"] button,#login[data-s="ok"] button{display:none}
 #login[data-s="out"] #loginOut{display:none}
 #login[data-s="denied"] #loginBtn{display:none}
@@ -21,7 +21,7 @@
 .gdbox>b{font-size:18px}.gdbox p{margin:0;font-size:14px;line-height:1.5;color:#55606C}.gdbox .gdn{font-size:13px;background:#F4F1EC;border-radius:10px;padding:10px 12px}
 .gdbox .gdm{color:#B0412E;font-weight:600;min-height:0}.gdbox .gdm:empty{display:none}
 .gdb{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}.gdb button{font:600 14px "Figtree",system-ui,sans-serif;border-radius:10px;padding:10px 16px;min-height:42px;cursor:pointer;border:1px solid #E2DCD2;background:#fff;color:#232B36}
-.gdb .gdy{background:#333F50;border-color:#333F50;color:#fff}
+.gdb .gdy{background:#D2B587;border-color:#D2B587;color:#1F2733;font-weight:800}
 @media (prefers-color-scheme: dark){.gdbox{background:#1F252D;color:#E7E3DC}.gdbox p{color:#9AA2AD}.gdbox .gdn{background:#252C35}.gdb button{background:#1F252D;color:#E7E3DC;border-color:#323A45}}
 .pkey{font:600 14px "IBM Plex Mono",monospace;background:#F4F1EC;border-radius:8px;padding:8px 10px;word-break:break-all;user-select:all}
 @media (prefers-color-scheme: dark){.pkey{background:#252C35}}
@@ -625,6 +625,116 @@ table.rnt{width:100%;border-collapse:collapse;font-size:12.5px}
   .gwrap,.gal,.kb,.cal{padding-bottom:96px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style id="dizajn-a">
+/* ==== Dizajn A: uloge boja (glavno dugme, izabrano, Radionica/Kuća, hitno, stanja) ==== */
+:root{
+  --muted:#5F6672;
+  --act:#D2B587; --act-h:#C6A675; --on-act:#1F2733;
+  --act-soft:#F3ECE1; --on-act-soft:#5B4421;
+  --selbg:#E4E8EE; --sel-bd:#333F50; --sel-fg:#232B36;
+  --track:#F1EDE6; --fld-bd:#D9D2C6;
+  --rad:#3466AF; --rad-t:#2E5A9A; --rad-soft:#E5EDF8;
+  --kuc:#2F7D57; --kuc-t:#276B4A; --kuc-soft:#E2F1E8;
+  --hit:#9A3324; --hit-soft:#F6E4DF;
+  --amb-t:#7A4B0C; --amb-soft:#F7E9D4;
+  --r-card:16px; --r-btn:12px; --toast-act:#E3C99B;
+  --f-num:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --muted:#A3ABB6;
+  --act:#CDB089; --act-h:#D9BF9B; --on-act:#171B21;
+  --act-soft:#2E2A22; --on-act-soft:#E3CFAE;
+  --selbg:#2A3442; --sel-bd:#C9D3E0; --sel-fg:#E7E3DC;
+  --track:#252C35; --fld-bd:#3A434F;
+  --rad:#6FA3E8; --rad-t:#8DB7EE; --rad-soft:#1F2C3D;
+  --kuc:#5DBB8C; --kuc-t:#7FCCA3; --kuc-soft:#1C3127;
+  --hit:#F0907E; --hit-soft:#3A2622;
+  --amb-t:#E8B66A; --amb-soft:#352A1A; --toast-act:#6B4E1F;
+}}
+:root[data-theme="dark"]{
+  --muted:#A3ABB6;
+  --act:#CDB089; --act-h:#D9BF9B; --on-act:#171B21;
+  --act-soft:#2E2A22; --on-act-soft:#E3CFAE;
+  --selbg:#2A3442; --sel-bd:#C9D3E0; --sel-fg:#E7E3DC;
+  --track:#252C35; --fld-bd:#3A434F;
+  --rad:#6FA3E8; --rad-t:#8DB7EE; --rad-soft:#1F2C3D;
+  --kuc:#5DBB8C; --kuc-t:#7FCCA3; --kuc-soft:#1C3127;
+  --hit:#F0907E; --hit-soft:#3A2622;
+  --amb-t:#E8B66A; --amb-soft:#352A1A; --toast-act:#6B4E1F;
+}
+body{font-variant-numeric:tabular-nums}
+.toast button{color:var(--toast-act);font-weight:800}
+
+/* ==== Dizajn A: glavna aplikacija ==== */
+/* dugmad: zlatno = radnja; izabrano = svetla podloga + okvir; navigacija = zlatna svetla podloga */
+.btn{border-radius:10px;min-height:40px;padding:8px 14px;font-weight:600}
+.btn:hover{background:var(--hover)}
+.pri,.btn.pri{background:var(--act);border-color:var(--act);color:var(--on-act);font-weight:700}
+.pri:hover,.btn.pri:hover{background:var(--act-h);border-color:var(--act-h);filter:none}
+.pri .ic{stroke-width:2.2}
+.dfill{border-radius:10px}
+input,select,textarea{border-color:var(--fld-bd);border-radius:10px}
+.tbtn{border-radius:10px}
+.tbtn.on{background:var(--selbg);border-color:var(--sel-bd);color:var(--sel-fg)}
+.seg{background:var(--track);border-color:transparent;border-radius:11px;padding:3px}
+.seg button{border-radius:8px;min-height:34px}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--fg);font-weight:700;box-shadow:0 1px 3px var(--lift)}
+.chip{border-width:1.5px;min-height:36px;padding:5px 13px}
+.chip[aria-pressed="true"]{background:var(--selbg);border-color:var(--sel-bd);color:var(--sel-fg);font-weight:700}
+.chip[style*="--c"][aria-pressed="true"]{background:color-mix(in srgb,var(--c) 16%,var(--panel));border-color:var(--c);color:var(--fg)}
+.vtab[aria-current="true"]{border-bottom-color:var(--act);border-bottom-width:3px;font-weight:700}
+.titem[aria-current="true"]{background:var(--act-soft);font-weight:700}
+.cb.on{background:var(--kuc);border-color:var(--kuc)}
+
+/* kartice */
+.dcard,.tile,.prop,.hint,.rcard>section{border-radius:var(--r-card)}
+.dcard{padding:12px 14px 8px}
+.dcard h2{font-size:16px;letter-spacing:0;text-transform:none;color:var(--fg);font-weight:800;margin:2px 0 8px;display:flex;align-items:baseline;gap:6px}
+.dcard h2 small{font-size:14px;font-weight:600;color:var(--muted)}
+.tile{padding:12px 14px}
+.tile span{font-size:13px;letter-spacing:0;text-transform:none;font-weight:700}
+.tile b{font:800 24px var(--f-ui);font-variant-numeric:tabular-nums}
+.tile.bad b{color:var(--hit)}
+.prop{background:var(--act-soft);border-color:var(--act);box-shadow:none}
+.drow{padding:10px 4px;border-top-color:var(--grid)}
+.drow .dd{font:600 13px var(--f-ui)}
+.drow .dd.bad{color:var(--hit)}
+.drow .dn{font-weight:700}
+.drow .dsub{display:block;font-size:13px;color:var(--muted);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drow .dtx{flex:1;min-width:0;display:flex;flex-direction:column}
+.drow .dtx .dn{flex:none}
+.pill{font-weight:700;font-size:12px;border-radius:8px;padding:3px 9px}
+
+/* Pregled */
+.dhead{align-items:flex-end}
+.dhead .dgreet{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dhead .dgreet p{margin:0;color:var(--muted);font-size:15px}
+.qa{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.qa button{min-height:64px;border:1.5px solid var(--line);border-radius:14px;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font:700 13px var(--f-ui);color:var(--navy);padding:6px 4px}
+.qa button:hover{background:var(--hover)}
+.qa button .ic{width:21px;height:21px}
+.qa button.pri{background:var(--act);border-color:var(--act);color:var(--on-act);font-weight:800}
+.qa button.pri:hover{background:var(--act-h)}
+@media (max-width:760px){.qa{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.alert{background:var(--hit-soft);border-radius:var(--r-card);padding:10px 12px 10px 14px;display:flex;flex-direction:column;gap:2px}
+.alert .ah{font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--hit);display:flex;align-items:center;gap:8px;padding-top:2px}
+.alert .ah .ic{width:18px;height:18px}
+.alert .arow{display:flex;align-items:center;gap:12px;border:0;background:none;text-align:left;padding:6px 0;font:inherit;color:var(--fg);width:100%}
+.alert .arow+.arow{border-top:1px solid color-mix(in srgb,var(--hit) 22%,transparent)}
+.alert .arow b{display:block;font-size:16px}
+.alert .arow small{display:block;font-size:13px;color:var(--muted)}
+.alert .arow .go{margin-left:auto;flex:none;background:var(--panel);border-radius:12px;padding:10px 14px;font-weight:700;color:var(--hit);font-size:14px}
+
+/* donja traka na telefonu: izabrano = zlatna podloga iza ikonice */
+@media (max-width:760px){
+  #tabbar .tab{font-size:11.5px}
+  #tabbar .tab[aria-current="true"]{background:none;color:var(--fg);font-weight:800}
+  #tabbar .tab[aria-current="true"] .ic{background:var(--act-soft);border-radius:15px;padding:4px 15px;box-sizing:content-box;margin:-4px 0}
+  #tabbar .tbadge{background:var(--hit);font-family:var(--f-ui)}
+  #tabbar .tbadge.soft{background:var(--navy);color:var(--panel)}
+}
+.prop .ph{color:var(--on-act-soft)}
 </style>
 
 <div id="app">
@@ -2053,7 +2163,7 @@ function renderModule(){
 
 /* ---------- ugrađene aplikacije (Fakture, Zadaci i Kupovina, Troškovi) ---------- */
 const frames={};
-const BRIDGE='<script>(function(){try{var p=window.parent;window.claude={use:function(n){return p.claude.use(n)}};window.__inTabele=true}catch(e){}})();<\/script>';
+const BRIDGE='<script>(function(){try{var p=window.parent;window.claude={use:function(n){return p.claude.use(n)}};window.__inTabele=true;document.documentElement.classList.add("emb")}catch(e){}})();<\/script>';
 function showApp(app,tab){
   const host=$('appHost');for(const k in frames)frames[k].hidden=k!==app;
   let fr=frames[app];
@@ -2085,19 +2195,28 @@ function jobTitle(t,r){const k=F(t,'f_kupac','Kupac');const kn=k?txt(t,k,r):'';r
 function tile(lbl,val,cls,onClick){const d=el(onClick?'button':'div','tile'+(cls?' '+cls:''));if(onClick){d.type='button';d.addEventListener('click',onClick)}d.append(el('span',null,lbl),el('b',null,val));return d}
 function renderPregled(c){
   const w=el('div','dash');const d=new Date();
-  const h=el('div','dhead');h.appendChild(el('h1',null,['Nedelja','Ponedeljak','Utorak','Sreda','Četvrtak','Petak','Subota'][d.getDay()]+', '+d.getDate()+'. '+MON[d.getMonth()]));
-  const qa=el('div','chips');
-  const b1=el('button','btn pri');b1.type='button';b1.innerHTML=ic('plus')+'<span>Posao</span>';b1.addEventListener('click',()=>newJob());
-  const b2=el('button','btn');b2.type='button';b2.innerHTML=ic('cal')+'<span>Događaj</span>';b2.addEventListener('click',()=>eventDlg(null,todayISO()));
-  const b3=el('button','btn');b3.type='button';b3.innerHTML=ic('print')+'<span>Štampaj mesec</span>';b3.addEventListener('click',()=>printDlg());
-  qa.append(b1,b2,b3);h.appendChild(qa);w.appendChild(h);
+  const h=el('div','dhead');const gr=el('div','dgreet');const hr=d.getHours();
+  const fn=(()=>{try{const u=window.__mtUser&&window.__mtUser();return u&&u.displayName?String(u.displayName).trim().split(/\s+/)[0]:''}catch(e){return''}})();
+  gr.appendChild(el('h1',null,(hr<11?'Dobro jutro':hr<18?'Dobar dan':'Dobro veče')+(fn?', '+fn:'')));
+  gr.appendChild(el('p',null,['nedelja','ponedeljak','utorak','sreda','četvrtak','petak','subota'][d.getDay()]+', '+d.getDate()+'. '+MON[d.getMonth()]));
+  h.appendChild(gr);w.appendChild(h);
+  /* brza dugmad: zlatno = glavna radnja */
+  const qa=el('div','qa');const qb=(icon,label,fn2,pri)=>{const b=el('button',pri?'pri':null);b.type='button';b.innerHTML=ic(icon);b.appendChild(el('span',null,label));b.addEventListener('click',fn2);qa.appendChild(b)};
+  qb('plus','Posao',()=>newJob(),true);
+  qb('cal','Događaj',()=>eventDlg(null,todayISO()));
+  qb('doc','Faktura',()=>newInvoice());
+  qb('cart','Kupovina',()=>openModule('kupovina'));
+  if(window.__mtFiles&&MODS.pdf)qb('pdf','PDF',()=>openModule('pdf'));
+  qb('print','Štampaj mesec',()=>printDlg());
+  w.appendChild(qa);
   /* predlozi iz faktura */
   const pp=pendingProposals();
   if(pp.length){const bx=el('div','prop');bx.appendChild(el('div','ph',pp.length===1?'Uplaćen avans — napravi posao':'Uplaćen avans — '+pp.length+' nova posla čekaju'));
     for(const p of pp){const r=el('div','prow2');const d0=p.d;r.append(el('span','pn',(DOCN[d0.type]||'Dokument')+' '+(d0.num||'')+' · '+((d0.client&&d0.client.name)||'bez kupca')));
       const b=el('button','btn pri','Pogledaj');b.type='button';b.addEventListener('click',()=>openProposal(p));r.appendChild(b);bx.appendChild(r)}
     w.appendChild(bx)}
-  if(narrow()){let seen=false;try{seen=localStorage.getItem('mt.hint.home')==='1'}catch(e){}
+  const standalone=(()=>{try{return matchMedia('(display-mode: standalone)').matches||!!window.__mtFiles}catch(e){return false}})();
+  if(narrow()&&!standalone){let seen=false;try{seen=localStorage.getItem('mt.hint.home')==='1'}catch(e){}
     if(!seen){const hb=el('div','hint');const i0=el('span','hic');i0.innerHTML=ic('phone');const tx=el('div');tx.appendChild(el('b',null,'Stavi aplikaciju na telefon'));
       tx.appendChild(el('span',null,'Android: otvori ovaj link u Chrome-u → ⋮ → „Dodaj na početni ekran“. Ako ponudi „Instaliraj“ i „Napravi prečicu“, izaberi „Napravi prečicu“ (inače se otvara samo Claude). iPhone: Safari → Podeli → „Dodaj na početni ekran“.'));
       const ok=el('button','btn','U redu');ok.type='button';ok.addEventListener('click',()=>{try{localStorage.setItem('mt.hint.home','1')}catch(e){}hb.remove()});hb.append(i0,tx,ok);w.appendChild(hb)}}
@@ -2110,6 +2229,11 @@ function renderPregled(c){
   const fo=F(t,'f_ostatak','Ostatak');let toCollect=0;
   for(const x of act){const v=fo?val(t,fo,x.r):null;if(typeof v==='number'&&v>0)toCollect+=v}
   const shopN=[...X.shopping.values()].filter(s=>!s.bought).length;
+  const lateL=due.filter(x=>jobDue(t,x.r)<td);
+  if(lateL.length){const al=el('section','alert');const ah=el('div','ah');ah.innerHTML=ic('bell');ah.appendChild(el('span',null,'KASNI '+lateL.length+(lateL.length===1?' POSAO':' POSLA')));al.appendChild(ah);
+    for(const x of lateL.slice(0,3)){const r=el('button','arow');r.type='button';const tx=el('span');tx.appendChild(el('b',null,jobTitle(t,x.r)));const n=-dayDiff(td,jobDue(t,x.r));
+      tx.appendChild(el('small',null,'rok je bio '+fmtD(jobDue(t,x.r)).slice(0,-5)+' · kasni '+n+(n===1?' dan':' dana')));r.append(tx,el('span','go','Otvori'));r.addEventListener('click',()=>openJob(x.id));al.appendChild(r)}
+    w.appendChild(al)}
   const tiles=el('div','tiles');
   tiles.append(tile('Aktivni poslovi',String(act.length),'',()=>openTable(t.id)),
     tile('Rok u 7 dana',String(due.length)+(late?' · '+late+' kasni':''),late?'bad':'',()=>openModule('kal')),
@@ -2118,13 +2242,16 @@ function renderPregled(c){
   w.appendChild(tiles);
   const cols=el('div','dcols');
   /* rokovi */
-  const s1=el('section','dcard');s1.appendChild(el('h2',null,'Rokovi'));
-  const list=act.filter(x=>jobDue(t,x.r)).sort((a,b)=>jobDue(t,a.r)<jobDue(t,b.r)?-1:1).slice(0,10);
-  if(!list.length)s1.appendChild(el('p','mute','Nema aktivnih poslova sa rokom.'));
-  for(const x of list){const r=el('button','drow');r.type='button';const d0=jobDue(t,x.r);const n=dayDiff(td,d0);
-    const dd=el('span','dd'+(n<0?' bad':n<=2?' warn':''),n<0?'kasni '+(-n)+' d':n===0?'danas':n===1?'sutra':fmtD(d0).slice(0,-5));
+  const s1=el('section','dcard');const h1=el('h2',null,'Aktivni poslovi');h1.appendChild(el('small',null,'· '+act.length));s1.appendChild(h1);
+  const fK=F(t,'f_kupac','Kupac');
+  const list=act.filter(x=>!/^bez naziva$/i.test(String(jobTitle(t,x.r)||'').trim())&&String(jobTitle(t,x.r)||'').trim()).sort((a,b)=>{const da=jobDue(t,a.r)||'9',db2=jobDue(t,b.r)||'9';return da<db2?-1:da>db2?1:0}).slice(0,10);
+  if(!list.length)s1.appendChild(el('p','mute','Nema aktivnih poslova.'));
+  for(const x of list){const r=el('button','drow');r.type='button';const d0=jobDue(t,x.r);const n=d0?dayDiff(td,d0):null;
     const st=jobState(t,x.r);const pl=el('span','pill',st.name||'—');if(st.c)pl.style.setProperty('--c',cv(st.c.c));
-    r.append(dd,piecesNode(jobPieces(t,x.r),{max:3,qty:false}),el('span','dn',jobTitle(t,x.r)),pl);r.addEventListener('click',()=>openJob(x.id));s1.appendChild(r)}
+    const tx=el('span','dtx');tx.appendChild(el('span','dn',jobTitle(t,x.r)));
+    const kup=fK?String(txt(t,fK,x.r)||''):'';const rok=d0?(n<0?'kasni '+(-n)+' d':n===0?'rok danas':n===1?'rok sutra':'rok '+fmtD(d0).slice(0,-5)):'bez roka';
+    const sub=el('span','dsub'+(n!=null&&n<0?' bad':''),[kup,rok].filter(Boolean).join(' · '));tx.appendChild(sub);
+    r.append(piecesNode(jobPieces(t,x.r),{max:2,qty:false}),tx,pl);r.addEventListener('click',()=>openJob(x.id));s1.appendChild(r)}
   /* danas i sutra */
   const s2=el('section','dcard');s2.appendChild(el('h2',null,'Danas i sutra'));
   const evs=calItems(td,addDays(td,1));if(!evs.length)s2.appendChild(el('p','mute','Nema sastanaka, isporuka ni zadataka za danas i sutra.'));
@@ -2938,6 +3065,11 @@ function openInvoice(id){
     if(res==='wait'&&Date.now()-t0<9000){setTimeout(tryOpen,250);return}toast('Faktura nije otvorena sama. Nađi je u listi Faktura.')};
   setTimeout(tryOpen,120);
 }
+/* nova faktura iz Pregleda: otvori Fakture → „+ Novi“ */
+function newInvoice(){closePop();openModule('fakture');const t0=Date.now();
+  const go=()=>{let ok=false;try{const fr=frames.fakture;const dd=fr&&fr.contentDocument;if(dd&&dd.readyState==='complete'){const b=dd.querySelector('#tabs [data-v="new"]');if(b){b.click();ok=true}}}catch(e){}
+    if(!ok&&Date.now()-t0<9000)setTimeout(go,250)};
+  setTimeout(go,120)}
 function docsOfClient(kr){const cid=kr&&kr.c&&kr.c._cid;const nn=ntxt(kr&&kr.c&&kr.c.f_ime);const out=[];
   for(const [id,d] of X.docs){if(!d||!d.type)continue;const c=d.client||{};if((cid&&c.id===cid)||(nn&&ntxt(c.name)===nn))out.push([id,d])}
   return out.sort((a,b)=>String(b[1].date||'').localeCompare(String(a[1].date||''))||String(b[1].updatedAt||'').localeCompare(String(a[1].updatedAt||'')))}
@@ -3572,7 +3704,7 @@ render();
   if(typeof subKurs==='function')subKurs();
 })();
 })();
-</script><script type="module" src="fb.js?v=1.4.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.5.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}

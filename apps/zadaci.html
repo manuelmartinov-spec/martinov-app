@@ -246,6 +246,141 @@ h2.g.late{color:var(--bad)}h2.g.today{color:var(--warn)}h2.g.store{color:var(--f
 #lbN{right:10px;top:50%;transform:translateY(-50%)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<style id="dizajn-a">
+/* ==== Dizajn A: uloge boja (glavno dugme, izabrano, Radionica/Kuća, hitno, stanja) ==== */
+:root{
+  --muted:#5F6672;
+  --act:#D2B587; --act-h:#C6A675; --on-act:#1F2733;
+  --act-soft:#F3ECE1; --on-act-soft:#5B4421;
+  --selbg:#E4E8EE; --sel-bd:#333F50; --sel-fg:#232B36;
+  --track:#F1EDE6; --fld-bd:#D9D2C6;
+  --rad:#3466AF; --rad-t:#2E5A9A; --rad-soft:#E5EDF8;
+  --kuc:#2F7D57; --kuc-t:#276B4A; --kuc-soft:#E2F1E8;
+  --hit:#9A3324; --hit-soft:#F6E4DF;
+  --amb-t:#7A4B0C; --amb-soft:#F7E9D4;
+  --r-card:16px; --r-btn:12px; --toast-act:#E3C99B;
+  --f-num:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --muted:#A3ABB6;
+  --act:#CDB089; --act-h:#D9BF9B; --on-act:#171B21;
+  --act-soft:#2E2A22; --on-act-soft:#E3CFAE;
+  --selbg:#2A3442; --sel-bd:#C9D3E0; --sel-fg:#E7E3DC;
+  --track:#252C35; --fld-bd:#3A434F;
+  --rad:#6FA3E8; --rad-t:#8DB7EE; --rad-soft:#1F2C3D;
+  --kuc:#5DBB8C; --kuc-t:#7FCCA3; --kuc-soft:#1C3127;
+  --hit:#F0907E; --hit-soft:#3A2622;
+  --amb-t:#E8B66A; --amb-soft:#352A1A; --toast-act:#6B4E1F;
+}}
+:root[data-theme="dark"]{
+  --muted:#A3ABB6;
+  --act:#CDB089; --act-h:#D9BF9B; --on-act:#171B21;
+  --act-soft:#2E2A22; --on-act-soft:#E3CFAE;
+  --selbg:#2A3442; --sel-bd:#C9D3E0; --sel-fg:#E7E3DC;
+  --track:#252C35; --fld-bd:#3A434F;
+  --rad:#6FA3E8; --rad-t:#8DB7EE; --rad-soft:#1F2C3D;
+  --kuc:#5DBB8C; --kuc-t:#7FCCA3; --kuc-soft:#1C3127;
+  --hit:#F0907E; --hit-soft:#3A2622;
+  --amb-t:#E8B66A; --amb-soft:#352A1A; --toast-act:#6B4E1F;
+}
+body{font-variant-numeric:tabular-nums}
+.toast button{color:var(--toast-act);font-weight:800}
+
+/* ==== Dizajn A: Zadaci i Kupovina ==== */
+button{border-radius:10px;min-height:40px}
+button.pri{background:var(--act);border-color:var(--act);color:var(--on-act);font-weight:800}
+button.pri:hover{background:var(--act-h);border-color:var(--act-h)}
+input,select,textarea{border-color:var(--fld-bd);border-radius:10px}
+input[type=date]{font-family:var(--f-ui)}
+/* u aplikaciji: bez drugog naslova i bez „Martinov zadaci“ */
+html.emb .hrow{display:none}
+html.emb nav.seg{margin-top:10px}
+html.emb #v-shop .day{display:none}
+html.emb #v-shop form.add{margin-top:12px}
+nav.seg{background:var(--track);border-color:transparent;border-radius:12px;padding:4px}
+nav.seg button{min-height:40px;border-radius:9px;font-size:15px}
+nav.seg button[aria-current="true"]{font-weight:800}
+nav.seg .n{font-family:var(--f-ui);font-weight:700;font-size:12.5px;background:var(--selbg);color:var(--sel-fg)}
+nav.seg .n.hot{background:var(--hit-soft);color:var(--hit)}
+.stat b{font-family:var(--f-ui);font-weight:700}
+/* izbori */
+.chip{min-height:40px;padding:6px 14px;border-width:1.5px;color:var(--fg);font-weight:600}
+.chip[aria-pressed="true"]{background:var(--selbg);color:var(--sel-fg);border-color:var(--sel-bd);font-weight:700}
+.chip.hot{color:var(--hit)}
+.chip.hot[aria-pressed="true"]{background:var(--hit-soft);border-color:var(--hit);color:var(--hit)}
+.chip .n{font-family:var(--f-ui);font-weight:600;opacity:.8}
+.chip.r{color:var(--rad-t)}.chip.k{color:var(--kuc-t)}
+.chip.r[aria-pressed="true"],.chip.k[aria-pressed="true"]{color:var(--sel-fg)}
+.dt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px;background:var(--muted)}
+.dt.r{background:var(--rad)}.dt.k{background:var(--kuc)}
+.seg2{background:var(--track);border-color:transparent;border-radius:10px;padding:3px}
+.seg2 button{min-height:32px;border-radius:8px}
+.seg2 button[aria-pressed="true"]{font-weight:700}
+/* brzi unos */
+form.add{border-radius:var(--r-card);padding:10px}
+.addrow input{min-height:48px;border-width:1.5px;border-radius:12px;padding:0 14px}
+.addrow button{min-height:48px;border-radius:12px}
+.addrow button.pri{padding:0 18px;font-size:15.5px;display:inline-flex;align-items:center;gap:6px}
+.addrow button.pri svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
+.addrow .cam{width:48px;border:1.5px solid var(--fld-bd);background:var(--panel)}
+.addopts{gap:8px}
+.addopts select,.addopts input{min-height:42px}
+.segf{display:inline-flex;background:var(--track);border-radius:10px;padding:3px;gap:3px}
+.segf button{border:0;background:none;min-height:38px;padding:0 12px;border-radius:8px;color:var(--muted);font-weight:600;font-size:14px;display:inline-flex;align-items:center}
+.segf button[aria-pressed="true"]{background:var(--panel);color:var(--fg);font-weight:700;box-shadow:0 1px 2px var(--lift)}
+.more{margin-left:auto;border:0;background:none;color:var(--navy);display:inline-flex;align-items:center;gap:4px;padding:0 8px;min-height:44px}
+.more svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;transition:transform .15s}
+.more[aria-expanded="true"] svg{transform:rotate(180deg)}
+/* filteri + ikonice */
+.frow{display:flex;align-items:center;gap:4px;margin-top:14px}
+.frow .cats{margin-top:0;flex:1;min-width:0}
+.ib{width:44px;min-height:44px;height:44px;border:0;background:none;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;padding:0;color:var(--navy);flex:none;position:relative}
+.ib:hover{background:var(--panel)}
+.ib svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ib .bn{position:absolute;top:4px;right:3px;min-width:17px;height:17px;border-radius:9px;background:var(--navy);color:var(--panel);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+/* kartica prodavnice */
+.scard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;margin-top:12px}
+.shead{display:flex;align-items:center;gap:8px;padding:8px 6px 6px 14px}
+.shead .dot{width:10px;height:10px;border-radius:50%;background:var(--stripe);flex:none}
+.shead .dot.none{background:none;box-shadow:inset 0 0 0 1.5px var(--muted)}
+.shead h2{margin:0;font-size:16px;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shead h2 small{font-size:14px;font-weight:600;color:var(--muted);margin-left:4px}
+.scard.pin .shead h2{color:var(--hit)}
+.scard.pin .shead svg.pn{width:15px;height:15px;fill:currentColor;color:var(--hit);flex:none}
+.scard .list{border:0;border-radius:0;border-top:1px solid var(--line)}
+.sfoot{padding:8px 10px 10px}
+.sfoot button{width:100%;min-height:44px;border:0;background:var(--act-soft);color:var(--on-act-soft);font-weight:800;font-size:15px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.sfoot button:hover{filter:brightness(.97)}
+.sfoot svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.gnote{padding:10px 14px 12px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+/* stavke */
+.list{border-radius:var(--r-card)}
+.task.s,.task.hot{box-shadow:none;background:none}
+.ck{width:54px;padding-top:12px}
+.ck span{width:28px;height:28px}
+.task.hot .ck span{border-color:var(--hit)}
+.task.done .ck span::after{left:8px;top:3px;width:7px;height:13px}
+.tt{font-size:16px;font-weight:700}
+.meta{font-size:13px}
+.meta .due,.meta .stp,.meta .qty{font-family:var(--f-ui);font-size:13px}
+.meta .qty{font-weight:600}
+.meta .cat{color:var(--muted)}
+.meta .cat.r{color:var(--rad-t)}.meta .cat.k{color:var(--kuc-t)}
+.meta .due.late{color:var(--hit)}
+.pill.hot{background:var(--hit-soft);color:var(--hit);border-radius:8px;font-size:11.5px;padding:3px 8px}
+/* naslovi grupa zadataka */
+h2.g{font-size:15px;letter-spacing:0;text-transform:none;color:var(--fg);font-weight:800;margin:20px 2px 8px}
+h2.g .r{font-family:var(--f-ui);font-weight:600;color:var(--muted);font-size:14px}
+h2.g.late{color:var(--hit)}h2.g.today{color:var(--amb-t)}h2.g.pin{color:var(--hit)}
+/* ovaj uređaj – dole */
+.me{justify-content:center;margin-top:18px}
+.dtog{font-size:13px;letter-spacing:.04em}
+.dtog span{font-family:var(--f-ui)}
+.sbox header .pri{min-width:96px}
+.frow .chip{padding:0 12px;font-size:14.5px}
+.frow .cats{gap:6px}
+.frow .ib{width:40px}
+</style>
 
 <header class="top"><div class="hin">
   <div class="hrow">
@@ -260,7 +395,6 @@ h2.g.late{color:var(--bad)}h2.g.today{color:var(--warn)}h2.g.store{color:var(--f
 </div></header>
 
 <div class="wrap">
-  <div class="me" id="meRow" hidden>Ovaj uređaj: <b id="meName"></b><button type="button" class="ghost" id="meEdit">Promeni ime</button></div>
   <form class="mecard" id="meCard" hidden autocomplete="off">
     <label for="meInput"><b>Kako se zove ovaj uređaj?</b> <span>Ime piše uz sve što dodaš, čekiraš ili kupiš, da se zna ko je šta upisao. Upisuješ ga samo jednom na svakom telefonu i laptopu.</span></label>
     <div class="addrow"><input id="meInput" type="text" maxlength="30" enterkeyhint="done" placeholder="npr. Manuel telefon, Laptop" aria-label="Ime uređaja"><button class="pri" type="submit">Sačuvaj</button></div>
@@ -306,16 +440,21 @@ h2.g.late{color:var(--bad)}h2.g.today{color:var(--warn)}h2.g.store{color:var(--f
 
     <form class="add" id="sAdd" autocomplete="off">
       <div class="addrow">
-        <input id="sName" type="text" enterkeyhint="done" placeholder="Šta treba kupiti, npr. tiplovi 8 mm" aria-label="Šta treba kupiti">
+        <input id="sName" type="text" enterkeyhint="done" placeholder="Šta treba kupiti?" aria-label="Šta treba kupiti">
         <button type="button" class="ghost cam" id="sCam" aria-label="Dodaj sliku"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6.5h3l1.4-2h5.2l1.4 2h3v9H3z"/><circle cx="10" cy="10.8" r="3"/></svg><span id="sCamN"></span></button>
-        <button class="pri" type="submit">Dodaj</button>
+        <button class="pri" type="submit"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>Dodaj</button>
       </div>
       <div class="addopts">
+        <div class="segf" role="group" aria-label="Za">
+          <button type="button" id="sForR" aria-pressed="true"><i class="dt r"></i>Radionica</button>
+          <button type="button" id="sForK" aria-pressed="false"><i class="dt k"></i>Kuća</button>
+        </div>
+        <button type="button" class="chip hot" id="sHot" aria-pressed="false">Hitno</button>
+        <button type="button" class="more" id="sMore" aria-expanded="false" aria-controls="sOpts">Više<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 8 5 5 5-5"/></svg></button>
+      </div>
+      <div class="addopts" id="sOpts" hidden>
         <input id="sQty" type="text" inputmode="decimal" placeholder="Kol." aria-label="Količina">
         <select id="sUnit" aria-label="Jedinica mere"></select>
-        <button type="button" class="chip" id="sForR" aria-pressed="true">Radionica</button>
-        <button type="button" class="chip" id="sForK" aria-pressed="false">Kuća</button>
-        <button type="button" class="chip hot" id="sHot" aria-pressed="false">Hitno</button>
         <input id="sStore" type="text" list="storeList" placeholder="Gde (prodavnica)" aria-label="Prodavnica">
       </div>
       <div class="lastp" id="sLast" hidden></div>
@@ -323,8 +462,9 @@ h2.g.late{color:var(--bad)}h2.g.today{color:var(--warn)}h2.g.store{color:var(--f
     </form>
     <datalist id="storeList"></datalist>
 
-    <div class="cats" id="sFor" role="toolbar" aria-label="Za šta"></div>
-    <div class="tools"><button type="button" class="ghost" id="sHist">Istorija i cene</button><span class="sp"></span><button type="button" class="ghost" id="sCopy">Kopiraj spisak</button></div>
+    <div class="frow"><div class="cats" id="sFor" role="toolbar" aria-label="Za šta"></div>
+      <button type="button" class="ib" id="sHist" aria-label="Istorija i cene" title="Istorija i cene"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 4v4.5H8M12 7.5V12l3 2"/></svg></button>
+      <button type="button" class="ib" id="sCopy" aria-label="Kopiraj ceo spisak" title="Kopiraj ceo spisak"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button></div>
 
     <div id="sGroups"><div class="empty">Učitavam spisak…</div></div>
 
@@ -333,6 +473,7 @@ h2.g.late{color:var(--bad)}h2.g.today{color:var(--warn)}h2.g.store{color:var(--f
 
     <p class="hint">Svi koji imaju pristup aplikaciji vide isti spisak. Kad neko doda ili čekira stavku, promena se odmah vidi na svim telefonima i na laptopu. Hitne stavke su uvek na vrhu. Svaka prodavnica ima svoju boju; promeniš je kad otvoriš stavku iz te prodavnice. Ako ostaviš prodavnicu praznu, stavka ide pod „Bilo gde“. Kod svake prodavnice su dugmad „Pošalji“ (prvo tekst, pa slike – za Viber), „Kopiraj“ i „Kupljeno“ (upišeš račun: cena, plaćanje, za koji posao – ide u Troškove i u istoriju).</p>
   </section>
+  <div class="me" id="meRow" hidden>Ovaj uređaj: <b id="meName"></b><button type="button" class="ghost" id="meEdit">Promeni ime</button></div>
 </div>
 
 <!-- izmena zadatka -->
@@ -442,6 +583,7 @@ h2.g.late{color:var(--bad)}h2.g.today{color:var(--warn)}h2.g.store{color:var(--f
 <div class="copybox" id="copybox" hidden><div class="msg">Telefon nije dozvolio automatsko kopiranje. Označi tekst i kopiraj ga ručno.</div><textarea id="copyT" readonly></textarea><button type="button" id="copyX">Zatvori</button></div>
 
 <script>
+try{if(window.__inTabele)document.documentElement.classList.add('emb')}catch(e){}
 (function(){
 const CATS=[
   {id:'posao',n:'Poslovi'},{id:'nabavka',n:'Nabavka'},{id:'cnc',n:'CNC i mašine'},{id:'radionica',n:'Radionica'},
@@ -684,7 +826,7 @@ function srow(s,grp){
   if(grp==='pin'&&s.store)m.appendChild(storeChip(s));
   const q=qtyText(s);if(q)m.appendChild(el('span','qty',q));
   if(s.price!==''){const tot=lineTotal(s);m.appendChild(el('span','due',(s.qty!==''&&s.qty!==1?fmtN(s.qty)+' × '+fmtE(s.price)+' = ':'')+fmtE(tot)))}
-  if(!fFor)m.appendChild(el('span','cat',FOR[s.for]));
+  if(!fFor)m.appendChild(el('span','cat '+(s.for==='kuca'?'k':'r'),FOR[s.for]));
   if(s.bought){m.appendChild(el('span','due','kupljeno '+fmtMs(s.boughtAt)+(s.boughtByName?' · '+s.boughtByName:'')));if(s.store)m.appendChild(storeChip(s))}
   if(s.bought&&s.paid!=null)m.appendChild(el('span','paid',fmtMoney(s.paid,s.paidCur)));
   const jn=jobLabel(s);if(jn)m.appendChild(el('span','job',jn));
@@ -703,9 +845,10 @@ function renderShop(){
   /* datalist prodavnica */
   const dl=$('storeList');dl.innerHTML='';for(const k of [...new Set(all.map(s=>s.store).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'sr'))){const o=el('option');o.value=k;dl.appendChild(o)}
   const fb=$('sFor');fb.innerHTML='';
-  const mk=(id,name,n)=>{const b=el('button','chip',name);b.type='button';b.setAttribute('aria-pressed',String(fFor===id));b.appendChild(el('span','n',String(n)));
+  const mk=(id,name,n)=>{const b=el('button','chip'+(id==='radionica'?' r':id==='kuca'?' k':''));b.type='button';if(id)b.appendChild(el('i','dt '+(id==='kuca'?'k':'r')));b.appendChild(document.createTextNode(name));b.setAttribute('aria-pressed',String(fFor===id));b.appendChild(el('span','n',String(n)));
     b.addEventListener('click',()=>{fFor=(fFor===id&&id)?'':id;if(fFor){sFor=fFor;syncSAdd()}renderShop()});fb.appendChild(b)};
   mk('','Sve',open.length);for(const k of Object.keys(FOR))mk(k,FOR[k],open.filter(s=>s.for===k).length);
+  {const sv=fb.querySelector('.chip .n');if(sv&&!fb.firstChild.classList.contains('r'))sv.remove()}
   const g=$('sGroups');g.innerHTML='';
   if(!loaded.shopping&&!noDb)g.appendChild(el('div','empty','Učitavam spisak…'));
   else{
@@ -713,12 +856,13 @@ function renderShop(){
     else if(!vis.length)g.appendChild(el('div','empty','Nema stavki za „'+FOR[fFor]+'“. Klikni „Sve“.'));
     const tot=items=>{const p=items.filter(s=>s.price!=='');return items.length+(p.length?' · '+fmtE(p.reduce((a,s)=>a+lineTotal(s),0)):'')};
     const pin=vis.filter(s=>s.hot);
-    if(pin.length){g.appendChild(gHead('pin','Hitno',tot(pin)));const l=el('div','list');for(const s of pin)l.appendChild(srow(s,'pin'));g.appendChild(l)}
+    if(pin.length){const c=el('section','scard pin');c.appendChild(sHead('Hitno',tot(pin),null,null,null));const l=el('div','list');for(const s of pin)l.appendChild(srow(s,'pin'));c.appendChild(l);g.appendChild(c)}
     for(const [store,itemsAll] of storesOf(vis)){const items=itemsAll.filter(s=>!s.hot);
-      g.appendChild(gHead('store',store||'Bilo gde',tot(itemsAll),cvar(colorOf(store))));
-      g.appendChild(storeActs(store,itemsAll));
-      if(!items.length){g.appendChild(el('div','gnote','Sve stavke iz ove prodavnice su gore, u „Hitno“.'));continue}
-      const l=el('div','list');for(const s of items)l.appendChild(srow(s,'store'));g.appendChild(l)}
+      const c=el('section','scard');c.appendChild(sHead(store||'Bilo gde',tot(itemsAll),cvar(colorOf(store)),store,itemsAll));
+      if(!items.length)c.appendChild(el('div','gnote','Sve stavke iz ove prodavnice su gore, u „Hitno“.'));
+      else{const l=el('div','list');for(const s of items)l.appendChild(srow(s,'store'));c.appendChild(l)}
+      if(!readonly&&!noDb){const f=el('div','sfoot');const b=el('button');b.type='button';b.innerHTML=IC.ok+'<span>Kupljeno – upiši cenu</span>';b.addEventListener('click',()=>openBuy(storeItems(store).map(s=>s.id)));f.appendChild(b);c.appendChild(f)}
+      g.appendChild(c)}
   }
   const bv=bought.filter(s=>!fFor||s.for===fFor).sort((a,b)=>(b.boughtAt||0)-(a.boughtAt||0));
   $('sTog').hidden=!loaded.shopping||!bought.length;$('sCount').textContent=String(bv.length);$('sTog').setAttribute('aria-expanded',String(showBought));
@@ -745,11 +889,15 @@ function fillUnits(sel){sel.innerHTML='';for(const u of UNITS){const o=el('optio
   $('sForR').addEventListener('click',()=>{sFor='radionica';syncSAdd()});
   $('sForK').addEventListener('click',()=>{sFor='kuca';syncSAdd()});
   $('sHot').addEventListener('click',()=>{sHot=!sHot;syncSAdd()});
+  let moreOpen=false;const showOpts=on=>{$('sOpts').hidden=!on;$('sMore').setAttribute('aria-expanded',String(on))};
+  $('sMore').addEventListener('click',()=>{moreOpen=$('sOpts').hidden;showOpts(moreOpen)});
+  $('sName').addEventListener('input',()=>{if($('sName').value.trim()&&$('sOpts').hidden)showOpts(true)});
+  window.__sOptsReset=()=>{if(!moreOpen)showOpts(false)};
   $('sAdd').addEventListener('submit',e=>{e.preventDefault();const name=$('sName').value.trim();if(!name){$('sName').focus();return}if(needName())return;
     const now=Date.now(),id=newId('shopping');
     const item={name,qty:num($('sQty').value),unit:$('sUnit').value,price:'',store:$('sStore').value.trim(),for:sFor,hot:sHot,note:'',bought:false,boughtAt:null,by:myId,byName:deviceName,createdAt:now,updatedAt:now,photos:pendPh.slice()};
     put('shopping',id,item);pendPh=[];syncCam();$('sLast').hidden=true;
-    $('sName').value='';$('sQty').value='';$('sUnit').value='kom';sHot=false;syncSAdd();$('sName').focus();
+    $('sName').value='';$('sQty').value='';$('sUnit').value='kom';sHot=false;syncSAdd();if(window.__sOptsReset)window.__sOptsReset();$('sName').focus();
     toast('Dodato'+(item.store?' – '+item.store:''),'Otvori',()=>openS(id))});
   syncSAdd();
 })();
@@ -1112,6 +1260,15 @@ function storeItems(store){const k=skey(store);return allS().filter(s=>!s.bought
 function storeText(store,items){const d=new Date();let t=(store||'Kupovina')+' – '+d.getDate()+'.'+(d.getMonth()+1)+'.\n';
   items.forEach((s,i)=>{const q=qtyText(s);t+='\n'+(i+1)+'. '+s.name+(q?' – '+q:'')+(s.hot?' (hitno)':'');for(const l of noteLines(s.note))t+='\n    '+l});
   return t.trim()}
+function sHead(name,right,stripe,store,items){const h=el('div','shead');
+  if(stripe==null)h.insertAdjacentHTML('beforeend',PIN.replace('<svg','<svg class="pn"'));else{const d=el('i','dot'+(stripe==='transparent'?' none':''));h.style.setProperty('--stripe',stripe);h.appendChild(d)}
+  const t=el('h2',null,name);t.appendChild(el('small',null,'· '+right));h.appendChild(t);
+  if(items){const ib=(svg,label,fn,badge)=>{const b=el('button','ib');b.type='button';b.setAttribute('aria-label',label);b.title=label;b.innerHTML=svg;if(badge)b.appendChild(el('span','bn',String(badge)));b.addEventListener('click',fn);h.appendChild(b)};
+    const nPh=items.reduce((a,s)=>a+s.photos.length,0);
+    ib(ICB.send,'Pošalji spisak'+(nPh?' i '+nPh+(nPh===1?' sliku':' slike'):'')+' – Viber, poruka',()=>shareStore(store),nPh);
+    ib(ICB.copy,'Kopiraj spisak za ovu prodavnicu',()=>copyText(storeText(store,storeItems(store)),'Spisak za „'+(store||'Bilo gde')+'“ kopiran. Nalepi ga u Viber.'))}
+  return h}
+const ICB={send:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>'};
 function storeActs(store,items){const w=el('div','gact');
   const mk=(ic,txt,fn,cls)=>{const b=el('button',cls||'ghost');b.type='button';b.innerHTML=IC[ic]+'<span></span>';b.querySelector('span').textContent=txt;b.addEventListener('click',fn);w.appendChild(b)};
   const nPh=items.reduce((a,s)=>a+s.photos.length,0);

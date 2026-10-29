@@ -67,6 +67,58 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);margin-top:8px}
 .legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<style id="dizajn-a">
+/* ==== Dizajn A: uloge boja (glavno dugme, izabrano, Radionica/Kuća, hitno, stanja) ==== */
+:root{
+  --muted:#5F6672;
+  --act:#D2B587; --act-h:#C6A675; --on-act:#1F2733;
+  --act-soft:#F3ECE1; --on-act-soft:#5B4421;
+  --selbg:#E4E8EE; --sel-bd:#333F50; --sel-fg:#232B36;
+  --track:#F1EDE6; --fld-bd:#D9D2C6;
+  --rad:#3466AF; --rad-t:#2E5A9A; --rad-soft:#E5EDF8;
+  --kuc:#2F7D57; --kuc-t:#276B4A; --kuc-soft:#E2F1E8;
+  --hit:#9A3324; --hit-soft:#F6E4DF;
+  --amb-t:#7A4B0C; --amb-soft:#F7E9D4;
+  --r-card:16px; --r-btn:12px; --toast-act:#E3C99B;
+  --f-num:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --muted:#A3ABB6;
+  --act:#CDB089; --act-h:#D9BF9B; --on-act:#171B21;
+  --act-soft:#2E2A22; --on-act-soft:#E3CFAE;
+  --selbg:#2A3442; --sel-bd:#C9D3E0; --sel-fg:#E7E3DC;
+  --track:#252C35; --fld-bd:#3A434F;
+  --rad:#6FA3E8; --rad-t:#8DB7EE; --rad-soft:#1F2C3D;
+  --kuc:#5DBB8C; --kuc-t:#7FCCA3; --kuc-soft:#1C3127;
+  --hit:#F0907E; --hit-soft:#3A2622;
+  --amb-t:#E8B66A; --amb-soft:#352A1A; --toast-act:#6B4E1F;
+}}
+:root[data-theme="dark"]{
+  --muted:#A3ABB6;
+  --act:#CDB089; --act-h:#D9BF9B; --on-act:#171B21;
+  --act-soft:#2E2A22; --on-act-soft:#E3CFAE;
+  --selbg:#2A3442; --sel-bd:#C9D3E0; --sel-fg:#E7E3DC;
+  --track:#252C35; --fld-bd:#3A434F;
+  --rad:#6FA3E8; --rad-t:#8DB7EE; --rad-soft:#1F2C3D;
+  --kuc:#5DBB8C; --kuc-t:#7FCCA3; --kuc-soft:#1C3127;
+  --hit:#F0907E; --hit-soft:#3A2622;
+  --amb-t:#E8B66A; --amb-soft:#352A1A; --toast-act:#6B4E1F;
+}
+body{font-variant-numeric:tabular-nums}
+.toast button{color:var(--toast-act);font-weight:800}
+
+/* ==== Dizajn A: Fakture, Troškovi, Krojenje (zajedničko) ==== */
+button{border-radius:10px}
+button.pri{background:var(--act);border-color:var(--act);color:var(--on-act);font-weight:800}
+button.pri:hover{background:var(--act-h);border-color:var(--act-h)}
+input,select,textarea{border-color:var(--fld-bd);border-radius:10px}
+.chip[aria-pressed="true"],.chipb[aria-pressed="true"]{background:var(--selbg);color:var(--sel-fg);border-color:var(--sel-bd);font-weight:700}
+nav.tabs button[aria-current="true"]{background:var(--act-soft);color:var(--fg);font-weight:700}
+.seg{background:var(--track)}
+.seg button[aria-pressed="true"]{font-weight:700}
+html.emb .brand{display:none}
+html.emb header.top:not(:has(nav)){display:none}
 </style></head><body>
 <header class="top"><div class="hin"><div class="brand">Martinov <small>krojenje ploča</small></div><div class="sp"></div><span class="msg" id="state"></span></div></header>
 <div class="wrap">
