@@ -3356,6 +3356,10 @@ window.__mtPdfAtt=async(a,t,f,rid)=>{
   pdfShow();let blob;try{blob=await window.__mtFiles.blob(a)}catch(e){pdfCloseNow();toast('PDF nije mogao da se učita. Proveri internet.');return}
   const pt=PT();const isJob=!!(pt&&t.id===pt.id);
   pdfOpen([{blob:new Blob([blob],{type:'application/pdf'}),name:a.name||'dokument.pdf'}],{label:recName(t.id,rid)||t.name,where:isJob?'posao':'zapis',save:(bytes,name)=>attachPdf(t,f,rid,bytes,name)})};
+/* PDF prilog iz Troškova (faktura dobavljača): samo pregled, čuvanje ide na uređaj */
+window.__mtPdfView=async a=>{
+  if(!window.__mtFiles)return;pdfShow();let blob;try{blob=await window.__mtFiles.blob(a)}catch(e){pdfCloseNow();toast('PDF nije mogao da se učita. Proveri internet.');return}
+  pdfOpen([{blob:new Blob([blob],{type:'application/pdf'}),name:a.name||'dokument.pdf'}],{label:a.label||a.name||'Troškovi',where:'zapis'})};
 window.__mtPdf={
   jobs:()=>kupJobs().map(j=>({id:j.id,name:j.name,sub:[j.client,j.inv?'faktura '+j.inv:''].filter(Boolean).join(' · '),active:j.active})),
   attachJob:(jid,bytes,name)=>{const t=PT();if(!t)throw new Error('nema tabele Poslovi');const f=F(t,'f_slike','Slike')||t.fields.find(x=>x.type==='att');
@@ -3451,22 +3455,22 @@ function appDlg(){
     else b.appendChild(el('div','note','Instalacija: u Chrome-u ⋮ → „Instaliraj aplikaciju“ (na telefonu „Dodaj na početni ekran“ → Instaliraj). Na iPhone-u: Safari → Podeli → „Dodaj na početni ekran“.'));
     {const pk=el('div','kcard');pk.appendChild(el('b',null,'Ključ za Claude podsetnik'));pk.appendChild(el('span','mute','Ključ koji Claude robot koristi da svako jutro pročita otvorene zadatke i kupovinu (samo čitanje).'));
       const kk=el('code','pkey',podKey||'…');pk.appendChild(kk);const cp=el('button','chip plain','Kopiraj ključ');cp.type='button';cp.disabled=!podKey;cp.addEventListener('click',()=>copyText(podKey,'Ključ kopiran'));pk.appendChild(cp);b.appendChild(fld('Podsetnik',pk))}
-    const im=el('button','btn','Prebaci podatke iz Claude aplikacije');im.type='button';im.addEventListener('click',()=>{closeDlg();importDlg()});b.appendChild(fld('Podaci',im,'Učitaj fajl koji si sačuvao u staroj aplikaciji (Martinov Tabele u Claude-u → „Izvoz za novu aplikaciju“).'));
+    const im=el('button','btn','Uvezi podatke iz fajla');im.type='button';im.addEventListener('click',()=>{closeDlg();importDlg()});b.appendChild(fld('Podaci',im,'Fajl koji ti je Claude poslao (npr. fakture za Troškove) ili izvoz iz stare aplikacije. Ništa se ne briše.'));
   });
 }
 function importDlg(auto){
-  openDlg('Prebaci podatke',b=>{
-    b.appendChild(el('p','note',(auto?'Baza je još prazna. ':'')+'U staroj aplikaciji (Martinov Tabele u Claude-u) klikni levo dole „Izvoz za novu aplikaciju“ i sačuvaj fajl. Onda ga izaberi ovde. Postojeći podaci sa istim oznakama se zamenjuju.'));
+  openDlg(auto?'Prebaci podatke':'Uvezi podatke',b=>{
+    b.appendChild(el('p','note',auto?'Baza je još prazna. U staroj aplikaciji (Martinov Tabele u Claude-u) klikni levo dole „Izvoz za novu aplikaciju“ i sačuvaj fajl. Onda ga izaberi ovde.':'Izaberi fajl koji ti je Claude poslao (ili izvoz iz stare aplikacije). Ništa se ne briše: nove stavke se dodaju, a iste stavke se zamenjuju novijim.'));
     const inp=el('input');inp.type='file';inp.accept='.json,application/json';b.appendChild(fld('Fajl sa podacima',inp));
     const info=el('div','note');b.appendChild(info);const bar=el('div','pbar');bar.hidden=true;const fill=el('i');bar.appendChild(fill);b.appendChild(bar);
-    const bot=el('div','ebot');const go=el('button','btn pri','Prebaci');go.type='button';go.disabled=true;const cn=el('button','btn',auto?'Kasnije':'Otkaži');cn.type='button';cn.addEventListener('click',closeDlg);bot.append(go,cn);b.appendChild(bot);
+    const bot=el('div','ebot');const go=el('button','btn pri',auto?'Prebaci':'Uvezi');go.type='button';go.disabled=true;const cn=el('button','btn',auto?'Kasnije':'Otkaži');cn.type='button';cn.addEventListener('click',closeDlg);bot.append(go,cn);b.appendChild(bot);
     let pkg=null;
     inp.addEventListener('change',async()=>{pkg=null;go.disabled=true;const f=inp.files&&inp.files[0];if(!f)return;info.textContent='Čitam fajl…';
       try{const j=JSON.parse(await f.text());if(j.kind!=='martinov-export')throw 0;pkg=j;
-        const n=Object.keys(j.docs||{}).length,fl=Object.keys(j.files||{}).length;info.textContent='U fajlu: '+n+' zapisa'+(fl?', '+fl+' slika i crteža':'')+(j.private&&j.private.cenovnik?', cenovnik':'')+'. Sačuvano '+(j.at?new Date(j.at).toLocaleString('sr-RS'):'')+'.';go.disabled=false}
-      catch(e){info.textContent='Ovo nije fajl za prenos. Napravi ga u staroj aplikaciji: „Izvoz za novu aplikaciju“.'}});
+        const n=Object.keys(j.docs||{}).length,fl=Object.keys(j.files||{}).length;const pl=(k,a,b,c)=>k+' '+(k%10===1&&k%100!==11?a:(k%10>=2&&k%10<=4&&(k%100<10||k%100>=20))?b:c);info.textContent=(j.title?j.title+' – ':'U fajlu: ')+pl(n,'zapis','zapisa','zapisa')+(fl?', '+pl(fl,'fajl','fajla','fajlova')+' (slike, PDF)':'')+(j.private&&j.private.cenovnik?', cenovnik':'')+'. Napravljeno '+(j.at?new Date(j.at).toLocaleString('sr-RS'):'')+'.';go.disabled=false}
+      catch(e){info.textContent='Ovo nije fajl za Martinov aplikaciju.'}});
     go.addEventListener('click',async()=>{if(!pkg)return;if(!navigator.onLine){toast('Za prenos treba internet.');return}
-      go.disabled=true;cn.disabled=true;inp.disabled=true;bar.hidden=false;info.textContent='Prebacujem… ne zatvaraj prozor.';
+      go.disabled=true;cn.disabled=true;inp.disabled=true;bar.hidden=false;info.textContent='Upisujem… ne zatvaraj prozor.';
       try{const r=await window.__mtImport(pkg,p=>{fill.style.width=Math.round(p*100)+'%'});info.textContent='Gotovo: '+r.docs+' zapisa'+(r.files?' i '+r.files+' fajlova':'')+'. Aplikacija se ponovo učitava…';setTimeout(()=>location.reload(),1500)}
       catch(e){info.textContent='Prenos nije uspeo'+(e&&e.code?' ('+e.code+')':'')+'. Proveri internet pa pokušaj ponovo.';go.disabled=false;cn.disabled=false;inp.disabled=false}});
   });
@@ -3747,7 +3751,7 @@ render();
   if(typeof subKurs==='function')subKurs();
 })();
 })();
-</script><script type="module" src="fb.js?v=1.5.3"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.5.4"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}

@@ -84,6 +84,26 @@ td select{font-size:12px;padding:4px 6px;width:auto;max-width:210px}
 .inl{display:flex;gap:6px;align-items:center;margin-top:4px}
 .inl input{font-size:12px;padding:4px 6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* podkategorija (posao / kupac), fakture dobavljača, prilozi */
+.tag.sub{background:var(--selbg,#E4E8EE);color:var(--sel-fg,var(--fg));text-transform:none;letter-spacing:0;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:6px}
+.tag.fak{background:var(--gold-soft);color:var(--fg)}
+.tag.wait{background:var(--amb-soft,#F7E9D4);color:var(--amb-t,#7A4B0C)}
+.tag.paid{background:var(--kuc-soft,#E2F1E8);color:var(--kuc-t,#276B4A)}
+.tag.cv{text-transform:none;letter-spacing:0;font-size:11.5px}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;align-items:center}
+tr.cov td{opacity:.62}tr.cov td.num.o{text-decoration:line-through}
+.att{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:3px 8px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;min-height:28px}
+.att{max-width:100%;white-space:nowrap}.att span{overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:210px}
+@media (max-width:640px){.att span{max-width:120px}}
+.att svg{flex:none;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.alertl{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--amb-soft,#F7E9D4);color:var(--amb-t,#7A4B0C);border:0;border-radius:12px;padding:10px 14px;margin:0 0 14px;font-size:14px;font-weight:700}
+.alertl span{flex:1;min-width:0}.alertl b{font-family:var(--f-num);white-space:nowrap}
+.pend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pend .att button{border:0;background:none;padding:0 2px;min-height:0;font-size:14px;line-height:1;color:var(--muted)}
+#imgOv{position:fixed;inset:0;z-index:95;background:rgba(15,18,23,.88);display:flex;align-items:center;justify-content:center;padding:16px}
+#imgOv img{max-width:100%;max-height:100%;border-radius:8px}
+#imgOv button{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:12px;background:var(--panel);border:0;border-radius:50%;width:44px;height:44px;font-size:20px}
+.form .wide{grid-column:1/-1}
 </style>
 <style id="dizajn-a">
 /* ==== Dizajn A: uloge boja (glavno dugme, izabrano, Radionica/Kuća, hitno, stanja) ==== */
@@ -144,7 +164,7 @@ html.emb header.top:not(:has(nav)){display:none}
   <nav class="tabs" id="tabs">
     <button data-v="sum" aria-current="true">Pregled</button>
     <button data-v="tx">Promene</button>
-    <button data-v="add">+ Keš trošak</button>
+    <button data-v="add">+ Trošak</button>
     <button data-v="rules">Pravila</button>
   </nav>
   <span class="sp"></span><span class="conn" id="conn">Učitavam…</span>
@@ -159,6 +179,7 @@ html.emb header.top:not(:has(nav)){display:none}
       <select id="accSel" aria-label="Račun"><option value="">Svi računi + keš</option><option value="RSD">Dinarski račun</option><option value="EUR">Devizni EUR</option><option value="GBP">Devizni GBP</option><option value="KES">Keš / privatno</option></select>
       <button class="ghost" id="clrMonth" hidden>Cela godina</button>
     </div>
+    <button type="button" class="alertl" id="unpaid" hidden></button>
     <div class="kpis">
       <div class="kpi"><span id="kOutL">Troškovi</span><b class="o" id="kOut">—</b></div>
       <div class="kpi"><span>Prihodi</span><b class="i" id="kIn">—</b></div>
@@ -166,7 +187,10 @@ html.emb header.top:not(:has(nav)){display:none}
       <div class="kpi"><span>Nerazvrstano · mogući duplikati</span><b id="kUnc">—</b></div>
     </div>
     <div class="two">
-      <div class="card"><h3>Troškovi po kategoriji</h3><div id="catOut"></div></div>
+      <div class="stack" style="display:flex;flex-direction:column;gap:14px;min-width:0">
+        <div class="card"><h3>Troškovi po kategoriji</h3><div id="catOut"></div></div>
+        <div class="card"><h3>Po podkategoriji · posao / kupac</h3><div id="subOut"></div></div>
+      </div>
       <div class="stack" style="display:flex;flex-direction:column;gap:14px;min-width:0">
         <div class="card"><h3 id="moTitle">Po mesecima</h3><div class="months" id="months"></div><div id="yearTbl" hidden style="margin-top:10px;overflow-x:auto"></div>
           <div class="legend"><span><i style="background:var(--out)"></i>Troškovi</span><span><i style="background:var(--in)"></i>Prihodi</span><span id="moHint">Klik na mesec filtrira</span></div></div>
@@ -178,13 +202,15 @@ html.emb header.top:not(:has(nav)){display:none}
 
   <section id="v-tx" hidden>
     <h1>Promene</h1>
-    <p class="sub">Sve stavke sa izvoda Banca Intesa i ručno uneti keš troškovi. Kategoriju menjaš direktno u redu; „Svi od ovog primaoca“ pamti pravilo za ubuduće.</p>
+    <p class="sub">Sve stavke sa izvoda Banca Intesa i ručno uneti troškovi (keš i fakture dobavljača). Kategoriju menjaš direktno u redu; „Svi od ovog primaoca“ pamti pravilo za ubuduće. „Podkategorija“ = posao ili kupac za koji je trošak.</p>
     <div class="filters">
       <input type="search" id="q" placeholder="Traži primaoca, svrhu, poziv na broj…" aria-label="Pretraga">
       <label class="row" style="gap:6px;font-size:13px;width:auto"><input type="checkbox" id="dupOnly" style="width:auto"> Samo mogući duplikati</label>
       <select id="dirSel" aria-label="Smer"><option value="out">Troškovi</option><option value="in">Prihodi</option><option value="">Sve</option></select>
       <select id="catSel" aria-label="Kategorija"></select>
+      <select id="subSel" aria-label="Podkategorija"></select>
       <select id="moSel" aria-label="Mesec"></select>
+      <button class="ghost" id="unpChip" hidden>Čekaju uplatu ✕</button>
       <button class="ghost" id="csv">Izvoz CSV</button>
     </div>
     <div class="note" id="txSum" style="margin-bottom:8px"></div>
@@ -193,25 +219,29 @@ html.emb header.top:not(:has(nav)){display:none}
   </section>
 
   <section id="v-add" hidden>
-    <h1>Keš trošak</h1>
-    <p class="sub">Troškovi koji ne idu preko računa firme: keš, privatna kartica, uplata sa privatnog računa. Upiši iznos u evrima ili dinarima.</p>
+    <h1>Unesi trošak</h1>
+    <p class="sub">Keš, privatna kartica, privatni račun – ili faktura dobavljača koju plaćaš sa računa firme. Kad ta uplata stigne na izvod, aplikacija je sama spoji sa fakturom, da se ne računa dva puta.</p>
     <div class="card" style="max-width:940px">
       <div class="form">
         <label class="f">Datum<input type="date" id="m-dt"></label>
         <label class="f">Dobavljač / gde<input id="m-who" placeholder="npr. Bauhaus, benzinska"></label>
         <label class="f">Kategorija<select id="m-cat"></select></label>
+        <label class="f">Podkategorija (posao / kupac)<input id="m-sub" list="subList" placeholder="npr. ime kupca ili posla" autocomplete="off"></label>
+        <label class="f">Broj fakture / računa<input id="m-inv" placeholder="npr. 2843/26"></label>
         <label class="f">Opis<input id="m-what" placeholder="npr. vijci 4×40, brusni papir"></label>
         <label class="f">Iznos<input id="m-amt" inputmode="decimal" placeholder="0,00"></label>
         <label class="f">Valuta<select id="m-cur"><option>RSD</option><option>EUR</option></select></label>
-        <label class="f">Plaćeno<select id="m-pay"><option value="keš">Keš</option><option value="kartica">Privatna kartica</option><option value="privatni račun">Privatni račun</option></select></label>
+        <label class="f">Plaćeno<select id="m-pay"><option value="keš">Keš</option><option value="kartica">Privatna kartica</option><option value="privatni račun">Privatni račun</option><option value="račun firme">Račun firme (faktura)</option></select></label>
         <label class="f">Kurs € (ako je u evrima)<input id="m-kurs" inputmode="decimal" value="117,2"></label>
         <label class="f">Napomena<input id="m-note"></label>
+        <div class="f wide"><span class="note">Prilog – slika računa ili PDF fakture</span><div class="pend" id="m-pend"><label class="att" style="cursor:pointer"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Dodaj prilog<input type="file" id="m-file" accept="image/*,application/pdf" multiple hidden></label></div></div>
       </div>
+      <datalist id="subList"></datalist>
       <div class="row" style="margin-top:12px"><button class="pri" id="m-save">Sačuvaj trošak</button><span class="note" id="m-msg"></span></div>
     </div>
-    <h3 style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:22px 0 8px">Poslednji keš troškovi</h3>
+    <h3 style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:22px 0 8px">Poslednji ručno uneti troškovi</h3>
     <div class="tblw"><table class="list"><thead><tr><th>Datum</th><th>Dobavljač</th><th>Kategorija</th><th class="r">Iznos</th><th></th></tr></thead><tbody id="mBody"></tbody></table>
-    <div class="empty" id="mEmpty">Još nema keš troškova. Prvi upiši gore.</div></div>
+    <div class="empty" id="mEmpty">Još nema ručno unetih troškova. Prvi upiši gore.</div></div>
   </section>
 
   <section id="v-rules" hidden>
@@ -284,10 +314,28 @@ function autoCat(t){
   return 'Nerazvrstano';
 }
 function all(){
-  const a=SEED.map(t=>{const m=META[t.id]||{};return {...t,cat:m.cat||autoCat(t),note:m.note||'',src:'banka'}});
-  for(const m of MANUAL)a.push({id:'m:'+m.id,mid:m.id,dt:m.dt,acc:'KES',dir:'out',amt:nz(m.amt),cur:m.cur,rsd:m.cur==='EUR'?nz(m.amt)*nz(m.kurs||117.2):nz(m.amt),who:m.who||'',what:m.what||'',pay:m.pay,cat:m.cat||'Nerazvrstano',note:m.note||'',src:'keš'});
+  const a=SEED.map(t=>{const m=META[t.id]||{};return {...t,cat:m.cat||autoCat(t),note:m.note||'',sub:m.sub||'',src:'banka'}});
+  for(const m of MANUAL){const firm=m.pay==='račun firme';
+    a.push({id:'m:'+m.id,mid:m.id,dt:m.dt,acc:firm?'RSD':'KES',dir:'out',amt:nz(m.amt),cur:m.cur,rsd:m.cur==='EUR'?nz(m.amt)*nz(m.kurs||117.2):nz(m.amt),who:m.who||'',what:m.what||'',pay:m.pay,cat:m.cat||'Nerazvrstano',note:m.note||'',
+      sub:m.sub||'',inv:m.inv||'',att:Array.isArray(m.att)?m.att:[],firm,key:firm?supKey(m.who):'',src:'keš'})}
+  link(a);
   return a;
 }
+/* faktura dobavljača (plaća se sa računa firme): kad uplata stigne na izvod, spoje se.
+   Broji se faktura (ima kategoriju i podkategoriju), a uplata sa izvoda se ne broji – da trošak ne bude dva puta. */
+function supKey(w){const x=String(w||'').toUpperCase().replace(/[^A-ZČĆŽŠĐ0-9]+/g,' ').split(' ').filter(v=>v.length>=3&&!/^(DOO|SZR|STR|PRODAJA)$/.test(v));return x[0]||''}
+function link(a){
+  const F=a.filter(t=>t.firm&&t.key).sort((x,y)=>x.dt.localeCompare(y.dt));if(!F.length)return;
+  const days=(x,y)=>(new Date(y)-new Date(x))/864e5;
+  const B=a.filter(t=>t.src==='banka'&&t.dir==='out'&&t.acc==='RSD').sort((x,y)=>x.dt.localeCompare(y.dt));
+  for(const b of B){const W=String(b.who).toUpperCase();
+    const C=F.filter(f=>!f.paid&&W.includes(f.key)&&days(f.dt,b.dt)>=-3&&days(f.dt,b.dt)<=150).slice(0,10);if(!C.length)continue;
+    const one=C.find(f=>Math.abs(f.rsd-b.rsd)<1);let hit=one?[one]:null;
+    for(let m=1;!hit&&m<(1<<C.length);m++){let x=0;const L=[];C.forEach((f,i)=>{if(m>>i&1){x+=f.rsd;L.push(f)}});if(L.length>1&&Math.abs(x-b.rsd)<1)hit=L}
+    if(!hit)continue;for(const f of hit)f.paid={iz:b.iz,dt:b.dt};b.cov=hit.map(f=>f.inv||f.who)}}
+const counts=t=>t.cat!==INTERNAL&&!t.cov;
+const plS=n=>n+' '+(n%10===1&&n%100!==11?'stavka':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?'stavke':'stavki');
+const plF=n=>n%10===1&&n%100!==11?'faktura':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?'fakture':'faktura';
 function yearOf(t){return +t.dt.slice(0,4)}
 function scoped(){const yv=$('#yr').value,y=+yv,acc=$('#accSel').value;return all().filter(t=>(yv==='all'||yearOf(t)===y)&&(!acc||t.acc===acc))}
 /* moguć duplikat: isti primalac + isti iznos u roku od 60 dana, a broj računa nije različit */
@@ -297,7 +345,7 @@ function invNo(t){const x=String(t.what)+' '+String(t.ref||'');let m=x.match(/\[
   return /^\d{0,3}-?\d{2}-\d{2}$/.test(r)?'':r}
 let DUP=new Set();
 function computeDup(){DUP=new Set();const g={};
-  for(const t of all()){if(t.dir!=='out'||['240','253','254','272','277'].includes(t.sif)||/BANCA INTESA|JKP/i.test(t.who)||t.cat===INTERNAL)continue;
+  for(const t of all()){if(t.cov||t.paid)continue;if(t.dir!=='out'||['240','253','254','272','277'].includes(t.sif)||/BANCA INTESA|JKP/i.test(t.who)||t.cat===INTERNAL)continue;
     const k=String(t.who).split(',')[0].trim().toUpperCase()+'|'+t.rsd.toFixed(2);(g[k]=g[k]||[]).push(t)}
   for(const L of Object.values(g)){if(L.length<2)continue;L.sort((a,b)=>a.dt.localeCompare(b.dt));
     for(let i=1;i<L.length;i++){const a=L[i-1],b=L[i];const days=(new Date(b.dt)-new Date(a.dt))/864e5;const ia=invNo(a),ib=invNo(b);
@@ -305,7 +353,9 @@ function computeDup(){DUP=new Set();const g={};
 
 /* ---------- pregled ---------- */
 function renderSum(){
-  let A=scoped().filter(t=>t.cat!==INTERNAL);
+  let A=scoped().filter(counts);
+  const up=all().filter(t=>t.firm&&!t.paid),ue=$('#unpaid');ue.hidden=!up.length;
+  if(up.length){const n=up.length;ue.innerHTML=`<span>${n} ${plF(n)} dobavljača ${n===1?'čeka':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?'čekaju':'čeka'} uplatu</span><b>${fmt(up.reduce((x,t)=>x+t.rsd,0))} RSD</b><span aria-hidden="true" style="flex:none">›</span>`}
   const mA=month==null?A:A.filter(t=>+t.dt.slice(5,7)-1===month);
   const out=mA.filter(t=>t.dir==='out'),inn=mA.filter(t=>t.dir==='in');
   const so=out.reduce((s,t)=>s+t.rsd,0),si=inn.reduce((s,t)=>s+t.rsd,0);
@@ -316,8 +366,11 @@ function renderSum(){
   $('#clrMonth').hidden=month==null;
   const grp=(L)=>{const g={};for(const t of L){(g[t.cat]=g[t.cat]||{s:0,n:0});g[t.cat].s+=t.rsd;g[t.cat].n++}return Object.entries(g).sort((a,b)=>b[1].s-a[1].s)};
   const draw=(L,el,tot)=>{const G=grp(L),mx=G.length?G[0][1].s:1;
-    el.innerHTML=G.length?G.map(([c,v])=>`<div class="cat" data-cat="${esc(c)}" data-dir="${L[0].dir}" tabindex="0"><div class="nm">${esc(c)}<small>${v.n} stavki · ${tot?Math.round(v.s/tot*100):0}%</small></div><div class="tr"><i style="width:${(v.s/mx*100).toFixed(1)}%"></i></div><div class="v">${fmt(v.s)}</div></div>`).join(''):'<div class="empty">Nema stavki.</div>'};
+    el.innerHTML=G.length?G.map(([c,v])=>`<div class="cat" data-cat="${esc(c)}" data-dir="${L[0].dir}" tabindex="0"><div class="nm">${esc(c)}<small>${plS(v.n)} · ${tot?Math.round(v.s/tot*100):0}%</small></div><div class="tr"><i style="width:${(v.s/mx*100).toFixed(1)}%"></i></div><div class="v">${fmt(v.s)}</div></div>`).join(''):'<div class="empty">Nema stavki.</div>'};
   draw(out,$('#catOut'),so);draw(inn,$('#catIn'),si);
+  const SB={};for(const t of out){if(!t.sub)continue;(SB[t.sub]=SB[t.sub]||{s:0,n:0});SB[t.sub].s+=t.rsd;SB[t.sub].n++}
+  const SG=Object.entries(SB).sort((a,b)=>b[1].s-a[1].s),smx=SG.length?SG[0][1].s:1;
+  $('#subOut').innerHTML=SG.length?SG.map(([c,v])=>`<div class="cat" data-sub="${esc(c)}" tabindex="0"><div class="nm">${esc(c)}<small>${plS(v.n)} · ${so?Math.round(v.s/so*100):0}% troškova</small></div><div class="tr"><i style="width:${(v.s/smx*100).toFixed(1)}%"></i></div><div class="v">${fmt(v.s)}</div></div>`).join(''):'<div class="note" style="padding:4px 0 2px;line-height:1.5">Još nema. Trošku dodaj podkategoriju – ime posla ili kupca – pa ovde vidiš koliko je koji posao koštao.</div>';
   const allY=$('#yr').value==='all';
   $('#moTitle').textContent=allY?'Po godinama':'Po mesecima';$('#moHint').textContent=allY?'Klik na godinu otvara tu godinu':'Klik na mesec filtrira';
   if(allY){const ys=[...new Set(A.map(yearOf))].sort();const yo=ys.map(y=>({y,o:A.filter(t=>yearOf(t)===y&&t.dir==='out').reduce((s,t)=>s+t.rsd,0),i:A.filter(t=>yearOf(t)===y&&t.dir==='in').reduce((s,t)=>s+t.rsd,0)}));
@@ -333,32 +386,56 @@ $('#months').addEventListener('click',e=>{const yb=e.target.closest('[data-y]');
 $('#clrMonth').onclick=()=>{month=null;renderSum()};
 function openCat(e){const c=e.target.closest('[data-cat]');if(!c)return;$('#catSel').value=c.dataset.cat;$('#dirSel').value=c.dataset.dir;$('#moSel').value=month==null?'':String(month);show('tx')}
 $('#catOut').addEventListener('click',openCat);$('#catIn').addEventListener('click',openCat);
+$('#subOut').addEventListener('click',e=>{const c=e.target.closest('[data-sub]');if(!c)return;fltUnpaid=false;$('#subSel').value=c.dataset.sub;$('#catSel').value='';$('#dirSel').value='out';$('#moSel').value=month==null?'':String(month);show('tx')});
+$('#unpaid').addEventListener('click',()=>{fltUnpaid=true;['#q','#catSel','#subSel','#moSel'].forEach(s=>$(s).value='');$('#dupOnly').checked=false;$('#dirSel').value='out';show('tx')});
 
 /* ---------- promene ---------- */
 function catOptions(dir,cur){const L=dir==='in'?[...CATS_IN,INTERNAL]:[...CATS_OUT,INTERNAL];if(cur&&!L.includes(cur))L.push(cur);return L.map(c=>`<option${c===cur?' selected':''}>${esc(c)}</option>`).join('')}
 function filtered(){
   const q=$('#q').value.trim().toLowerCase(),d=$('#dirSel').value,c=$('#catSel').value,m=$('#moSel').value;
-  const dOnly=$('#dupOnly').checked;
-  return scoped().filter(t=>(!dOnly||DUP.has(t.id))&&(!d||t.dir===d)&&(!c||t.cat===c)&&(m===''||+t.dt.slice(5,7)-1===+m)&&(!q||(t.who+' '+t.what+' '+(t.ref||'')+' '+t.note).toLowerCase().includes(q))).sort((a,b)=>b.dt.localeCompare(a.dt)||b.rsd-a.rsd);
+  const dOnly=$('#dupOnly').checked,sb=$('#subSel').value;
+  return (fltUnpaid?all():scoped()).filter(t=>(!fltUnpaid||(t.firm&&!t.paid))&&(!dOnly||DUP.has(t.id))&&(!d||t.dir===d)&&(!c||t.cat===c)&&(!sb||(sb==='-'?!t.sub:t.sub===sb))&&(m===''||+t.dt.slice(5,7)-1===+m)&&(!q||(t.who+' '+t.what+' '+(t.ref||'')+' '+t.note+' '+(t.sub||'')+' '+(t.inv||'')).toLowerCase().includes(q))).sort((a,b)=>b.dt.localeCompare(a.dt)||b.rsd-a.rsd);
 }
 function renderTx(){
   const L=filtered();
-  const so=L.filter(t=>t.dir==='out'&&t.cat!==INTERNAL).reduce((s,t)=>s+t.rsd,0),si=L.filter(t=>t.dir==='in'&&t.cat!==INTERNAL).reduce((s,t)=>s+t.rsd,0);
-  $('#txSum').textContent=`${L.length} stavki · troškovi ${fmt(so)} RSD · prihodi ${fmt(si)} RSD`;
+  const so=L.filter(t=>t.dir==='out'&&counts(t)).reduce((s,t)=>s+t.rsd,0),si=L.filter(t=>t.dir==='in'&&counts(t)).reduce((s,t)=>s+t.rsd,0);
+  $('#unpChip').hidden=!fltUnpaid;
+  $('#txSum').textContent=`${plS(L.length)} · troškovi ${fmt(so)} RSD · prihodi ${fmt(si)} RSD`;
   $('#txEmpty').hidden=L.length>0;
   $('#txBody').innerHTML=L.slice(0,600).map(t=>{
     const fx=t.cur!=='RSD'?`<div class="note">${fmt2(t.amt)} ${t.cur}</div>`:'';
-    return `<tr data-id="${esc(t.id)}" class="${t.cat==='Nerazvrstano'?'unc':''}"><td class="num">${dsr(t.dt)}${t.src==='keš'?`<div><span class="tag keš">${esc(t.pay||'keš')}</span></div>`:`<div class="note">izvod ${t.acc==='RSD'?'':t.acc+' '}${t.iz}</div>`}</td>
-      <td><div class="who">${esc(t.who)||'—'}</div><div class="what">${esc(t.what)}${t.ref?` · poziv ${esc(t.ref)}`:''}</div>${t.note?`<div class="what" style="color:var(--fg)">✎ ${esc(t.note)}</div>`:''}</td>
+    return `<tr data-id="${esc(t.id)}" class="${t.cat==='Nerazvrstano'?'unc':''}${t.cov?' cov':''}"><td class="num">${dsr(t.dt)}${t.src==='keš'?`<div><span class="tag ${t.firm?'fak':'keš'}">${t.firm?'faktura':esc(t.pay||'keš')}</span></div>`:`<div class="note">izvod ${t.acc==='RSD'?'':t.acc+' '}${t.iz}</div>`}</td>
+      <td><div class="who">${esc(t.who)||'—'}</div><div class="what">${esc(t.what)}${t.inv?` · br. ${esc(t.inv)}`:''}${t.ref?` · poziv ${esc(t.ref)}`:''}</div>${t.note?`<div class="what" style="color:var(--fg)">✎ ${esc(t.note)}</div>`:''}${tagsHTML(t)}</td>
       <td class="r num ${t.dir==='out'?'o':'i'}">${t.dir==='out'?'−':'+'}${fmt2(t.rsd)}${fx}${DUP.has(t.id)?'<div><span class="tag" style="background:var(--warn);color:var(--panel)">moguć duplikat</span></div>':''}</td>
       <td><select data-cat aria-label="Kategorija">${catOptions(t.dir,t.cat)}</select>
-        <div class="inl">${t.src==='banka'?`<button class="lnk" data-rule>Svi od ovog primaoca</button>`:''}<button class="lnk" data-note>${t.note?'Izmeni belešku':'Beleška'}</button></div></td></tr>`}).join('');
+        <div class="inl">${t.src==='banka'?`<button class="lnk" data-rule>Svi od ovog primaoca</button>`:''}<button class="lnk" data-note>${t.note?'Izmeni belešku':'Beleška'}</button><button class="lnk" data-subed>${t.sub?'Izmeni podkategoriju':'Podkategorija'}</button></div></td></tr>`}).join('');
 }
-['#q','#dirSel','#catSel','#moSel','#dupOnly'].forEach(s=>$(s).addEventListener('input',renderTx));
+['#q','#dirSel','#catSel','#subSel','#moSel','#dupOnly'].forEach(s=>$(s).addEventListener('input',renderTx));
+$('#unpChip').onclick=()=>{fltUnpaid=false;renderTx()};
+/* oznake ispod stavke: podkategorija, stanje fakture, prilozi */
+const icDoc='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>';
+function tagsHTML(t){const x=[];
+  if(t.sub)x.push(`<span class="tag sub">${esc(t.sub)}</span>`);
+  if(t.firm)x.push(t.paid?`<span class="tag paid">plaćeno · izvod ${esc(t.paid.iz)}</span>`:'<span class="tag wait">čeka uplatu</span>');
+  if(t.cov)x.push(`<span class="tag paid cv">Uplata za fakture ${esc(t.cov.join(', '))} – ne broji se dva puta</span>`);
+  (t.att||[]).forEach((a,i)=>x.push(`<button type="button" class="att" data-att="${i}" title="${esc(a.name||'prilog')}">${icDoc}<span>${esc(a.name||'prilog')}</span></button>`));
+  return x.length?`<div class="tags">${x.join('')}</div>`:''}
+async function openAtt(a){
+  const P=window.parent;const isPdf=/pdf/i.test(a.type||'')||/\.pdf$/i.test(a.name||'');
+  if(isPdf&&P&&P!==window&&P.__mtPdfView){P.__mtPdfView(a);return}
+  const F=P&&P.__mtFiles;if(!F)return toast('Prilog može da se otvori u aplikaciji.','bad');
+  try{const u=await F.load(a);if(isPdf){window.open(u,'_blank');return}
+    let o=$('#imgOv');if(!o){o=document.createElement('div');o.id='imgOv';o.innerHTML='<img alt=""><button type="button" aria-label="Zatvori">✕</button>';o.onclick=()=>o.remove();document.body.appendChild(o)}o.querySelector('img').src=u}
+  catch(_){toast('Prilog nije mogao da se učita.','bad')}}
+function attClick(e){const b=e.target.closest('[data-att]');if(!b)return false;const tr=b.closest('tr');const t=all().find(x=>x.id===tr.dataset.id);const a=t&&t.att&&t.att[+b.dataset.att];if(a)openAtt({...a,label:[t.who,t.inv].filter(Boolean).join(' – ')});return true}
 $('#kUnc').addEventListener('click',e=>{if(e.target.id==='dupBtn'){$('#dupOnly').checked=true;$('#catSel').value='';$('#dirSel').value='out';show('tx')}});
 $('#txBody').addEventListener('change',async e=>{const s=e.target.closest('[data-cat]');if(!s)return;const id=s.closest('tr').dataset.id;await setCat(id,s.value)});
 $('#txBody').addEventListener('click',async e=>{
+  if(attClick(e))return;
   const tr=e.target.closest('tr');if(!tr)return;const id=tr.dataset.id;const t=all().find(x=>x.id===id);
+  if(e.target.closest('[data-subed]')){const td=e.target.closest('td');if(td.querySelector('.subEd'))return;
+    const w=document.createElement('div');w.className='inl subEd';w.innerHTML=`<input value="${esc(t.sub)}" list="subList" placeholder="ime posla ili kupca"><button class="lnk">Sačuvaj</button>`;td.appendChild(w);const inp=w.querySelector('input');inp.focus();
+    const save=async()=>{await setMeta(id,{sub:inp.value.trim()})};w.querySelector('button').onclick=save;inp.addEventListener('keydown',ev=>{if(ev.key==='Enter')save()});return}
   if(e.target.closest('[data-rule]')){const key=ruleKey(t.who);if(!key)return;const cat=tr.querySelector('[data-cat]').value;await addRule(key,cat);return}
   if(e.target.closest('[data-note]')){const td=e.target.closest('td');if(td.querySelector('.noteEd'))return;
     const w=document.createElement('div');w.className='inl noteEd';w.innerHTML=`<input value="${esc(t.note)}" placeholder="npr. za Nenada – Ophelia"><button class="lnk">Sačuvaj</button>`;td.appendChild(w);const inp=w.querySelector('input');inp.focus();
@@ -383,27 +460,36 @@ async function addRule(match,cat){
 $('#csv').onclick=async()=>{
   const dl=await window.claude?.use?.('downloads');if(!dl)return toast('Preuzimanje nije dostupno ovde.','bad');
   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
-  const rows=[['Datum','Račun','Smer','Primalac/platilac','Svrha','Poziv','Kategorija','Iznos RSD','Iznos','Valuta','Beleška']];
-  for(const t of filtered())rows.push([dsr(t.dt),t.acc==='KES'?'keš':t.acc,t.dir==='out'?'trošak':'prihod',t.who,t.what,t.ref||'',t.cat,fmt2(t.rsd),fmt2(t.amt),t.cur,t.note]);
+  const rows=[['Datum','Račun','Smer','Primalac/platilac','Svrha','Poziv','Kategorija','Podkategorija','Broj fakture','Iznos RSD','Iznos','Valuta','Beleška']];
+  for(const t of filtered())rows.push([dsr(t.dt),t.acc==='KES'?'keš':t.firm?'faktura (račun firme)':t.acc,t.dir==='out'?'trošak':'prihod',t.who,t.what,t.ref||'',t.cat,t.sub||'',t.inv||'',fmt2(t.rsd),fmt2(t.amt),t.cur,t.note+(t.cov?' [plaćene fakture: '+t.cov.join(', ')+' – ne broji se]':'')+(t.firm?(t.paid?' [plaćeno, izvod '+t.paid.iz+']':' [čeka uplatu]'):'')]);
   try{await dl.save({filename:`Troskovi ${$('#yr').value}.csv`,data:new Blob(['﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n')],{type:'text/csv'})});toast('CSV preuzet')}catch(e){if(e?.code!=='declined')toast('CSV nije napravljen.','bad')}
 };
 
 /* ---------- keš ---------- */
 function renderManual(){
-  const L=[...MANUAL].sort((a,b)=>String(b.dt).localeCompare(String(a.dt))).slice(0,50);
+  const L=all().filter(t=>t.src==='keš').sort((a,b)=>String(b.dt).localeCompare(String(a.dt))).slice(0,50);
   $('#mEmpty').hidden=L.length>0;
-  $('#mBody').innerHTML=L.map(m=>`<tr><td class="num">${dsr(m.dt)}</td><td><div class="who">${esc(m.who)}</div><div class="what">${esc(m.what)}</div></td><td>${esc(m.cat)}<div class="note">${esc(m.pay)}</div></td><td class="r num o">−${fmt2(nz(m.amt))} ${esc(m.cur)}</td><td><button class="ghost danger" data-del="${esc(m.id)}">Obriši</button></td></tr>`).join('');
+  $('#mBody').innerHTML=L.map(t=>`<tr data-id="${esc(t.id)}"><td class="num">${dsr(t.dt)}</td><td><div class="who">${esc(t.who)}</div><div class="what">${esc(t.what)}${t.inv?` · br. ${esc(t.inv)}`:''}</div>${tagsHTML(t)}</td><td>${esc(t.cat)}<div class="note">${esc(t.pay)}</div></td><td class="r num o">−${fmt2(t.amt)} ${esc(t.cur)}</td><td><button class="ghost danger" data-del="${esc(t.mid)}">Obriši</button></td></tr>`).join('');
 }
-$('#mBody').addEventListener('click',async e=>{const b=e.target.closest('[data-del]');if(!b)return;if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='Potvrdi';return}try{await db.collection('manual').doc(b.dataset.del).delete();toast('Obrisano')}catch(_){toast('Nije obrisano.','bad')}});
+$('#mBody').addEventListener('click',async e=>{if(attClick(e))return;const b=e.target.closest('[data-del]');if(!b)return;if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='Potvrdi';return}try{await db.collection('manual').doc(b.dataset.del).delete();toast('Obrisano')}catch(_){toast('Nije obrisano.','bad')}});
 $('#m-save').onclick=async()=>{
   if(!db)return toast('Bez baze – otvori u Claude-u.','bad');
-  const m={dt:$('#m-dt').value,who:$('#m-who').value.trim(),what:$('#m-what').value.trim(),cat:$('#m-cat').value,amt:$('#m-amt').value.trim(),cur:$('#m-cur').value,pay:$('#m-pay').value,kurs:$('#m-kurs').value.trim(),note:$('#m-note').value.trim()};
+  const m={dt:$('#m-dt').value,who:$('#m-who').value.trim(),what:$('#m-what').value.trim(),cat:$('#m-cat').value,sub:$('#m-sub').value.trim(),inv:$('#m-inv').value.trim(),amt:$('#m-amt').value.trim(),cur:$('#m-cur').value,pay:$('#m-pay').value,kurs:$('#m-kurs').value.trim(),note:$('#m-note').value.trim()};
   if(!m.dt||!nz(m.amt)){$('#m-msg').textContent='Upiši datum i iznos.';return}
+  if(m.pay==='račun firme'&&!m.who){$('#m-msg').textContent='Za fakturu upiši dobavljača (po imenu se spaja sa uplatom sa izvoda).';return}
   m.id='m'+Date.now().toString(36);m.at=new Date().toISOString();
   const b=$('#m-save');b.disabled=true;
-  try{await db.collection('manual').doc(m.id).set(m);toast('Trošak sačuvan');['#m-who','#m-what','#m-amt','#m-note'].forEach(s=>$(s).value='');$('#m-msg').textContent=''}catch(_){toast('Nije sačuvano – proveri vezu.','bad')}
+  try{if(PEND.length){const as=await window.claude?.use?.('assets');if(!as)throw{code:'att'};m.att=[];
+      for(const f of PEND){const r=await as.upload(f);m.att.push({id:r.id,name:f.name||'prilog',type:f.type||r.contentType||'',size:f.size||0})}}
+    await db.collection('manual').doc(m.id).set(m);toast('Trošak sačuvan');['#m-who','#m-what','#m-amt','#m-note','#m-inv'].forEach(s=>$(s).value='');PEND=[];renderPend();$('#m-msg').textContent=''}
+  catch(e){toast(e&&e.code==='att'?'Prilog ne može da se sačuva ovde.':e&&e.code==='too_large'?'Prilog je veći od 20 MB.':'Nije sačuvano – proveri vezu.','bad')}
   b.disabled=false;
 };
+let PEND=[];
+function renderPend(){const w=$('#m-pend');w.querySelectorAll('.pf').forEach(x=>x.remove());
+  PEND.forEach((f,i)=>{const s=document.createElement('span');s.className='att pf';s.innerHTML=`${icDoc}${esc(f.name||'prilog')}<button type="button" aria-label="Ukloni prilog" data-rm="${i}">✕</button>`;w.insertBefore(s,w.lastElementChild)})}
+$('#m-file').addEventListener('change',()=>{PEND=PEND.concat([...$('#m-file').files]);$('#m-file').value='';renderPend()});
+$('#m-pend').addEventListener('click',e=>{const r=e.target.closest('[data-rm]');if(!r)return;e.preventDefault();PEND.splice(+r.dataset.rm,1);renderPend()});
 
 /* ---------- pravila ---------- */
 function renderRules(){
@@ -418,7 +504,16 @@ $('#r-add').onclick=async()=>{const m=$('#r-match').value.trim().toUpperCase();i
 /* ---------- osnovno ---------- */
 function show(v){view=v;document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-current',String(b.dataset.v===v)));['sum','tx','add','rules'].forEach(x=>$('#v-'+x).hidden=x!==v);render();scrollTo(0,0)}
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)show(b.dataset.v)});
-function render(){computeDup();if(view==='sum')renderSum();if(view==='tx')renderTx();if(view==='add')renderManual();if(view==='rules')renderRules()}
+let fltUnpaid=false;
+function subLists(){
+  const A=all(),S=new Set(A.map(t=>t.sub).filter(Boolean)),sel=$('#subSel'),v=sel.value;
+  const L=[...S].sort((a,b)=>a.localeCompare(b,'sr'));
+  sel.innerHTML='<option value="">Sve podkategorije</option>'+L.map(c=>`<option>${esc(c)}</option>`).join('')+'<option value="-">Bez podkategorije</option>';
+  sel.value=(v==='-'||S.has(v))?v:'';
+  const D=new Set(L);try{const J=window.parent&&window.parent!==window&&window.parent.__mtPdf?window.parent.__mtPdf.jobs():[];
+    for(const j of J){if(j.name)D.add(j.name);const c=String(j.sub||'').split(' · ')[0];if(c&&!/^faktura /.test(c))D.add(c)}}catch(_){}
+  $('#subList').innerHTML=[...D].map(c=>`<option value="${esc(c)}">`).join('')}
+function render(){subLists();computeDup();if(view==='sum')renderSum();if(view==='tx')renderTx();if(view==='add')renderManual();if(view==='rules')renderRules()}
 function initSelects(){
   const yrs=[...new Set([...SEED.map(yearOf),new Date().getFullYear()])].sort((a,b)=>b-a);
   $('#yr').innerHTML=yrs.map(y=>`<option>${y}</option>`).join('')+'<option value="all">Sve godine</option>';
@@ -428,7 +523,7 @@ function initSelects(){
   $('#r-cat').innerHTML=[...CATS_OUT,...CATS_IN,INTERNAL].map(c=>`<option>${esc(c)}</option>`).join('');
   $('#m-dt').value=new Date().toISOString().slice(0,10);
   const last=SEED.filter(t=>t.acc==='RSD').reduce((a,t)=>t.dt>a.dt||(t.dt===a.dt&&t.iz>a.iz)?t:a,{iz:0,dt:''});
-  $('#srcNote').textContent=`Izvodi Banca Intesa iz mejla: ${SEED.length} stavki, poslednji dinarski izvod br. ${last.iz} od ${dsr(last.dt)} Keš troškove dodaješ ručno.`;
+  $('#srcNote').textContent=`Izvodi Banca Intesa iz mejla: ${SEED.length} stavki, poslednji dinarski izvod br. ${last.iz} od ${dsr(last.dt)} Keš troškove i fakture dobavljača dodaješ u „+ Trošak“.`;
 }
 ['#yr','#accSel'].forEach(s=>$(s).addEventListener('input',()=>{month=null;render()}));
 initSelects();render();

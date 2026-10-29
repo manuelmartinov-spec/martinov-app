@@ -1,7 +1,12 @@
 {
- "v": "1.5.3",
- "date": "28.10.2026.",
+ "v": "1.5.4",
+ "date": "29.10.2026.",
  "log": [
+  {
+   "v": "1.5.4",
+   "date": "29.10.2026.",
+   "t": "Troškovi: nova „Podkategorija“ – posao ili kupac za koji je trošak; u Pregledu se vidi koliko je koji posao koštao. „+ Trošak“ prima i fakturu dobavljača koja se plaća sa računa firme, sa brojem fakture i prilogom (PDF ili slika). Kad uplata stigne na izvod, sama se spoji sa fakturom, da se trošak ne računa dva puta; dok ne stigne, gore piše „čeka uplatu“. Podešavanja → „Uvezi podatke iz fajla“ prima fajl koji ti pošalje Claude."
+  },
   {
    "v": "1.5.3",
    "date": "29.10.2026.",
