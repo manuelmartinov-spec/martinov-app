@@ -32,6 +32,11 @@ Claude ne može direktno u bazu. Zato: Claude zaključa paket javnim ključem i 
 - Izvodi stižu na Gmail (info@mail.bancaintesa.rs, „Izvod broj N računa 160-…“ i „Izvod deviznog računa … broj N“);
   Claude ih čita (RAW poruka → PDF), proverava i šalje kroz most. Dinarski izvod: kolone x (pdfplumber reči) –
   naziv 60–230, datumi 250–300, zaduženje x1≤425 / odobrenje, šifra 485–512, svrha 512–636, poziv 636–712.
+  Alati (Python, pdfplumber): `tools/izvodi/extract_izvod.py OUT poruka.txt…` (Gmail RAW → PDF),
+  `tools/izvodi/parse_izvod.py *.Pdf` (dinarski: zaglavlje + stavke + `ok/msg` provera), `tools/izvodi/parse_dev.py` (devizni).
+  Stavka ide u `banka/d<godina>-<izvod>-<rn>` samo ako je NOVA (posle 2026/99 su u bazi; starije su u seed-u — ne dupliraj);
+  PDF u `files/izvod-<acc>-<godina>-<broj>`, opis u `izvodi/<acc>-<godina>-<broj>`. Uvek proveri `ok` i lanac stanja pre slanja.
+  Stanje 29.10.2026: u bazi su svi izvodi 2026 (RSD 1–105, EUR 1–4, GBP 1–2) i 2025/141; ostali 2025 PDF-ovi još nisu.
 - `docs/<id>` dokumenti iz Faktura (ponuda, predračun, avans, račun) – Troškovi → Provera ih upoređuje sa uplatama.
 - `meta/<id stavke>` kategorija/beleška/podkategorija koju je Manuel izabrao: `{cat, note, sub}` — ne pregazi.
 
