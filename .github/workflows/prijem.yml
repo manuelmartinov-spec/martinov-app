@@ -1,0 +1,38 @@
+name: Claude prijem
+
+# Kad Claude pošalje zaključan paket (prijem/ulaz) ili zahtev za čitanje (prijem/zahtev), robot ga obradi.
+on:
+  push:
+    branches: [main]
+    paths: ['prijem/ulaz/**', 'prijem/zahtev/**', 'prijem/proba.txt']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prijem
+  cancel-in-progress: false
+
+jobs:
+  prijem:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Obradi pakete i zahteve
+        run: node tools/prijem.mjs
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SA }}
+      - name: Sačuvaj rezultat
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A prijem
+          if ! git diff --cached --quiet; then
+            git commit -m "Prijem: obrađeno"
+            for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
+          fi
