@@ -380,6 +380,15 @@ h2.g.late{color:var(--hit)}h2.g.today{color:var(--amb-t)}h2.g.pin{color:var(--hi
 .frow .chip{padding:0 12px;font-size:14.5px}
 .frow .cats{gap:6px}
 .frow .ib{width:40px}
+/* predlozi dok kucaš */
+.sugg{margin-top:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.sg{display:flex;width:100%;align-items:center;gap:10px;padding:9px 12px;border:0;border-top:1px solid var(--line);border-radius:0;background:none;text-align:left;min-height:52px;font-weight:500}
+.sg:first-child{border-top:0}
+.sg:hover,.sg:focus-visible{background:var(--hover,var(--bg))}
+.sgt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.sgt b{font-size:15.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sgt small{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sgt small.on{color:var(--kuc-t);font-weight:700}
 </style>
 
 <header class="top"><div class="hin">
@@ -444,6 +453,7 @@ h2.g.late{color:var(--hit)}h2.g.today{color:var(--amb-t)}h2.g.pin{color:var(--hi
         <button type="button" class="ghost cam" id="sCam" aria-label="Dodaj sliku"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6.5h3l1.4-2h5.2l1.4 2h3v9H3z"/><circle cx="10" cy="10.8" r="3"/></svg><span id="sCamN"></span></button>
         <button class="pri" type="submit"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>Dodaj</button>
       </div>
+      <div class="sugg" id="sSugg" role="listbox" aria-label="Ranije kupovano" hidden></div>
       <div class="addopts">
         <div class="segf" role="group" aria-label="Za">
           <button type="button" id="sForR" aria-pressed="true"><i class="dt r"></i>Radionica</button>
@@ -1108,6 +1118,43 @@ function showLast(boxId,name,withStore){const box=$(boxId);const v=lastFor(name)
   if(v.name&&ikey(v.name)!==ikey(name))box.appendChild(el('span',null,'(„'+v.name+'“)'));
   if(withStore&&v.store&&!$('sStore').value.trim()){const b=el('button','ghost','Uzmi „'+v.store+'“');b.type='button';b.addEventListener('click',()=>{$('sStore').value=v.store;b.remove()});box.appendChild(b)}}
 let lastT=null;$('sName').addEventListener('input',()=>{clearTimeout(lastT);lastT=setTimeout(()=>showLast('sLast',$('sName').value,true),250)});
+
+/* ---------- predlozi dok kucaš: ranije kupovane stvari (prodavnica, jedinica, poslednja cena) ---------- */
+function suggIndex(){const m=new Map();
+  const add=(k,o)=>{if(!k)return;const p=m.get(k);if(!p||(o.at||0)>=(p.at||0))m.set(k,Object.assign({},p||{},o,{openId:(p&&p.openId)||o.openId||''}));else if(o.openId&&!p.openId)p.openId=o.openId};
+  for(const [id,x0] of data.shopping){const x=normS(x0);if(!x.name)continue;const k=ikey(x.name);
+    add(k,{name:x.name,store:x.store,unit:x.unit,qty:x.qty,for:x.for,at:x.bought?(x.boughtAt||x.updatedAt||0):(x.createdAt||0),openId:x.bought?'':id})}
+  for(const [k,v] of PRICES){const p=m.get(k);const at=v.at?Date.parse(v.at)||0:0;
+    if(!p)m.set(k,{name:v.name,store:v.store,unit:v.unit,qty:v.qty,at,price:v});else{p.price=v;if(at>(p.at||0)&&v.store)p.store=v.store}}
+  return m}
+function suggFind(q){const k=ikey(q);if(k.length<2)return[];const qw=k.split(' ');const out=[];
+  for(const [kk,v] of suggIndex()){if(kk===k&&!v.openId)continue;const w=kk.split(' ');
+    let sc=0;if(kk.startsWith(k))sc=3;else if(qw.every(t=>w.some(x=>x.startsWith(t))))sc=2;else if(k.length>=3&&kk.includes(k))sc=1;
+    if(sc)out.push([sc,v])}
+  return out.sort((a,b)=>(b[0]-a[0])||((b[1].at||0)-(a[1].at||0))).slice(0,5).map(x=>x[1])}
+function hideSugg(){const b=$('sSugg');b.hidden=true;b.innerHTML=''}
+function showSugg(){const q=$('sName').value;const box=$('sSugg');const list=suggFind(q);box.innerHTML='';
+  if(!list.length||document.activeElement!==$('sName')){box.hidden=true;return}
+  for(const v of list){const b=el('button','sg');b.type='button';b.setAttribute('role','option');
+    const tx=el('span','sgt');tx.appendChild(el('b',null,v.name));
+    const sub=[];if(v.openId)sub.push('već je na spisku – otvori');else{if(v.store)sub.push(v.store);if(v.price)sub.push('poslednje '+priceText(v.price)+(v.price.date?' · '+fmtDate(v.price.date):''))}
+    tx.appendChild(el('small',v.openId?'on':null,sub.join(' · ')||(v.unit?'jedinica: '+v.unit:'ranije dodato')));b.appendChild(tx);
+    if(!v.openId&&v.for)b.appendChild(el('i','dt '+(v.for==='kuca'?'k':'r')));
+    b.addEventListener('pointerdown',e=>e.preventDefault());
+    b.addEventListener('click',()=>pickSugg(v));box.appendChild(b)}
+  box.hidden=false}
+function pickSugg(v){hideSugg();
+  if(v.openId&&data.shopping.has(v.openId)){$('sName').value='';$('sLast').hidden=true;if(window.__sOptsReset)window.__sOptsReset();openS(v.openId);toast('Već je na spisku – otvorio sam je');return}
+  $('sName').value=v.name;if(v.store)$('sStore').value=v.store;if(v.unit&&UNITS.includes(v.unit))$('sUnit').value=v.unit;
+  $('sQty').value='';$('sQty').placeholder=v.qty!==''&&v.qty!=null?'Kol. ('+fmtN(v.qty)+')':'Kol.';
+  if(v.for==='kuca'||v.for==='radionica'){sFor=v.for;syncSAdd()}
+  $('sOpts').hidden=false;$('sMore').setAttribute('aria-expanded','true');showLast('sLast',v.name,true);
+  try{$('sQty').focus()}catch(e){}}
+{let st=null;$('sName').addEventListener('input',()=>{clearTimeout(st);st=setTimeout(showSugg,120)});
+  $('sName').addEventListener('focus',()=>{if($('sName').value.trim().length>=2)showSugg()});
+  $('sName').addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==$('sName'))hideSugg()},150));
+  $('sName').addEventListener('keydown',e=>{if(e.key==='Escape')hideSugg()});
+  $('sAdd').addEventListener('submit',()=>{hideSugg();$('sQty').placeholder='Kol.'})}
 
 /* ---------- račun: kupljeno sa cenom, plaćanje, posao, Troškovi ---------- */
 const PAY=[['kes','Keš'],['kartica','Privatna kartica'],['racun','Privatni račun'],['firma','Firma (račun ili kartica firme)']];

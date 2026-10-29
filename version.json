@@ -1,7 +1,12 @@
 {
- "v": "1.5.0",
+ "v": "1.5.1",
  "date": "28.10.2026.",
  "log": [
+  {
+   "v": "1.5.1",
+   "date": "29.10.2026.",
+   "t": "Kupovina: dok kucaš, ispod se pojave stvari koje si ranije kupovao – sa prodavnicom i poslednjom cenom; jedan dodir popuni ime, prodavnicu i jedinicu. Ako je stvar već na spisku, otvori se ona (bez duplikata). Pregled: dugme „Faktura“ otvara prozor – Nova faktura, poslednje fakture, Sve fakture i PDF sa uređaja. Meni levo: manje i mirnije oznake grupa, sa linijom između grupa."
+  },
   {
    "v": "1.5.0",
    "date": "29.10.2026.",
