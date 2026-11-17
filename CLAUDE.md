@@ -1,8 +1,9 @@
 # Martinov aplikacija — beleške za Claude-a
 
 Javni projekat (GitHub Pages). Ovde NIKAD ne idu privatni podaci (izvodi, PIB, računi, imena kupaca) — samo kod.
-Izvor koda nije ovde: aplikacija se pravi iz izvora (`p1.html`, `p2–p11.js`, `apps/*`, PWA sloj `fb.js`, `glue.js`, `sw.js`),
-a ovde se objavljuje gotov rezultat. Baza: Firebase projekat `martinov-app` (Firestore, pristup samo manuel.martinov@gmail.com).
+Do 1.6.0 aplikacija se pravila iz izvora (`p1.html`, `p2–p11.js`, `glue.js`) koji više ne postoje. Od 1.7.0 se menjaju
+direktno fajlovi ovde (`index.html`, `fb.js`, `sw.js`, `apps/*`) – oni su sada izvor. Posle izmene: podigni verziju u `sw.js` (V),
+`version.json` (v, date, log) i `fb.js?v=` u `index.html`; probaj u Playwright-u sa lažnom bazom (window.__fbResolve + __mtPush stub umesto fb.js). Baza: Firebase projekat `martinov-app` (Firestore, pristup samo manuel.martinov@gmail.com).
 
 ## Most: Claude upisuje u aplikaciju (robot „Claude prijem“)
 Claude ne može direktno u bazu. Zato: Claude zaključa paket javnim ključem i gurne ga ovde, a GitHub robot
@@ -48,3 +49,15 @@ Claude ne može direktno u bazu. Zato: Claude zaključa paket javnim ključem i 
 
 ## Objava
 Gotov rezultat se kopira ovde BEZ brisanja foldera `prijem/` i `.git` (ne kopirati `.git` iz build foldera).
+
+## Alarmi (od 1.7.0)
+- `alarmi/<id>` `{t, k:"kotao|lepak|farba|ostalo", at, rep (min, 0 = jednom), next, nag, on, by, byName, note, cr, up, log:[{n,a}], doneByName, doneAt, endBy, endAt, snz}`.
+  `at` = kad zvoni; `next` = kad robot šalje (null = ne šalje); `nag` = koliko puta je poslao u ovom krugu. Aplikacija postavlja `next=at, nag=0`
+  pri dodavanju/„Urađeno“ (ponavljanje: `at = sada + rep`)/„+10 min“, a `on:false, next:null` kad je gotov ili ugašen.
+- Robot `worker/` (Cloudflare Worker „martinov-alarmi“, svakog minuta): `next ≤ sada` → FCM `data.kind="alarm"` na `naprave` sa `alarmi!==false`,
+  pa `next = +10 min` (najviše 3 slanja), upis sa `currentDocument.updateTime` da ne pregazi potvrdu. Isti robot šalje jutarnji spisak tačno
+  u izabrano vreme (GitHub „Jutarnji podsetnik“ ostaje kao rezerva; `lastSent` sprečava duplo). Znak života: `app_meta/alarmi_robot {last, ok, msg}`.
+- Postavljanje: `.github/workflows/alarmi-robot.yml` (push na `worker/**` ili ručno) – treba GitHub tajna `CLOUDFLARE_API_TOKEN`
+  (Manuelov Cloudflare nalog, token „Martinov alarmi robot“, samo Workers prava); `FIREBASE_SA` prepisuje u Cloudflare tajnu. Proba bez interneta: `node worker/proba.mjs`.
+- `sw.js`: alarm sa vidljivom aplikacijom → `postMessage mt-alarm-push` (aplikacija sama zvoni); inače obaveštenje sa dugmadima done/snooze →
+  `?m=alarmi&a=<id>&do=done|snooze|open`.

@@ -1,5 +1,5 @@
 /* Martinov aplikacija — rad bez interneta i samo-ažuriranje */
-const V='1.6.0';
+const V='1.7.0';
 const SHELL='mt-shell-'+V, RUN='mt-run-v1';
 const CORE=['./','index.html','fb.js','config.js','manifest.webmanifest','version.json','lib/firebase-app.js','lib/firebase-auth.js','lib/firebase-firestore.js','apps/fakture.html','apps/zadaci.html','apps/troskovi.html','apps/nesting.html','apps/pdf.html','apps/kalkulator.html','icons/m-icon-192.png','icons/m-icon-512.png','icons/m-maskable-512.png','icons/m-favicon-64.png','icons/m-apple-180.png','icons/m-badge-96.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(SHELL).then(c=>c.addAll(CORE.map(u=>new Request(u,{cache:'reload'})))))});
@@ -20,11 +20,22 @@ self.addEventListener('fetch',e=>{
   if(/fonts\.(googleapis|gstatic)\.com$/.test(u.hostname)){
     e.respondWith((async()=>{const c=await caches.open(RUN);const h=await c.match(r);if(h)return h;const res=await fetch(r);try{c.put(r,res.clone())}catch(x){}return res})())}
 });
-/* obaveštenja: jutarnji spisak (šalje ga program na GitHub-u preko Firebase Cloud Messaging) */
+/* obaveštenja: alarmi (kotao, lepak…) i jutarnji spisak – šalje ih robot na Cloudflare-u preko Firebase Cloud Messaging */
 self.addEventListener('push',e=>{let p={};try{p=e.data?e.data.json():{}}catch(x){p={data:{body:e.data?e.data.text():''}}}
   const d=p.data||{},n=p.notification||{};const title=d.title||n.title||'Martinov';const body=d.body||n.body||'';
+  if(d.kind==='alarm'&&d.id){e.waitUntil((async()=>{
+    /* aplikacija je otvorena i vidi se → ona sama zvoni, obaveštenje ne treba */
+    const cs=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    const vis=cs.find(c=>c.visibilityState==='visible'&&c.url.startsWith(self.registration.scope));
+    if(vis){vis.postMessage({type:'mt-alarm-push',id:d.id});return}
+    return self.registration.showNotification(title,{body,icon:'icons/m-icon-192.png',badge:'icons/m-badge-96.png',tag:'mt-alarm-'+d.id,renotify:true,requireInteraction:true,
+      vibrate:[600,200,600,200,900],actions:[{action:'done',title:'✓ Urađeno'},{action:'snooze',title:'Još 10 min'}],data:{url:d.url||'./?m=alarmi',alarm:d.id}})})());return}
   e.waitUntil(self.registration.showNotification(title,{body,icon:'icons/m-icon-192.png',badge:'icons/m-badge-96.png',tag:d.tag||'mt-podsetnik',renotify:true,data:{url:d.url||'./'}}))});
-self.addEventListener('notificationclick',e=>{e.notification.close();const url=new URL((e.notification.data&&e.notification.data.url)||'./',self.registration.scope);const m=url.searchParams.get('m')||'';
+self.addEventListener('notificationclick',e=>{e.notification.close();const nd=e.notification.data||{};
+  const url=new URL(nd.url||'./',self.registration.scope);const m=url.searchParams.get('m')||'';
+  const alarm=nd.alarm||'';const act=alarm?(e.action==='done'||e.action==='snooze'?e.action:'open'):'';
+  if(alarm){url.searchParams.set('m','alarmi');url.searchParams.set('a',alarm);url.searchParams.set('do',act)}
   e.waitUntil((async()=>{const cs=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-    for(const c of cs){if(c.url.startsWith(self.registration.scope)){try{await c.focus()}catch(x){}c.postMessage({type:'mt-open',m});return}}
+    for(const c of cs){if(c.url.startsWith(self.registration.scope)){try{await c.focus()}catch(x){}
+      if(alarm)c.postMessage({type:'mt-alarm',id:alarm,act});else c.postMessage({type:'mt-open',m});return}}
     await self.clients.openWindow(url.href)})())});

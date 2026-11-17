@@ -812,6 +812,63 @@ input,select,textarea{border-color:var(--fld-bd);border-radius:10px}
 .plist .padd .ic{width:17px;height:17px}
 .plist .pfoot{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;padding:12px 4px}
 .plist .pfoot button{border:0;background:none;color:var(--navy);font:600 13px var(--f-ui);padding:6px 2px;cursor:pointer}
+</style><style id="alarmi">
+/* ==== Alarmi: kartica na Pregledu, strana Alarmi, traka gore kad zvoni ==== */
+.alc h2{align-items:center}
+.alc h2 .lnk{margin-left:auto;border:0;background:none;color:var(--navy);font:600 13.5px var(--f-ui);padding:6px 2px;min-height:0;cursor:pointer;display:inline-block}
+.alc h2 .lnk+.lnk{margin-left:12px}
+.alc h2 .lnkp{color:var(--on-act-soft);font-weight:800}
+.alc.ring{border-color:var(--hit);box-shadow:inset 4px 0 0 var(--hit)}
+.alr{display:flex;align-items:center;gap:4px;border-top:1px solid var(--grid)}
+.alr .qck{flex:none;width:44px;min-height:50px;border:0;background:none;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.alr .qck span{width:24px;height:24px;border-radius:50%;border:2px solid var(--muted);display:block;transition:background .12s}
+.alr .qck:hover span{background:var(--kuc-soft);border-color:var(--kuc)}
+.alr .aico{flex:none;width:30px;height:30px;border-radius:9px;background:var(--act-soft);color:var(--on-act-soft);display:flex;align-items:center;justify-content:center}
+.alr .aico .ic{width:18px;height:18px}
+.alr .altx{flex:1;min-width:0;border:0;background:none;text-align:left;padding:10px 4px 10px 6px;display:flex;flex-direction:column;gap:2px;font:inherit;color:var(--fg);cursor:pointer}
+.alr .alt{font-weight:700;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.alr .alm{font-size:12.5px;color:var(--muted);line-height:1.35}
+.alr .anote{font-size:12.5px;color:var(--muted);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alr.ring{background:var(--hit-soft);border-radius:12px;border-top-color:transparent;margin:3px -6px;padding:0 6px}
+.alr.ring .qck span{border-color:var(--hit)}
+.alr.ring .aico{background:var(--hit);color:var(--panel)}
+.alr.ring .alm b{color:var(--hit);letter-spacing:.04em}
+.alr.ring .aico .ic{animation:awig 1s ease-in-out infinite}
+.alr.off .aico{background:var(--track);color:var(--muted)}
+.alr.off .altx{padding-left:10px}
+.alr .asnz{flex:none;min-height:38px;padding:6px 10px;font-size:13px}
+.apre{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0 4px}
+.akc{display:inline-flex;align-items:center;gap:6px}
+.akc .aki{display:inline-flex}.akc .aki .ic{width:16px;height:16px}
+.apush{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--amb-soft);color:var(--amb-t);border-radius:12px;padding:8px 10px;font-size:13px;line-height:1.4;margin:6px 0 4px}
+.apush span{flex:1;min-width:180px}
+.aempty{margin:2px 0 0}
+.alpage .alh{display:flex;align-items:flex-start;gap:12px}
+.alpage .alh>div{flex:1;min-width:0}
+.alpage h1{margin:0 0 4px;font-size:24px}
+.alpage .alh p{margin:0;max-width:62ch;line-height:1.45}
+.adev .adr{padding:8px 0;border-top:1px solid var(--grid);font-size:14px}
+.alpage .alc>.btn{margin:10px 0 2px}
+.arobot{font-size:12.5px;margin:8px 0 4px}.arobot.bad{color:var(--hit)}
+.ald .atime{width:auto;max-width:130px;min-height:36px}
+.ald .aor{font-size:13px;padding:0 2px 0 4px;align-self:center}
+.ald .anext{margin-top:-6px}
+.ald .aacts{border-top:1px solid var(--grid);padding-top:10px;flex-wrap:wrap}
+.ahist{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted);border-top:1px solid var(--grid);padding-top:10px}
+.ahist .lb{font-size:12px;font-weight:700;color:var(--fg)}
+.aring{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 8px);z-index:240;width:min(560px,calc(100vw - 16px));background:#A3301E;color:#fff;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.35);padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;font-family:var(--f-ui)}
+.aring .arh{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:.06em;font-size:13px}
+.aring .arh .ic{width:20px;height:20px;animation:awig 1s ease-in-out infinite}
+.aring .arr{display:flex;flex-direction:column;gap:8px;background:rgba(255,255,255,.12);border-radius:12px;padding:10px}
+.aring .art b{display:block;font-size:18px;line-height:1.25;overflow-wrap:anywhere}
+.aring .art small{display:block;font-size:13px;opacity:.92;margin-top:2px}
+.aring .arb{display:flex;gap:8px;flex-wrap:wrap}
+.aring .btn{background:#fff;border:1.5px solid #fff;color:#7A1E12;min-height:44px;font-weight:800;border-radius:12px;padding:8px 14px;cursor:pointer}
+.aring .btn.pri{background:#fff;border-color:#fff;color:#7A1E12;flex:1;justify-content:center}
+.aring .btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.65)}
+.aring .btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@keyframes awig{0%,100%{transform:rotate(0)}25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}}
+@media (prefers-reduced-motion:reduce){.aring .arh .ic,.alr.ring .aico .ic{animation:none}}
 </style>
 
 <div id="app">
@@ -2197,6 +2254,7 @@ Object.assign(P,{
 const MODS={
   pregled:{n:'Pregled',i:'home',cat:''},
   kal:{n:'Kalendar',i:'cal',cat:''},
+  alarmi:{n:'Alarmi',i:'alarm',cat:''},
   zadaci:{n:'Zadaci',i:'check',cat:'Poslovi',app:'zadaci',tab:'tabT'},
   cenovnik:{n:'Cenovnik',i:'tag',cat:'Proizvodi'},
   krojenje:{n:'Krojenje ploča',i:'nest',cat:'Proizvodi',app:'nesting'},
@@ -2217,7 +2275,7 @@ function allCats(){const c=[...BASECATS];for(const t of T.values()){const x=tabl
 const ntxt=s=>String(s==null?'':s).toLowerCase().replace(/đ/g,'dj').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
 
 /* ---------- podaci drugih delova aplikacije (fakture, kupci, zadaci, kupovina, događaji) ---------- */
-const X={docs:new Map(),clients:new Map(),auto:new Map(),events:new Map(),tasks:new Map(),shopping:new Map(),settings:new Map(),kupljeno:new Map(),nesting:new Map(),izvestaji:new Map()};
+const X={alarmi:new Map(),docs:new Map(),clients:new Map(),auto:new Map(),events:new Map(),tasks:new Map(),shopping:new Map(),settings:new Map(),kupljeno:new Map(),nesting:new Map(),izvestaji:new Map()};
 const XL=new Set();
 function subX(col){
   if(!db)return;
@@ -2231,7 +2289,7 @@ function xput(col,id,d){X[col].set(id,d);write(col+'/'+id,{k:'set',d:clone(d)});
 function xpatch(col,id,patch){const cur=X[col].get(id);if(!cur){xput(col,id,patch);return}const n=Object.assign({},cur,patch);X[col].set(id,n);write(col+'/'+id,{k:'patch',d:clone(patch),full:()=>clone(X[col].get(id))});onData()}
 function xdel(col,id){X[col].delete(id);write(col+'/'+id,{k:'del'});onData()}
 let xTimer=null;
-function onXData(col){clearTimeout(xTimer);xTimer=setTimeout(()=>{if(col==='clients'||col==='docs')syncClients();checkProposals();if(typeof podTick==='function')podTick()},400);onData()}
+function onXData(col){if(col==='alarmi'&&typeof alarmsLoaded==='function')alarmsLoaded();clearTimeout(xTimer);xTimer=setTimeout(()=>{if(col==='clients'||col==='docs')syncClients();checkProposals();if(typeof podTick==='function')podTick()},400);onData()}
 
 /* ---------- levi meni ---------- */
 function navBtn(label,cur,onClick,iconNode,count,badge){
@@ -2243,7 +2301,7 @@ function tabIcon(t){const i=el('span','tico',t.name.trim().charAt(0)||'T');i.sty
 function renderSide(){
   const box=$('tlist');box.innerHTML='';
   const pend=pendingProposals().length;
-  for(const k of ['pregled','kal'])if(MODS[k])box.appendChild(navBtn(MODS[k].n,ui.t==='m:'+k,()=>openModule(k),modIcon(k),null,k==='pregled'?pend:0));
+  for(const k of ['pregled','kal','alarmi'])if(MODS[k])box.appendChild(navBtn(MODS[k].n,ui.t==='m:'+k,()=>openModule(k),modIcon(k),k==='alarmi'&&XL.has('alarmi')?(activeAlarms().length||null):null,k==='pregled'?pend:k==='alarmi'?ringCount():0));
   for(const c of allCats()){
     const items=[];
     for(const k in MODS)if(MODS[k].cat===c)items.push({k,mod:true});
@@ -2272,7 +2330,7 @@ function renderModule(){
   $('content').hidden=!!m.app;$('appHost').hidden=!m.app;
   if(m.app){showApp(m.app,m.tab);return}
   const c=$('content');
-  if(k==='pregled')renderPregled(c);else if(k==='kal')renderKal(c);else if(k==='cenovnik')renderCenovnik(c);
+  if(k==='pregled')renderPregled(c);else if(k==='kal')renderKal(c);else if(k==='alarmi')renderAlarmi(c);else if(k==='cenovnik')renderCenovnik(c);
 }
 
 /* ---------- ugrađene aplikacije (Fakture, Zadaci i Kupovina, Troškovi) ---------- */
@@ -2326,6 +2384,7 @@ function renderPregled(c){
   qb('todo','Zadatak',()=>quickTask());
   qb('print','Štampaj mesec',()=>printDlg());
   w.appendChild(qa);
+  w.appendChild(alarmCard());
   {const rc=reportCard();if(rc)w.appendChild(rc)}
   w.appendChild(taskCard());
   /* predlozi iz faktura */
@@ -3171,7 +3230,7 @@ const TABS=[['m:pregled','Pregled','home'],['poslovi','Poslovi','check'],['m:zad
 function renderTabbar(){
   const nb=$('tabbar');if(!nb)return;nb.innerHTML='';const pt=PT();
   for(const [k,n,i] of TABS){const id=k==='poslovi'?(pt&&pt.id):k;if(!id)continue;const b=el('button','tab');b.type='button';b.setAttribute('aria-current',String(ui.t===id));b.innerHTML=ic(i);b.appendChild(el('span',null,n));
-    if(k==='m:pregled'){const pc=pendingProposals().length;if(pc)b.appendChild(el('i','tbadge',String(pc)))}
+    if(k==='m:pregled'){const pc=pendingProposals().length+ringCount();if(pc)b.appendChild(el('i','tbadge',String(pc)))}
     if(k==='m:zadaci'&&XL.has('tasks')){const c=[...X.tasks.values()].filter(s=>s&&!s.done).length;if(c)b.appendChild(el('i','tbadge soft',String(c)))}
     if(k==='m:kupovina'&&XL.has('shopping')){const c=[...X.shopping.values()].filter(s=>!s.bought).length;if(c)b.appendChild(el('i','tbadge soft',String(c)))}
     b.addEventListener('click',()=>{if(isMod(id))openModule(modKey(id));else openTable(id)});nb.appendChild(b)}
@@ -3532,6 +3591,7 @@ function quickMenu(){
     it('plus','Posao','novi posao za kupca',()=>newJob());
     it('cal','Događaj','sastanak, isporuka, montaža',()=>eventDlg(null,todayISO()));
     it('coins','Trošak','keš, kartica ili faktura dobavljača',quickTrosak);
+    it('alarm','Alarm','kotao, lepak, lak – zvoni svima',()=>alarmDlg(null));
     it('calc','Kalkulator','cena drveta i nameštaja',()=>openModule('kalkulator'))})}
 function syncQFab(){const b=$('qFab');if(!b)return;b.hidden=!(ui.t==='m:pregled'&&!readonly)}
 (function(){const b=el('button','btn pri');b.id='qFab';b.type='button';b.innerHTML=ic('plus')+'<span>Dodaj</span>';b.setAttribute('aria-label','Dodaj');b.title='Dodaj: zadatak, kupovina, posao, događaj, trošak';b.hidden=true;b.addEventListener('click',quickMenu);document.body.appendChild(b)})();
@@ -3727,21 +3787,22 @@ function pushCard(){
   const sel=(opts,val)=>{const x=el('select');for(const [v,t] of opts){const o=el('option',null,t);o.value=v;x.appendChild(o)}if(!opts.some(o=>o[0]===val)){const o=el('option',null,val);o.value=val;x.appendChild(o)}x.value=val;return x};
   const lab=(t,n)=>{const x=el('label','pf');x.append(el('span','mute',t),n);return x};
   const save=ch=>P.update(ch).then(()=>{toast('Sačuvano');drawList()},e=>toast(pushErr(e)));
-  const draw=()=>{w.innerHTML='';w.appendChild(el('b',null,'Jutarnje obaveštenje na ovom uređaju'));
+  const draw=()=>{w.innerHTML='';w.appendChild(el('b',null,'Obaveštenja na ovom uređaju'));
     if(!P){w.appendChild(el('span','mute','Nije dostupno u ovoj verziji.'));return}
     const s=P.support(),l=P.local();
     if(s==='nokey'){w.appendChild(el('span','mute','Obaveštenja se još podešavaju.'));return}
     if(s==='ios-home'){w.appendChild(el('span','mute','Na iPhone-u: u Safari-ju Podeli → „Dodaj na početni ekran“, pa otvori aplikaciju sa početnog ekrana i ovde uključi obaveštenja.'));return}
     if(s!=='ok'){w.appendChild(el('span','mute','Ovaj pregledač ne podržava obaveštenja. Probaj u Chrome-u.'));return}
     if(P.perm()==='denied'){w.appendChild(el('span','mute','Obaveštenja su blokirana za ovu aplikaciju. Telefon: drži prst na ikoni aplikacije → Informacije o aplikaciji → Obaveštenja → uključi. Računar: katanac levo od adrese → Obaveštenja → Dozvoli. Pa se vrati ovde.'));return}
-    if(!l){w.appendChild(el('span','mute','Svako jutro stiže kratak spisak: hitno, kasni, danas, sutra i šta treba kupiti. Ako nema ničega, obaveštenje ne stiže.'));
+    if(!l){w.appendChild(el('span','mute','Alarmi (kotao, lepak…) zvone čim dođe vreme, a svako jutro stiže kratak spisak: hitno, kasni, danas, sutra i šta treba kupiti.'));
       const b=el('button','btn pri','Uključi obaveštenja');b.type='button';
       b.addEventListener('click',async()=>{b.disabled=true;b.textContent='Uključujem…';try{await P.enable({});toast('Obaveštenja su uključena na ovom uređaju')}catch(e){toast(pushErr(e))}draw();drawList()});
       w.appendChild(b);return}
     const tm=sel(PTIMES.map(t=>[t,t.replace(/^0/,'')]),l.time||'07:00');tm.addEventListener('change',()=>save({time:tm.value}));
     const tk=sel([['1','Da'],['0','Ne']],l.tasks===false?'0':'1');tk.addEventListener('change',()=>save({tasks:tk.value==='1'}));
     const sh=sel(PSHOP,l.shop||'sve');sh.addEventListener('change',()=>save({shop:sh.value}));
-    const g=el('div','pgrid');g.append(lab('Vreme',tm),lab('Zadaci',tk),lab('Kupovina',sh));w.appendChild(g);
+    const al=sel([['1','Da'],['0','Ne']],l.alarmi===false?'0':'1');al.addEventListener('change',()=>save({alarmi:al.value==='1'}));
+    const g=el('div','pgrid');g.append(lab('Alarmi',al),lab('Jutro u',tm),lab('Zadaci',tk),lab('Kupovina',sh));w.appendChild(g);
     const bt=el('div','prow');
     const pr=el('button','chip plain','Probaj obaveštenje');pr.type='button';
     pr.addEventListener('click',async()=>{let t=null;try{t=podText(podData(),{tasks:tk.value==='1',shop:sh.value},podToday())}catch(e){}
@@ -3757,8 +3818,10 @@ function pushCard(){
       const rm=el('button','chip plain','Ukloni');rm.type='button';rm.addEventListener('click',async()=>{rm.disabled=true;try{await P.remove(x.id)}catch(e){toast(pushErr(e))}draw();drawList()});
       r.appendChild(rm);lw.appendChild(r)}},()=>{})};
   draw();drawList();return wrap}
+/* alarm iz obaveštenja: ?m=alarmi&a=<id>&do=done|snooze|open */
+const ALARM_Q=(()=>{try{const q=new URLSearchParams(location.search);const a=q.get('a');return a?{id:a,act:q.get('do')||'open'}:null}catch(e){return null}})();
 /* klik na obaveštenje otvara Zadatke ili Kupovinu */
-(function(){const go=m=>{if(!m)return;const sp=['zadatak','trosak','kupovina-novo','dodaj'].includes(m);if(!sp&&!MODS[m])return;let n=0;const t=setInterval(()=>{if(loadedT){clearInterval(t);try{if(!(window.__mtGo&&window.__mtGo(m)))openModule(m)}catch(e){}}else if(++n>60)clearInterval(t)},300)};
+(function(){const go=m=>{if(!m)return;const sp=['zadatak','trosak','kupovina-novo','dodaj','alarm'].includes(m);if(!sp&&!MODS[m])return;let n=0;const t=setInterval(()=>{if(loadedT){clearInterval(t);try{if(!(window.__mtGo&&window.__mtGo(m)))openModule(m)}catch(e){}}else if(++n>60)clearInterval(t)},300)};
   try{const q=new URLSearchParams(location.search);const m=q.get('m');if(m){history.replaceState(null,'',location.pathname);go(m)}}catch(e){}
   if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='mt-open')go(e.data.m)})})();
 /* PDF iz drugih aplikacija: telefon „Podeli → Martinov“, računar „Otvori pomoću → Martinov“ */
@@ -3953,6 +4016,225 @@ let qT=null;$('q').addEventListener('input',e=>{clearTimeout(qT);qT=setTimeout((
 let wasNarrow=narrow();window.addEventListener('resize',()=>{clearTimeout(qT);qT=setTimeout(()=>{if(ui.edit)return;const n=narrow();if(!isMod(ui.t))renderContent();else if(n!==wasNarrow&&MODS[modKey(ui.t)]&&!MODS[modKey(ui.t)].app)renderModule();wasNarrow=n},150)});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)onData()});
 
+/* ================= ALARMI: zajednički podsetnik za sve u kući (kotao, lepak, lak…) =================
+   alarmi/{id}: {t, k, at, rep, next, nag, on, by, byName, note, cr, up, log:[{n,a}], doneByName, doneAt, endBy, endAt, snz}
+   at   = kada zvoni (ms) · rep = ponavljanje u minutima posle svake potvrde (0 = jednom) · on = false kad je gotov/ugašen
+   next = kada robot na Cloudflare-u šalje obaveštenje svim uređajima (null = ne šalje) · nag = koliko puta je poslao u ovom krugu
+   Aplikacija sama zvoni (zvuk + traka gore) dok je otvorena; zatvorene telefone budi robot (worker/). */
+Object.assign(P,{
+  alarm:'<circle cx="10" cy="11" r="5.9"/><path d="M10 7.8v3.4l2.1 1.3M3.4 5.4l2.8-2.4M16.6 5.4l-2.8-2.4M5.9 16.2l-1.4 1.6M14.1 16.2l1.4 1.6"/>',
+  flame:'<path d="M10 17.3c-2.9 0-5-2-5-4.9 0-2.7 2.1-4.1 2.9-6.7.9 1.1 1.3 2.3 1.3 3.5 1-1.6 1.9-3.8 1.4-6.4 2.6 1.6 4.4 4.6 4.4 8.3 0 3.7-2.1 6.2-5 6.2z"/>',
+  drop:'<path d="M10 2.9c2.9 3.7 4.8 6.3 4.8 8.7a4.8 4.8 0 0 1-9.6 0c0-2.4 1.9-5 4.8-8.7z"/>',
+  brush:'<path d="M12.3 3.3l4.4 4.4-6.1 6.1-4.4-4.4zM6.2 9.4l-.8.8c-1.3 1.3-1.2 3.4-2.9 5 2.6.4 5-.3 6.2-1.5l.8-.8"/>'
+});
+const AK={
+  kotao:{n:'Kotao',i:'flame',t:'Proveri kotao',min:120,rep:120},
+  lepak:{n:'Lepak',i:'drop',t:'Lepak se osušio – skini stege',min:45,rep:0},
+  farba:{n:'Farba / lak',i:'brush',t:'Lak se osušio – sledeći sloj',min:120,rep:0},
+  ostalo:{n:'Drugo',i:'alarm',t:'',min:30,rep:0}
+};
+const AMIN=[10,20,30,45,60,90,120,180,240];
+const AREP=[0,30,60,120,180,240];
+let ALAST={};try{ALAST=JSON.parse(localStorage.getItem('mt.alarm.last')||'{}')||{}}catch(e){ALAST={}}
+function aLast(k){const d=AK[k]||AK.ostalo;const l=ALAST[k]||{};return{t:typeof l.t==='string'&&l.t?l.t:d.t,min:typeof l.min==='number'&&l.min>0?l.min:d.min,rep:AREP.includes(l.rep)?l.rep:d.rep}}
+function aRemember(k,o){const p=ALAST[k]||{};ALAST[k]={t:o.t,min:o.min!=null?o.min:p.min,rep:o.rep};try{localStorage.setItem('mt.alarm.last',JSON.stringify(ALAST))}catch(e){}}
+function meName(){try{const u=window.__mtUser&&window.__mtUser();const n=u&&u.displayName?String(u.displayName).trim().split(/\s+/)[0]:'';if(n)return n;const e=u&&u.email?String(u.email).split('@')[0]:'';if(e)return e}catch(e){}return devName()||'neko'}
+const hhmm=ms=>{const d=new Date(ms);return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')};
+function dayTag(ms){const d=new Date(ms),t=new Date();if(d.toDateString()===t.toDateString())return'';const y=new Date(t);y.setDate(t.getDate()-1);if(d.toDateString()===y.toDateString())return'juče ';const m=new Date(t);m.setDate(t.getDate()+1);if(d.toDateString()===m.toDateString())return'sutra ';return d.getDate()+'.'+(d.getMonth()+1)+'. '}
+function durTxt(min){min=Math.round(min);if(min<60)return min+' min';const h=Math.floor(min/60),m=min%60;return h+(m===30?',5 h':' h'+(m?' '+m+' min':''))}
+function leftTxt(ms){const s=Math.round((ms-Date.now())/1000);if(s<=0)return'sada';if(s<60)return'za manje od minuta';return'za '+durTxt(Math.ceil(s/60))}
+function repTxt(r){if(!r)return'';if(r<60)return'svakih '+r+' min';if(r===60)return'svakog sata';if(r%60===0){const h=r/60;return(h<5?'svaka ':'svakih ')+h+(h<5?' sata':' sati')}return'svakih '+durTxt(r)}
+function aNorm(a){a=a||{};return{t:str(a.t),k:AK[a.k]?a.k:'ostalo',at:+a.at||0,rep:Math.max(0,+a.rep||0),next:typeof a.next==='number'?a.next:null,nag:+a.nag||0,on:a.on!==false,
+  by:a.by||null,byName:str(a.byName),note:str(a.note),cr:+a.cr||0,up:+a.up||0,log:(Array.isArray(a.log)?a.log:[]).filter(x=>x&&x.a).slice(-20),
+  doneByName:str(a.doneByName),doneAt:+a.doneAt||0,endBy:str(a.endBy),endAt:+a.endAt||0,snz:str(a.snz)}}
+function alarmList(){const L=[];for(const [id,a] of X.alarmi){const n=aNorm(a);if(n.t)L.push([id,n])}return L}
+function activeAlarms(){return alarmList().filter(([,a])=>a.on).sort((x,y)=>x[1].at-y[1].at)}
+const aRing=a=>a.on&&a.at<=Date.now();
+function ringCount(){return XL.has('alarmi')?activeAlarms().filter(([,a])=>aRing(a)).length:0}
+
+/* ---------- radnje ---------- */
+function addAlarm(o){
+  if(readonly){toastRO();return null}
+  const now=Date.now(),id=newId('alarmi'),at=o.at;
+  xput('alarmi',id,{t:o.t,k:o.k||'ostalo',at,rep:o.rep||0,next:at,nag:0,on:true,by:myId||null,byName:meName(),note:o.note||'',cr:now,up:now,log:[]});
+  toast('Alarm: '+o.t+' · '+dayTag(at)+hhmm(at),'Otvori',()=>alarmDlg(id),{ok:true});setTimeout(checkRing,50);return id}
+function alarmDone(id){
+  if(readonly){toastRO();return}
+  const a0=X.alarmi.get(id);if(!a0)return;const a=aNorm(a0);const now=Date.now(),me=meName();
+  const log=a.log.concat([{n:me,a:now}]).slice(-20);
+  if(a.rep){const at=now+a.rep*60000;xpatch('alarmi',id,{at,next:at,nag:0,log,doneByName:me,doneAt:now,up:now,snz:''});
+    toast('Urađeno: '+a.t+' · sledeći put '+dayTag(at)+hhmm(at),'',null,{ok:true,ms:6000,alt:['Vrati',()=>xput('alarmi',id,clone(a0))]})}
+  else{xpatch('alarmi',id,{on:false,next:null,log,doneByName:me,doneAt:now,up:now});
+    toast('Urađeno: '+a.t,'',null,{ok:true,ms:6000,alt:['Vrati',()=>xput('alarmi',id,clone(a0))]})}
+  setTimeout(checkRing,50)}
+function alarmSnooze(id,min){
+  if(readonly){toastRO();return}
+  const a0=X.alarmi.get(id);if(!a0)return;const now=Date.now(),at=now+min*60000;
+  xpatch('alarmi',id,{at,next:at,nag:0,up:now,snz:meName()});toast('Odloženo '+durTxt(min)+' · zvoni u '+hhmm(at),'',null,{ok:true});setTimeout(checkRing,50)}
+function alarmStop(id){
+  if(readonly){toastRO();return}
+  const a0=X.alarmi.get(id);if(!a0)return;const now=Date.now();
+  xpatch('alarmi',id,{on:false,next:null,up:now,endBy:meName(),endAt:now});
+  toast('Alarm ugašen: '+aNorm(a0).t,'',null,{ok:true,ms:6000,alt:['Vrati',()=>xput('alarmi',id,clone(a0))]});setTimeout(checkRing,50)}
+function alarmDel(id){
+  if(readonly){toastRO();return}
+  const a0=X.alarmi.get(id);if(!a0)return;xdel('alarmi',id);toast('Alarm obrisan','',null,{alt:['Vrati',()=>xput('alarmi',id,clone(a0))]});setTimeout(checkRing,50)}
+
+/* ---------- prozor: novi alarm / izmena ---------- */
+function alarmDlg(id,kind){
+  const a0=id?X.alarmi.get(id):null;if(id&&!a0){toast('Alarm više ne postoji.');return}
+  const a=a0?aNorm(a0):null;
+  openDlg(a?'Alarm':'Novi alarm',b=>{b.classList.add('ald');
+    let k=a?a.k:(AK[kind]?kind:'kotao');const L0=aLast(k);
+    let min=(!a||!a.on)?L0.min:null,atFix=null,rep=a?a.rep:L0.rep;
+    const ti=el('input');ti.placeholder='npr. Proveri kotao';ti.setAttribute('aria-label','Tekst alarma');ti.value=a?a.t:L0.t;ti.enterKeyHint='done';ti.maxLength=80;
+    const kr=el('div','chips');
+    const drawK=()=>{kr.innerHTML='';for(const [kk,d] of Object.entries(AK)){const c=el('button','chip akc');c.type='button';c.setAttribute('aria-pressed',String(k===kk));const s=el('span','aki');s.innerHTML=ic(d.i);c.append(s,el('span',null,d.n));
+      c.addEventListener('click',()=>{const was=ti.value.trim();const auto=!was||was===aLast(k).t||Object.values(AK).some(x=>x.t===was);k=kk;const nl=aLast(kk);
+        if(auto)ti.value=nl.t;if(!a||!a.on){min=nl.min;atFix=null;wi.value=''}if(!a)rep=nl.rep;drawK();drawW();drawR();if(!ti.value)ti.focus()});kr.appendChild(c)}};
+    const wr=el('div','chips');const wi=el('input');wi.type='time';wi.className='atime';wi.setAttribute('aria-label','Zvoni u tačno vreme');
+    const info=el('div','note anext');
+    const target=()=>atFix!=null?atFix:min!=null?Date.now()+min*60000:a.at;
+    const drawW=()=>{wr.innerHTML='';for(const m of AMIN){const c=el('button','chip',durTxt(m));c.type='button';c.setAttribute('aria-pressed',String(atFix==null&&min===m));c.addEventListener('click',()=>{min=m;atFix=null;wi.value='';drawW()});wr.appendChild(c)}
+      const lu=el('span','mute aor','ili u');wr.append(lu,wi);
+      if(a&&a.on&&min==null&&atFix==null)info.textContent=aRing(a)?'Zvoni od '+dayTag(a.at)+hhmm(a.at)+'. Izaberi novo vreme samo ako hoćeš da ga pomeriš.':'Zvoni '+dayTag(a.at)+'u '+hhmm(a.at)+' ('+leftTxt(a.at)+'). Izaberi novo vreme samo ako hoćeš da ga pomeriš.';
+      else{const t=target();info.textContent='Zvoniće '+dayTag(t)+'u '+hhmm(t)+' ('+leftTxt(t)+').'}};
+    wi.addEventListener('change',()=>{const v=wi.value;if(!/^\d{1,2}:\d{2}$/.test(v)){atFix=null;drawW();return}const [hh,mm]=v.split(':').map(Number);const d=new Date();d.setHours(hh,mm,0,0);if(d.getTime()<=Date.now()+30000)d.setDate(d.getDate()+1);atFix=d.getTime();min=null;drawW()});
+    const rr=el('div','chips');const drawR=()=>{rr.innerHTML='';for(const r of AREP){const c=el('button','chip',r?durTxt(r):'Jednom');c.type='button';c.setAttribute('aria-pressed',String(rep===r));c.addEventListener('click',()=>{rep=r;drawR()});rr.appendChild(c)}};
+    const no=el('input');no.placeholder='npr. ubaci 2 džaka briketa';no.setAttribute('aria-label','Napomena');no.value=a?a.note:'';no.maxLength=140;
+    drawK();drawW();drawR();
+    b.appendChild(fld('Za šta',kr));b.appendChild(fld('Tekst alarma',ti));
+    b.appendChild(fld(a&&a.on?'Pomeri (od sada)':'Kada da zvoni',wr));b.appendChild(info);
+    b.appendChild(fld('Ponavljaj',rr,'Kad neko štiklira „Urađeno“, sledeći put zvoni posle izabranog vremena.'));
+    b.appendChild(fld('Napomena (nije obavezno)',no));
+    const save=()=>{const t=ti.value.trim();if(!t){ti.focus();toast('Upiši tekst alarma.');return}const now=Date.now();
+      if(!a){const at=target();aRemember(k,{t,min,rep});addAlarm({t,k,at,rep,note:no.value.trim()});closeDlg();return}
+      if(readonly){toastRO();return}
+      const p={t,k,rep,note:no.value.trim(),up:now};if(min!=null||atFix!=null||!a.on){const at=target();Object.assign(p,{at,next:at,nag:0,on:true})}
+      if(min!=null)aRemember(k,{t,min,rep});
+      xpatch('alarmi',id,p);toast(a.on?'Sačuvano':'Alarm je ponovo uključen · '+dayTag(p.at)+hhmm(p.at),'',null,{ok:true});closeDlg();setTimeout(checkRing,50)};
+    ti.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save()}});
+    const bot=el('div','ebot');const ok=el('button','btn pri',!a?'Postavi alarm':a.on?'Sačuvaj':'Uključi ponovo');ok.type='button';ok.addEventListener('click',save);
+    const cn=el('button','btn','Otkaži');cn.type='button';cn.addEventListener('click',closeDlg);bot.append(ok,cn);b.appendChild(bot);
+    if(a){
+      const act=el('div','ebot aacts');
+      if(a.on){const d=el('button','btn','✓ Urađeno');d.type='button';d.addEventListener('click',()=>{closeDlg();alarmDone(id)});act.appendChild(d);
+        if(aRing(a)){const s=el('button','btn','Odloži 10 min');s.type='button';s.addEventListener('click',()=>{closeDlg();alarmSnooze(id,10)});act.appendChild(s)}
+        const st=el('button','btn',a.rep?'Ugasi (ne ponavljaj više)':'Ugasi alarm');st.type='button';st.addEventListener('click',()=>{closeDlg();alarmStop(id)});act.appendChild(st)}
+      const dl=el('button','btn danger','Obriši');dl.type='button';dl.addEventListener('click',()=>{closeDlg();alarmDel(id)});act.appendChild(dl);b.appendChild(act);
+      const hi=el('div','ahist');hi.appendChild(el('div','lb','Ko je šta uradio'));
+      const ev=[];for(const x of a.log)ev.push([x.a,'✓ '+(x.n||'?')+' – urađeno']);if(a.endAt)ev.push([a.endAt,'Ugasio '+(a.endBy||'?')]);if(a.cr)ev.push([a.cr,'Postavio '+(a.byName||'?')]);
+      ev.sort((x,y)=>y[0]-x[0]);for(const [t0,tx] of ev.slice(0,8))hi.appendChild(el('div','ahr',dayTag(t0)+hhmm(t0)+' · '+tx));
+      b.appendChild(hi)}
+    if(!a)setTimeout(()=>{try{if(!coarse())ti.select()}catch(e){}},80)})}
+
+/* ---------- red u listi (Pregled i strana Alarmi) ---------- */
+function alarmRow(id,a){
+  const ring=aRing(a);const r=el('div','alr'+(ring?' ring':'')+(a.on?'':' off'));
+  if(a.on){const ck=el('button','qck');ck.type='button';ck.setAttribute('aria-label','Urađeno: '+a.t);ck.title='Urađeno';ck.appendChild(el('span'));ck.addEventListener('click',e=>{e.stopPropagation();alarmDone(id)});r.appendChild(ck)}
+  const ico=el('span','aico');ico.innerHTML=ic((AK[a.k]||AK.ostalo).i);r.appendChild(ico);
+  const b=el('button','altx');b.type='button';b.appendChild(el('span','alt',a.t));const m=el('span','alm');
+  if(!a.on){m.textContent=a.endAt&&(!a.doneAt||a.endAt>a.doneAt)?'ugasio '+(a.endBy||'?')+' · '+dayTag(a.endAt)+hhmm(a.endAt):'✓ '+(a.doneByName||'?')+' · '+dayTag(a.doneAt||a.up)+hhmm(a.doneAt||a.up)}
+  else{if(ring){m.appendChild(el('b',null,'ZVONI'));m.appendChild(document.createTextNode(' od '+dayTag(a.at)+hhmm(a.at)))}
+    else{const cd=el('span','acd',leftTxt(a.at));cd.dataset.at=String(a.at);m.append(cd,document.createTextNode(' · '+dayTag(a.at)+hhmm(a.at)))}
+    const ex=[];if(a.rep)ex.push(repTxt(a.rep));ex.push(a.doneAt&&a.doneByName?'poslednji put '+a.doneByName+' '+dayTag(a.doneAt)+hhmm(a.doneAt):'postavio '+(a.byName||'?'));
+    m.appendChild(document.createTextNode(' · '+ex.join(' · ')))}
+  b.appendChild(m);if(a.note&&a.on)b.appendChild(el('span','anote',a.note));b.addEventListener('click',()=>alarmDlg(id));r.appendChild(b);
+  if(ring){const sz=el('button','btn asnz','+10 min');sz.type='button';sz.setAttribute('aria-label','Odloži 10 minuta');sz.addEventListener('click',e=>{e.stopPropagation();alarmSnooze(id,10)});r.appendChild(sz)}
+  return r}
+function alarmPresets(){const p=el('div','apre');
+  for(const [k,d] of Object.entries(AK)){const c=el('button','chip akc');c.type='button';const s=el('span','aki');s.innerHTML=ic(d.i);c.append(s,el('span',null,k==='ostalo'?'Drugi alarm':d.n));c.addEventListener('click',()=>alarmDlg(null,k));p.appendChild(c)}
+  return p}
+function alarmPushHint(){const Pu=window.__mtPush;if(!Pu)return null;let s='';try{s=Pu.support()}catch(e){return null}if(s!=='ok')return null;
+  if(Pu.local()&&Pu.local().alarmi!==false&&Pu.perm()==='granted')return null;
+  const h=el('div','apush');
+  if(Pu.perm()==='denied'){h.appendChild(el('span',null,'Obaveštenja su blokirana na ovom uređaju, pa alarm zvoni samo dok je aplikacija otvorena. Uključi ih u podešavanjima telefona (Aplikacija → Obaveštenja).'));return h}
+  const l=Pu.local();h.appendChild(el('span',null,l?'Na ovom uređaju su alarmi isključeni u obaveštenjima.':'Na ovom uređaju obaveštenja nisu uključena – alarm se čuje samo dok je aplikacija otvorena.'));
+  const b=el('button','btn','Uključi');b.type='button';b.addEventListener('click',async()=>{b.disabled=true;try{if(l)await Pu.update({alarmi:true});else await Pu.enable({});toast('Alarmi stižu i na ovaj uređaj',null,null,{ok:true})}catch(e){toast(pushErr(e))}render()});h.appendChild(b);return h}
+
+/* ---------- kartica na Pregledu ---------- */
+function alarmCard(){
+  const L=XL.has('alarmi')?activeAlarms():[];const rn=L.filter(([,a])=>aRing(a)).length;
+  const s=el('section','dcard alc'+(rn?' ring':''));const h=el('h2',null,'Alarmi');if(L.length)h.appendChild(el('small',null,'· '+L.length));
+  const all=el('button','lnk','Svi alarmi');all.type='button';all.addEventListener('click',()=>openModule('alarmi'));
+  const add=el('button','lnk lnkp','+ Alarm');add.type='button';add.addEventListener('click',()=>alarmDlg(null));h.append(add,all);s.appendChild(h);
+  if(!XL.has('alarmi')){s.appendChild(el('p','mute','Učitavam alarme…'));return s}
+  for(const [id,a] of L.slice(0,5))s.appendChild(alarmRow(id,a));
+  if(L.length>5){const m=el('button','qmore','+ još '+(L.length-5));m.type='button';m.addEventListener('click',()=>openModule('alarmi'));s.appendChild(m)}
+  if(!L.length)s.appendChild(el('p','mute aempty','Postavi podsetnik koji vide svi u kući. Kad dođe vreme, zvoni svima – ko uradi, štiklira.'));
+  s.appendChild(alarmPresets());const ph=alarmPushHint();if(ph)s.appendChild(ph);
+  return s}
+
+/* ---------- strana Alarmi ---------- */
+function renderAlarmi(c){
+  const w=el('div','dash alpage');const hd=el('div','alh');
+  const tx=el('div');tx.appendChild(el('h1',null,'Alarmi'));tx.appendChild(el('p','mute','Podsetnik za sve u kući: kotao, lepak, lak… Kad dođe vreme, zvoni na svim telefonima i računarima sa uključenim obaveštenjima. Ko uradi, štiklira – svi vide ko i kada.'));
+  const nb=el('button','btn pri');nb.type='button';nb.innerHTML=ic('plus')+'<span>Alarm</span>';nb.addEventListener('click',()=>alarmDlg(null));hd.append(tx,nb);w.appendChild(hd);
+  w.appendChild(alarmPresets());{const ph=alarmPushHint();if(ph)w.appendChild(ph)}
+  const s1=el('section','dcard alc');const L=XL.has('alarmi')?activeAlarms():[];const h1=el('h2',null,'Uključeni');h1.appendChild(el('small',null,'· '+L.length));s1.appendChild(h1);
+  if(!XL.has('alarmi'))s1.appendChild(el('p','mute','Učitavam alarme…'));else if(!L.length)s1.appendChild(el('p','mute','Nema uključenih alarma.'));
+  for(const [id,a] of L)s1.appendChild(alarmRow(id,a));w.appendChild(s1);
+  const D=alarmList().filter(([,a])=>!a.on).sort((x,y)=>(y[1].up||0)-(x[1].up||0)).slice(0,20);
+  if(D.length){const s2=el('section','dcard alc');const h2=el('h2',null,'Završeno');h2.appendChild(el('small',null,'· '+D.length));s2.appendChild(h2);for(const [id,a] of D)s2.appendChild(alarmRow(id,a));w.appendChild(s2)}
+  const s3=el('section','dcard alc');s3.appendChild(el('h2',null,'Ko dobija alarm'));const dl=el('div','adev');dl.appendChild(el('p','mute','Učitavam…'));s3.appendChild(dl);
+  const pr=el('button','btn','Probaj: alarm za 1 minut svima');pr.type='button';pr.addEventListener('click',()=>{addAlarm({t:'Proba alarma',k:'ostalo',at:Date.now()+60000,rep:0,note:'Samo proba – štikliraj kad čuješ.'})});
+  const rs=el('p','mute arobot');s3.append(pr,rs);w.appendChild(s3);
+  c.replaceChildren(w);
+  const Pu=window.__mtPush;
+  if(Pu&&Pu.support()!=='nokey')Pu.list().then(arr=>{dl.innerHTML='';const on=arr.filter(x=>x.alarmi!==false);
+    if(!on.length){dl.appendChild(el('p','mute','Još nijedan uređaj nema uključena obaveštenja. Na svakom telefonu: Aplikacija → Obaveštenja → Uključi.'));return}
+    for(const x of on)dl.appendChild(el('div','adr',(x.name||x.email||'?')+' · '+x.device+(x.mine?' (ovaj)':'')))},()=>{dl.innerHTML='';dl.appendChild(el('p','mute','Spisak uređaja nije mogao da se učita.'))});
+  else{dl.innerHTML='';dl.appendChild(el('p','mute','Obaveštenja nisu dostupna u ovoj verziji.'))}
+  try{if(db)db.doc('app_meta/alarmi_robot').get().then(s=>{const d=s&&s.exists?s.data():null;if(!d||!d.last){rs.textContent='Robot za alarme na telefonima još nije povezan – alarm se sada čuje samo u otvorenoj aplikaciji.';return}
+    const old=Date.now()-d.last>2*3600000;rs.textContent=(old?'Robot za alarme se nije javio od ':'Robot za alarme radi · poslednja provera ')+dayTag(d.last)+hhmm(d.last)+(d.msg?' · '+d.msg:'');if(old)rs.classList.add('bad')},()=>{})}catch(e){}
+}
+
+/* ---------- zvono: traka gore + zvuk dok je aplikacija otvorena ---------- */
+const RING={el:null,silent:new Map(),ctx:null,snd:null,until:0,key:''};
+function ringEl(){if(RING.el)return RING.el;const d=el('div','aring');d.hidden=true;d.setAttribute('role','alert');d.addEventListener('pointerdown',()=>{if(aCtx()&&!RING.snd&&!d.hidden)beep()});document.body.appendChild(d);RING.el=d;return d}
+function checkRing(){
+  if(!XL.has('alarmi'))return;const now=Date.now();const box=ringEl();
+  const due=activeAlarms().filter(([id,a])=>a.at<=now&&RING.silent.get(id)!==a.at);
+  if(!due.length){if(!box.hidden){box.hidden=true;stopSound()}RING.key='';return}
+  const key=due.map(([id,a])=>id+':'+a.at).join(',');if(key===RING.key&&!box.hidden)return;
+  const fresh=due.some(([id,a])=>!(','+RING.key+',').includes(','+id+':'+a.at+','));RING.key=key;box.innerHTML='';
+  const hd=el('div','arh');hd.innerHTML=ic('alarm');hd.appendChild(el('span',null,due.length===1?'ALARM':'ALARMI · '+due.length));box.appendChild(hd);
+  for(const [id,a] of due.slice(0,3)){const r=el('div','arr');const tx=el('div','art');tx.appendChild(el('b',null,a.t));
+    tx.appendChild(el('small',null,'od '+dayTag(a.at)+hhmm(a.at)+' · postavio '+(a.byName||'?')+(a.rep?' · '+repTxt(a.rep):'')+(a.note?' · '+a.note:'')));
+    const ok=el('button','btn pri','✓ Urađeno');ok.type='button';ok.addEventListener('click',()=>alarmDone(id));
+    const sz=el('button','btn','+10 min');sz.type='button';sz.addEventListener('click',()=>alarmSnooze(id,10));
+    const ms=el('button','btn ghost','Utišaj');ms.type='button';ms.title='Sakrij i utišaj samo na ovom uređaju (ostali ga i dalje vide)';ms.addEventListener('click',()=>{RING.silent.set(id,a.at);RING.key='';checkRing()});
+    const bt=el('div','arb');bt.append(ok,sz,ms);r.append(tx,bt);box.appendChild(r)}
+  box.hidden=false;if(fresh)startSound()}
+function aCtx(){try{if(!RING.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;RING.ctx=new C()}if(RING.ctx.state==='suspended')RING.ctx.resume().catch(()=>{});return RING.ctx}catch(e){return null}}
+(function(){const un=()=>{const c=aCtx();if(c&&c.state==='running'){document.removeEventListener('pointerdown',un,true);document.removeEventListener('keydown',un,true)}};
+  document.addEventListener('pointerdown',un,true);document.addEventListener('keydown',un,true)})();
+function beep(){const c=RING.ctx;if(!c||c.state!=='running')return;const t0=c.currentTime;
+  for(let i=0;i<3;i++){const o=c.createOscillator(),g=c.createGain();o.type='square';o.frequency.value=i===2?1175:880;const s=t0+i*0.22;
+    g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(0.22,s+0.02);g.gain.exponentialRampToValueAtTime(0.0001,s+0.18);o.connect(g);g.connect(c.destination);o.start(s);o.stop(s+0.2)}}
+function startSound(){stopSound();RING.until=Date.now()+60000;aCtx();
+  const go=()=>{if(Date.now()>RING.until||!RING.el||RING.el.hidden){stopSound();return}beep();try{if(navigator.vibrate&&(!navigator.userActivation||navigator.userActivation.hasBeenActive))navigator.vibrate([300,120,300])}catch(e){}};go();RING.snd=setInterval(go,1800)}
+function stopSound(){if(RING.snd){clearInterval(RING.snd);RING.snd=null}try{if(navigator.vibrate&&(!navigator.userActivation||navigator.userActivation.hasBeenActive))navigator.vibrate(0)}catch(e){}}
+
+/* ---------- odbrojavanje, obaveštenja (dugme „Urađeno“ u obaveštenju) ---------- */
+let aClean=false;
+setInterval(()=>{if(!XL.has('alarmi'))return;checkRing();let cross=false;
+  for(const s of document.querySelectorAll('.acd[data-at]')){const at=+s.dataset.at;if(at<=Date.now()){cross=true;break}const t=leftTxt(at);if(s.textContent!==t)s.textContent=t}
+  if(cross)onData()},5000);
+function alarmsLoaded(){
+  setTimeout(checkRing,0);
+  if(!aClean&&!readonly&&db){aClean=true;const lim=Date.now()-30*864e5;for(const [id,a] of alarmList())if(!a.on&&(a.up||a.cr)<lim)xdel('alarmi',id)}}
+function alarmAct(id,act){
+  const go=()=>{const a0=X.alarmi.get(id);if(!a0){toast('Alarm više ne postoji.');openModule('alarmi');return}const a=aNorm(a0);
+    if(act==='done'||act==='snooze'){
+      if(!a.on||a.at>Date.now()+60000){openModule('alarmi');toast(!a.on?'Alarm je već završen'+(a.doneByName?' – štiklirao '+a.doneByName:''):'Već urađeno'+(a.doneByName?': '+a.doneByName+' u '+hhmm(a.doneAt):'')+' · sledeće '+dayTag(a.at)+'u '+hhmm(a.at));return}
+      openModule('alarmi');if(act==='done')alarmDone(id);else alarmSnooze(id,10);return}
+    openModule('alarmi');setTimeout(()=>alarmDlg(id),250)};
+  let n=0;const t=setInterval(()=>{if(XL.has('alarmi')&&loadedT){clearInterval(t);go()}else if(++n>120)clearInterval(t)},250)}
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='mt-alarm'&&d.id)alarmAct(d.id,d.act||'open');if(d.type==='mt-alarm-push')setTimeout(checkRing,300)});
+if(ALARM_Q)alarmAct(ALARM_Q.id,ALARM_Q.act);
+{const g0=window.__mtGo;window.__mtGo=m=>{if(m==='alarm'){openModule('pregled');setTimeout(()=>alarmDlg(null),300);return true}return g0?g0(m):false}}
+
 render();
 (async()=>{
   try{db=window.claude&&window.claude.use?await window.claude.use('db'):null}catch(e){db=null}
@@ -3973,11 +4255,11 @@ render();
     onData();
   },e=>{if(e&&e.code==='unavailable'){setTimeout(sub,2000);return}loadedT=true;setConn('off');showBanner('Veza sa bazom je prekinuta. Osveži stranicu.');onData()})}catch(e){loadedT=true;onData()}};
   sub();
-  for(const c of ['docs','clients','auto','events','tasks','shopping','settings','kupljeno','nesting','izvestaji'])subX(c);
+  for(const c of ['alarmi','docs','clients','auto','events','tasks','shopping','settings','kupljeno','nesting','izvestaji'])subX(c);
   if(typeof subKurs==='function')subKurs();
 })();
 })();
-</script><script type="module" src="fb.js?v=1.6.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.7.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}

@@ -1,0 +1,11 @@
+# Robot za alarme (Martinov aplikacija). Postavlja ga GitHub: .github/workflows/alarmi-robot.yml
+name = "martinov-alarmi"
+main = "index.mjs"
+compatibility_date = "2025-06-01"
+workers_dev = false
+
+[triggers]
+crons = ["* * * * *"]
+
+[observability]
+enabled = true

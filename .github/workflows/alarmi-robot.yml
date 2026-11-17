@@ -1,0 +1,43 @@
+name: Alarmi robot (Cloudflare)
+
+# Postavlja robota za alarme na Cloudflare (worker/), a tajni ključ baze (FIREBASE_SA) prepisuje u Cloudflare.
+# Treba GitHub tajna CLOUDFLARE_API_TOKEN (Cloudflare → My Profile → API Tokens → šablon „Edit Cloudflare Workers“).
+on:
+  push:
+    branches: [main]
+    paths: ['worker/**', 'tools/podsetnik-tekst.mjs', '.github/workflows/alarmi-robot.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alarmi-robot
+  cancel-in-progress: false
+
+jobs:
+  postavi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Proba robota (bez interneta, lažna baza)
+        run: node worker/proba.mjs
+      - name: Postavi robota na Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          FIREBASE_SA: ${{ secrets.FIREBASE_SA }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "CLOUDFLARE_API_TOKEN još nije podešen – robot se ne postavlja."; exit 0; fi
+          if [ -n "$CF_ACCOUNT" ]; then export CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT"; fi
+          if [ -z "$FIREBASE_SA" ]; then echo "FIREBASE_SA nedostaje"; exit 1; fi
+          cd worker
+          npx --yes wrangler@4.157.0 deploy
+          printf '%s' "$FIREBASE_SA" | npx --yes wrangler@4.157.0 secret put FIREBASE_SA
+          echo "Robot je postavljen i radi svakog minuta."

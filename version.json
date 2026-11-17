@@ -1,7 +1,12 @@
 {
- "v": "1.6.0",
- "date": "29.10.2026.",
+ "v": "1.7.0",
+ "date": "17.11.2026.",
  "log": [
+  {
+   "v": "1.7.0",
+   "date": "17.11.2026.",
+   "t": "Novo: Alarmi – zajednički podsetnik za sve u kući (kotao, lepak, lak…). Postaviš „za 45 min“ ili „u 14:30“, a može i da se ponavlja (npr. kotao svaka 2 sata). Kad dođe vreme, zvoni na svim telefonima i računarima sa uključenim obaveštenjima, a u otvorenoj aplikaciji iskoči crvena traka sa zvukom. Ko uradi, štiklira „✓ Urađeno“ – svi vide ko i kada; ako niko ne potvrdi, podseti još 2 puta na 10 minuta. U obaveštenju su dugmad „✓ Urađeno“ i „Još 10 min“. Kartica Alarmi na Pregledu, strana Alarmi u meniju, „Alarm“ u „+ Dodaj“ i na dugom pritisku ikone. U Aplikacija → Obaveštenja svaki uređaj bira da li prima alarme. Jutarnji spisak sada stiže tačno u izabrano vreme."
+  },
   {
    "v": "1.6.0",
    "date": "29.10.2026.",
