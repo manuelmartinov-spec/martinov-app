@@ -1,0 +1,13 @@
+{
+ "col": [
+  "alarmi",
+  "naprave"
+ ],
+ "docs": [
+  "app_meta/alarmi_robot",
+  "app_meta/obavestenja"
+ ],
+ "files": [],
+ "pub": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAv1HIk8ajc9bb6cYaeR2n\nqlEcKbyKkIjPmOWw0+sstTOtIbCuXU40zCwkHE25L25jg8bVW99pieVUa9mddEtK\nestkac8n1PAXGfRXa1tdasEA53vL87Yryc2fAvXa07nmocrXmofYAxGYy98aTNU0\nJbMZ5vPNsnYWufZwO+gQhIGCgIUnP7nydEScnWFxgOx71Bn1743HZ27XinrwZx1P\nKgrCzOacHEHzl71qjVHFLzYKCB9SDSLfsyxo6P0I2hrC9VaAPDKG0ndwMfjO8Oz1\nbn226VpFKRXy/H/CvvrMcfMA6oNCc/ULooBDtxnSXrnkOrkfThS4Sv0RtLfyK0oi\n5UnteczXr7IGvkAjxvNivlHML0gDRAqNxnpmCeLa9r3lXsu7vDYs+CAFceyjgEOq\nuibzv5x9meldBJ5p533DKRMWsikmHKqxgUvd5+45WNJI+TGxIck3C5kAyTq+YPYT\nGouXf60IQSWxwONktTl0yWNacZosOnLUaRP8Tdp4BOPpAgMBAAE=\n-----END PUBLIC KEY-----\n",
+ "at": "2026-11-18T10:39:05.886Z"
+}
