@@ -100,14 +100,21 @@ const downloadsApi={async save(o){
 async function unz(s){const ds=new DecompressionStream('gzip');const st=new Blob([unb64(s)]).stream().pipeThrough(ds);return JSON.parse(await new Response(st).text())}
 async function z(obj){const cs=new CompressionStream('gzip');const st=new Blob([JSON.stringify(obj)]).stream().pipeThrough(cs);return b64(new Uint8Array(await new Response(st).arrayBuffer()))}
 const priv=new Map();
-function getPriv(key){if(priv.has(key))return priv.get(key);const p=(async()=>{const m=await getC(doc(fs,'private/'+key));if(!m.exists())return null;const d=m.data();let s=d.z||'';
-  for(let i=1;i<(d.n||1);i++){const c=await getC(doc(fs,'private/'+key+'_'+i));s+=c.exists()?c.data().z:''}return unz(s)})();p.catch(()=>priv.delete(key));priv.set(key,p);return p}
+/* zaštićeni podaci (u delovima): prvo iz memorije telefona (brzo), pa sa servera u pozadini da sledeći put bude sveže;
+   ako delovi iz memorije ne odgovaraju jedan drugom (stara verzija) – odmah sa servera */
+async function rdPriv(key,get){const m=await get(doc(fs,'private/'+key));if(!m.exists())return null;const d=m.data();let s=d.z||'';
+  for(let i=1;i<(d.n||1);i++){const c=await get(doc(fs,'private/'+key+'_'+i));if(!c.exists())throw new Error('deo '+i+' fali');s+=c.data().z}return unz(s)}
+function getPriv(key){if(priv.has(key))return priv.get(key);
+  const p=rdPriv(key,getC).catch(()=>rdPriv(key,getDoc));p.catch(()=>priv.delete(key));priv.set(key,p);
+  p.then(()=>rdPriv(key,getDoc)).then(v=>{if(v!=null&&priv.get(key)===p)priv.set(key,Promise.resolve(v))}).catch(()=>{});return p}
+window.__mtPriv=k=>['fakture_def','cenovnik'].includes(k)?getPriv(k):Promise.reject(new Error('nije dozvoljeno'));
 async function putPriv(key,obj){const s=await z(obj);const n=Math.max(1,Math.ceil(s.length/CH));const b=writeBatch(fs);
   for(let i=1;i<n;i++)b.set(doc(fs,'private/'+key+'_'+i),{z:s.slice(i*CH,(i+1)*CH)});b.set(doc(fs,'private/'+key),{z:s.slice(0,CH),n,at:Date.now()});await commit(b);priv.delete(key)}
 window.__mtCen=async()=>{const c=await getPriv('cenovnik');if(!c)throw new Error('nema cenovnika');return c};
 const safe=o=>JSON.stringify(o).replace(/</g,'\\u003c');
 window.__mtAppPre=async app=>{const P={};
-  try{if(app==='fakture'){const [d,c]=await Promise.all([getPriv('fakture_def'),getPriv('cenovnik')]);if(d)P.DEF_SET=d;if(c)P.CAT=c}
+  try{if(app==='fakture'){const [d,c]=await Promise.allSettled([getPriv('fakture_def'),getPriv('cenovnik')]);/* jedno ne sme da pokvari drugo */
+      if(d.status==='fulfilled'&&d.value)P.DEF_SET=d.value;if(c.status==='fulfilled'&&c.value)P.CAT=c.value}
     if(app==='troskovi'){const s=await getPriv('troskovi_seed');if(s)P.SEED=s}}catch(e){}
   return'<script>window.__PRIV='+safe(P)+'<\/script>'};
 

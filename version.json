@@ -1,7 +1,12 @@
 {
- "v": "1.7.1",
+ "v": "1.7.2",
  "date": "19.11.2026.",
  "log": [
+  {
+   "v": "1.7.2",
+   "date": "19.11.2026.",
+   "t": "Fakture: popravljen prazan „Primalac uplate“ kod dokumenata „Privatno“. Podaci firme i primaoci uplate (i cenovnik) sada se sigurno učitaju – ako ne stignu odmah, aplikacija ih sama učita ponovo, a lista primalaca se osveži sama. Ako ipak nema imena, ispod polja piše gde se upisuju (Podešavanja → Privatno)."
+  },
   {
    "v": "1.7.1",
    "date": "19.11.2026.",

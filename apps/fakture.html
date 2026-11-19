@@ -287,7 +287,7 @@ html.emb header.top:not(:has(nav)){display:none}
           <div class="grid g4">
             <label class="f">Vrsta dokumenta<select id="f-type"><option value="ponuda">Ponuda</option><option value="predracun">Predračun</option><option value="avans">Avansni račun</option><option value="racun">Račun</option><option value="otpremnica">Otpremnica</option></select></label>
             <label class="f">Izdaje<select id="f-issuer"><option value="firma">Firma (Martinov Design)</option><option value="privatno">Privatno (Manuel Martinov)</option></select></label>
-            <label class="f" id="w-pw">Primalac uplate<select id="f-privIdx"></select></label>
+            <label class="f" id="w-pw">Primalac uplate<select id="f-privIdx"></select><small class="cv bad" id="pwHint" hidden>Podaci se još učitavaju ili nema imena – <a href="#" id="pwSet">Podešavanja → Privatno</a></small></label>
             <label class="f">Broj<input id="f-num"></label>
             <label class="f">Datum<input id="f-date" type="date"></label>
             <label class="f" id="w-dd">Datum prometa<input id="f-deliveryDate" type="date"></label>
@@ -455,8 +455,10 @@ const STATUS = {
   racun:[['nacrt','Nije poslato'],['poslato','Poslato'],['otkucano','Otkucan (fiskalni / SEF)'],['placeno','Plaćeno'],['storno','Storno']],
   otpremnica:[['nacrt','Nije poslato'],['isporuceno','Isporučeno']]
 };
-const DEF_SET = ((window.__PRIV&&window.__PRIV.DEF_SET)||{"seller": {"name": "", "legal": "", "addr": "", "phone": "", "email": "", "web": "", "account": "", "pib": "", "mb": ""}, "priv": {"addr": "", "phone": "", "email": ""}, "privAcc": [], "warranty": "Na sav nameštaj iz našeg asortimana dajemo garanciju od 2 godine, pod uslovom da se koristi i održava prema uputstvu za održavanje drvenog nameštaja. Svaki komad drveta i keramike ima drugačije šare i nijanse, pa gotov proizvod ne može biti identičan proizvodu sa slike. Boje izabrane sa slike mogu se malo razlikovati na gotovom proizvodu. Garancija prestaje da važi ako se preko postojeće ploče stola postavi druga ploča (staklena, keramička, drvena i sl.) koja za to nije bila predviđena od naše strane. Prihvatanjem ponude ili uplatom avansa kupac potvrđuje da je upoznat sa ovim uslovima i da ih prihvata. Ovi uslovi ne umanjuju prava kupca po Zakonu o zaštiti potrošača.", "driveRoot": "", "vatPayer": true, "vatRate": 20, "kurs": 117.2, "currency": "RSD", "avansPct": 50, "dueDays": 8, "start": {"ponuda": 1, "predracun": 1, "avans": 1, "racun": 1, "otpremnica": 1}, "noteOffer": "Cene su bez dostave i montaže, osim ako je navedeno.", "noteInvoice": ""});
-let db=null, S=JSON.parse(JSON.stringify(DEF_SET)), DOCS=[], CLIENTS=[], cur=null, dirty=false, filterType='', view='list';
+let DEF_SET = ((window.__PRIV&&window.__PRIV.DEF_SET)||{"seller": {"name": "", "legal": "", "addr": "", "phone": "", "email": "", "web": "", "account": "", "pib": "", "mb": ""}, "priv": {"addr": "", "phone": "", "email": ""}, "privAcc": [], "warranty": "Na sav nameštaj iz našeg asortimana dajemo garanciju od 2 godine, pod uslovom da se koristi i održava prema uputstvu za održavanje drvenog nameštaja. Svaki komad drveta i keramike ima drugačije šare i nijanse, pa gotov proizvod ne može biti identičan proizvodu sa slike. Boje izabrane sa slike mogu se malo razlikovati na gotovom proizvodu. Garancija prestaje da važi ako se preko postojeće ploče stola postavi druga ploča (staklena, keramička, drvena i sl.) koja za to nije bila predviđena od naše strane. Prihvatanjem ponude ili uplatom avansa kupac potvrđuje da je upoznat sa ovim uslovima i da ih prihvata. Ovi uslovi ne umanjuju prava kupca po Zakonu o zaštiti potrošača.", "driveRoot": "", "vatPayer": true, "vatRate": 20, "kurs": 117.2, "currency": "RSD", "avansPct": 50, "dueDays": 8, "start": {"ponuda": 1, "predracun": 1, "avans": 1, "racun": 1, "otpremnica": 1}, "noteOffer": "Cene su bez dostave i montaže, osim ako je navedeno.", "noteInvoice": ""});
+let SETV=null;/* settings/main iz baze */
+const mkS=()=>{const v=SETV||{};return JSON.parse(JSON.stringify({...DEF_SET,...v,seller:{...DEF_SET.seller,...(v.seller||{})},priv:{...DEF_SET.priv,...(v.priv||{})},privAcc:(v.privAcc&&v.privAcc.some(a=>a&&a.name))?v.privAcc:(DEF_SET.privAcc||[]),start:{...DEF_SET.start,...(v.start||{})}}))};
+let db=null, S=mkS(), DOCS=[], CLIENTS=[], cur=null, dirty=false, filterType='', view='list';
 const $=s=>document.querySelector(s);
 const r2=x=>Math.round((+x||0)*100)/100;
 const nz=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
@@ -618,9 +620,15 @@ function renderChips(){
 /* ---------- editor ---------- */
 const F=['payMethod','fiscalNo','issuer','privIdx','leadTime','paid','paidDate','num','date','deliveryDate','dueDate','place','currency','kurs','status','extraDisc','shipping','avansPct','avansAmount','avansDate','ref','validUntil','note'];
 const CF=['name','contact','kind','address','city','pib','mb','phone','email'];
+/* Primalac uplate (privatno): imena iz Podešavanja → Privatno */
+document.addEventListener('click',e=>{if(e.target.id==='pwSet'){e.preventDefault();setView('settings')}});
+function fillPrivSel(){const sel=$('#f-privIdx');if(!sel)return;const L=(S.privAcc||[]).map((a,i)=>({a,i})).filter(x=>x.a&&x.a.name);
+  sel.innerHTML=L.length?L.map(x=>`<option value="${x.i}">${esc(x.a.name)}${x.a.account?'':' (nema račun)'}</option>`).join(''):'<option value="">— nema imena —</option>';
+  if(cur&&L.length){if(!L.some(x=>String(x.i)===String(cur.privIdx)))cur.privIdx=L[0].i;sel.value=String(cur.privIdx)}
+  const hn=$('#pwHint');if(hn)hn.hidden=!!L.length}
 function openDoc(d){
   viewSnap=null;cur=JSON.parse(JSON.stringify(d));cur.issuer=cur.issuer||'firma';cur.payMethod=cur.payMethod||'racun';cur.privIdx=cur.privIdx??0;dirty=false;
-  $('#f-privIdx').innerHTML=(S.privAcc||[]).map((a,i)=>a.name?`<option value="${i}">${esc(a.name)}</option>`:'').join('');
+  fillPrivSel();
   $('#w-pw').hidden=cur.issuer!=='privatno';
   const T=TYPES[cur.type];
   $('#edTag').textContent=T.label;$('#edNo').textContent=cur.id?cur.num:cur.num+' (novi)';
@@ -891,7 +899,7 @@ $('#listBody').addEventListener('change',async e=>{const sel=e.target.closest('[
   try{await db.collection('docs').doc(d.id).set(body);Object.assign(d,body);sel.closest('.st').className='st s-'+sel.value;toast(`${TYPES[d.type].label} ${d.num}: ${sel.options[sel.selectedIndex].text}`,'ok')}
   catch(_){sel.value=old;toast('Status nije sačuvan.','bad')}});
 $('#listBody').addEventListener('keydown',e=>{if(e.key==='Enter'){const tr=e.target.closest('tr[data-id]');if(tr)tr.click()}});
-F.forEach(k=>{const el=$('#f-'+k);if(!el)return;el.addEventListener('input',()=>{const old=cur[k];cur[k]=el.value;if(k==='currency'&&old!==cur[k])docCurChanged(old);if(k==='kurs')cur.items.forEach(it=>syncP(it));if(k==='fiscalNo'&&el.value&&(cur.status==='nacrt'||cur.status==='poslato'||cur.status==='izdato')){cur.status='otkucano';$('#f-status').value='otkucano'}if(k==='issuer'&&(!cur.id||String(cur.num||'').startsWith('P-')!==(cur.issuer==='privatno'))){cur.seq=nextSeq(cur.type,cur.year,cur.issuer);cur.num=numStr(cur.seq,cur.year,cur.issuer);$('#f-num').value=cur.num;$('#edNo').textContent=cur.num+(cur.id?'':' (novi)')}if(k==='issuer'){$('#legal').innerHTML=legalNote(cur.type);$('#w-pw').hidden=cur.issuer!=='privatno'}if(k==='currency'||k==='kurs')renderItems();markDirty();refresh()})});
+F.forEach(k=>{const el=$('#f-'+k);if(!el)return;el.addEventListener('input',()=>{const old=cur[k];cur[k]=el.value;if(k==='currency'&&old!==cur[k])docCurChanged(old);if(k==='kurs')cur.items.forEach(it=>syncP(it));if(k==='fiscalNo'&&el.value&&(cur.status==='nacrt'||cur.status==='poslato'||cur.status==='izdato')){cur.status='otkucano';$('#f-status').value='otkucano'}if(k==='issuer'&&(!cur.id||String(cur.num||'').startsWith('P-')!==(cur.issuer==='privatno'))){cur.seq=nextSeq(cur.type,cur.year,cur.issuer);cur.num=numStr(cur.seq,cur.year,cur.issuer);$('#f-num').value=cur.num;$('#edNo').textContent=cur.num+(cur.id?'':' (novi)')}if(k==='issuer'){$('#legal').innerHTML=legalNote(cur.type);fillPrivSel();$('#w-pw').hidden=cur.issuer!=='privatno'}if(k==='currency'||k==='kurs')renderItems();markDirty();refresh()})});
 CF.forEach(k=>{const el=$('#c-'+k);el.addEventListener('input',()=>{cur.client=cur.client||{};cur.client[k]=el.value;
   if(k==='name'){const m=CLIENTS.find(c=>c.name===el.value);if(m){Object.assign(cur.client,m);delete cur.client.id;CF.forEach(f=>$('#c-'+f).value=cur.client[f]??'')}}
   $('#w-pib').hidden=$('#w-mb').hidden=false;markDirty();refresh()})});
@@ -925,9 +933,9 @@ $('#csv').onclick=async()=>{const dl=await window.claude?.use?.('downloads');if(
       String(av?c.aBase:c.base).replace('.',','),String(av?c.aVat:c.vat).replace('.',','),String(av?c.aGross:c.total).replace('.',','),String(c.pay).replace('.',','),String(nz(d.paid)).replace('.',',')])});
   const csv='﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n');
   try{await dl.save({filename:`Martinov_dokumenti_${today()}.csv`,data:csv});msg('#csvMsg','Preuzeto.','ok')}catch(e){msg('#csvMsg',e?.code==='declined'?'Otkazano.':'Nije uspelo.','bad')}};
-const CAT=((window.__PRIV&&window.__PRIV.CAT)||[]);
+let CAT=((window.__PRIV&&window.__PRIV.CAT)||[]);
 const norm=x=>String(x).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'dj').replace(/[×*]/g,'x').replace(/ø/g,'');
-const CATN=CAT.map(c=>norm(c[0]+' '+c[1]).replace(/(\d)\s*x\s*(\d)/g,'$1x$2'));
+let CATN=CAT.map(c=>norm(c[0]+' '+c[1]).replace(/(\d)\s*x\s*(\d)/g,'$1x$2'));
 function catSearch(raw){const q=norm(raw).replace(/(\d)\s*x\s*(\d)/g,'$1x$2').split(/\s+/).filter(Boolean);if(!q.length)return[];
   const r=[];for(let i=0;i<CAT.length&&r.length<60;i++){if(q.every(t=>CATN[i].includes(t)))r.push(i)}return r}
 const SUG=document.createElement('div');SUG.className='sug';SUG.hidden=true;document.body.appendChild(SUG);
@@ -1064,13 +1072,23 @@ addEventListener('beforeunload',e=>{if(dirty){e.preventDefault()}});
 
 /* ---------- start ---------- */
 renderChips();renderList();
+/* podaci firme (privatno: primaoci uplate) i cenovnik stižu iz zaštićenog dela baze; ako nisu stigli pri otvaranju – probaj ponovo */
+async function lateDef(){const P=window.__PRIV||{};let get=null;try{get=window.parent&&window.parent.__mtPriv}catch(e){}
+  if(!get||(P.DEF_SET&&P.CAT&&P.CAT.length))return;
+  for(let i=0;i<4;i++){
+    try{if(!(window.__PRIV&&window.__PRIV.DEF_SET)){const d=await get('fakture_def');if(d&&d.seller){(window.__PRIV=window.__PRIV||{}).DEF_SET=d;DEF_SET=d;S=mkS();if(cur){fillPrivSel();refresh()}if(view==='settings')fillSettings()}}}catch(e){}
+    try{if(!(window.__PRIV&&window.__PRIV.CAT&&window.__PRIV.CAT.length)){const c=await get('cenovnik');if(Array.isArray(c)&&c.length){(window.__PRIV=window.__PRIV||{}).CAT=c;CAT=c;CATN=CAT.map(c=>norm(c[0]+' '+c[1]).replace(/(\d)\s*x\s*(\d)/g,'$1x$2'))}}}catch(e){}
+    if(window.__PRIV&&window.__PRIV.DEF_SET&&window.__PRIV.CAT&&window.__PRIV.CAT.length)return;
+    await new Promise(r=>setTimeout(r,1000*(i+1)))}
+  if(!(window.__PRIV&&window.__PRIV.DEF_SET))toast('Podaci firme (ime, račun, PIB) se nisu učitali – zatvorite i ponovo otvorite Fakture.','bad')}
 (async()=>{
   const w=window.claude;
   (async()=>{try{MCP=w?.use?await w.use('mcp'):null;if(MCP){$('#gdrive').hidden=false;try{const l=await MCP.listTools();FILEARGS=!!l.fileArgs;const sv=(l.servers||[]).find(x=>x.kind!=='artifact'&&/drive/i.test(x.server||''));if(sv)GD=sv.server}catch(_){}}}catch(_){}})();
   db=w?.use?await w.use('db'):null;
   if(!db){$('#conn').innerHTML='<b class="off">Bez baze</b> – otvorite u Claude-u da bi se čuvalo';return}
   $('#conn').innerHTML='<b>●</b> Sačuvano u oblaku';
-  db.doc('settings/main').onSnapshot(s=>{if(s.exists){const v=s.data();S={...DEF_SET,...v,seller:{...DEF_SET.seller,...(v.seller||{})},priv:{...DEF_SET.priv,...(v.priv||{})},privAcc:(v.privAcc&&v.privAcc.some(a=>a.name))?v.privAcc:DEF_SET.privAcc,start:{...DEF_SET.start,...(v.start||{})}};if(view==='settings')fillSettings();if(view==='edit'&&cur)refresh()}},()=>{});
+  db.doc('settings/main').onSnapshot(s=>{SETV=s.exists?s.data():null;S=mkS();if(view==='settings')fillSettings();if(view==='edit'&&cur){fillPrivSel();refresh()}},()=>{});
+  lateDef();
   db.collection('docs').onSnapshot(s=>{DOCS=s.docs.map(d=>d.data());if(view==='list')renderList();if(view==='money')renderMoney();if(view==='edit'&&cur){renderLinks();refresh()}},e=>{$('#conn').innerHTML='<b class="off">Veza prekinuta</b> – osvežite stranicu'});
   db.collection('clients').onSnapshot(s=>{CLIENTS=s.docs.map(d=>d.data());renderClients()},()=>{});
 })();
