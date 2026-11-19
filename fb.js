@@ -87,12 +87,15 @@ const assetsApi={
 };
 
 /* ---------- čuvanje fajla na računar / telefon ---------- */
-const MIME={pdf:'application/pdf',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',csv:'text/csv',json:'application/json'};
+const MIME={pdf:'application/pdf',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',csv:'text/csv',json:'application/json',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',dxf:'application/dxf',txt:'text/plain'};
+const MDESC={pdf:'PDF dokument',xlsx:'Excel tabela',csv:'CSV tabela (Excel)',json:'JSON fajl',png:'Slika PNG',jpg:'Slika JPG',jpeg:'Slika JPG',dxf:'DXF crtež',txt:'Tekst'};
 const downloadsApi={async save(o){
   const name=o.filename||'fajl';const ext=(name.split('.').pop()||'').toLowerCase();const type=o.type||MIME[ext]||'application/octet-stream';
   const blob=o.data instanceof Blob?o.data:new Blob([o.data],{type});
   if(window.showSaveFilePicker&&!/Android|iPhone|iPad/i.test(navigator.userAgent)){
-    let h;try{h=await window.showSaveFilePicker({suggestedName:name,id:'martinov'})}catch(e){if(e&&e.name==='AbortError')throw{code:'declined'};h=null}
+    /* vrsta fajla u prozoru „Sačuvaj“ (npr. „PDF dokument (*.pdf)“ umesto „All Files“) */
+    const opt={suggestedName:name,id:String(o.dirId||('mt-'+(ext||'fajl'))).replace(/[^\w-]/g,'').slice(0,32)};/* svaka vrsta pamti svoj folder (fakture → npr. 03 Fakture i predracuni) */if(MIME[ext]){opt.types=[{description:MDESC[ext]||ext.toUpperCase(),accept:{[MIME[ext]]:['.'+ext]}}];opt.excludeAcceptAllOption=true}
+    let h;try{h=await window.showSaveFilePicker(opt)}catch(e){if(e&&e.name==='AbortError')throw{code:'declined'};h=null}
     if(h){const w=await h.createWritable();await w.write(blob);await w.close();return{status:'saved'}}}
   const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000);return{status:'saved'}}};
 

@@ -1,7 +1,12 @@
 {
- "v": "1.7.2",
+ "v": "1.7.3",
  "date": "19.11.2026.",
  "log": [
+  {
+   "v": "1.7.3",
+   "date": "19.11.2026.",
+   "t": "Čuvanje fajla na računaru: u prozoru „Sačuvaj“ sada piše „PDF dokument (*.pdf)“ (umesto „All Files“), pa se fajl sigurno sačuva kao PDF; isto za Excel i CSV. Fakture pamte svoj folder – prvi put izaberite npr. Martinov Design → 03 Fakture i predracuni, posle se sam otvara tu."
+  },
   {
    "v": "1.7.2",
    "date": "19.11.2026.",

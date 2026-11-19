@@ -794,7 +794,7 @@ async function makePdf(){
   const btn=$('#pdf');btn.disabled=true;btn.textContent='Pravim PDF…';
   try{const dl=await window.claude?.use?.('downloads');
     if(!dl){msg('#saveMsg','Preuzimanje nije dostupno u ovom prikazu.','bad');return}
-    const {blob,name}=await buildPdf();await dl.save({filename:name,data:blob});msg('#saveMsg','PDF preuzet.','ok');
+    const {blob,name}=await buildPdf();await dl.save({filename:name,data:blob,dirId:'fakture'});msg('#saveMsg','PDF preuzet.','ok');
   }catch(e){console.error('pdf',e);msg('#saveMsg',e?.code==='declined'?'Preuzimanje otkazano.':e?.code==='nolib'?e.message:'PDF nije napravljen ('+String(e?.message||e?.code||'greška').slice(0,90)+'). Pokušajte ponovo.','bad')}
   finally{btn.disabled=false;btn.textContent='Preuzmi PDF'}
 }
@@ -1029,7 +1029,7 @@ $('#versBox').addEventListener('click',async e=>{const b=e.target.closest('butto
   if(b.dataset.vback!==undefined){viewSnap=null;renderVers();refresh();return}
   const h=cur.hist||[];
   if(b.dataset.vview!==undefined){viewSnap=h[+b.dataset.vview];renderVers();refresh();$('#pvw').scrollIntoView({behavior:'smooth'});return}
-  if(b.dataset.vpdf!==undefined){const v=h[+b.dataset.vpdf];b.disabled=true;b.textContent='…';try{const dl=await window.claude?.use?.('downloads');if(!dl)throw 0;const {blob,name}=await buildPdf(0.9,v);await dl.save({filename:name,data:blob})}catch(e){if(e?.code!=='declined')toast('PDF nije napravljen.','bad')}b.disabled=false;b.textContent='PDF'}});
+  if(b.dataset.vpdf!==undefined){const v=h[+b.dataset.vpdf];b.disabled=true;b.textContent='…';try{const dl=await window.claude?.use?.('downloads');if(!dl)throw 0;const {blob,name}=await buildPdf(0.9,v);await dl.save({filename:name,data:blob,dirId:'fakture'})}catch(e){if(e?.code!=='declined')toast('PDF nije napravljen.','bad')}b.disabled=false;b.textContent='PDF'}});
 $('#save').onclick=async()=>{const b=$('#save');b.disabled=true;b.textContent='Čuvam…';const ok=await saveCur();b.disabled=false;b.textContent=ok?'✓ Sačuvano':'Sačuvaj';if(ok)setTimeout(()=>{b.textContent='Sačuvaj'},1800)};/* ---------- uplate ---------- */
 function payments(){const out=[];
   DOCS.forEach(d=>{if(d.status==='storno'||d.status==='nacrt'&&d.type!=='predracun'&&!nz(d.paid))return;const c=calc(d);let a=0,date=d.date;
