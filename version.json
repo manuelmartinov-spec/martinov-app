@@ -1,7 +1,12 @@
 {
- "v": "1.7.0",
- "date": "17.11.2026.",
+ "v": "1.7.1",
+ "date": "19.11.2026.",
  "log": [
+  {
+   "v": "1.7.1",
+   "date": "19.11.2026.",
+   "t": "Fakture: popravljeno „Preuzmi PDF“ i „Sačuvaj PDF na Drive“ (greška „html2canvas is not defined“) – alat za PDF se sada sam ponovo učita, a radi i bez interneta. Kod svake cene je dugme € / din: upišeš cenu u evrima ili dinarima, a faktura sama preračuna u valutu dokumenta po kursu (ispod piše „= 52.740 din“); kad promeniš valutu ili kurs, sve cene se same preračunaju; cene iz cenovnika ostaju u evrima. Opis stavke je sada veliko polje preko cele širine, u više redova (Enter = novi red). Novo „⤢ Uvećaj fakturu“ – faktura preko celog ekrana sa + / −, pa „Sačuvaj“ odatle. U „Boje i detalji“ dodata Boja MDF-a (RAL bele, krem, sive, antracit, crna ili svoja) i mat / polumat / sjaj."
+  },
   {
    "v": "1.7.0",
    "date": "17.11.2026.",

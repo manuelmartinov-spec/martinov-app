@@ -2727,13 +2727,14 @@ function addToShopping(items,jobName,meta){meta=meta||{};
       bought:false,boughtAt:null,by:myId||null,byName:'',createdAt:now+n,updatedAt:now+n});ids.push(id)}
   return ids;
 }
+const mdfTxt=o=>o&&o.mdf?'MDF '+o.mdf+(o.mobr?' '+String(o.mobr).toLowerCase():''):'';
 function openProposal(p){
   const t=PT(),kt=KT(),pt=PRT();if(!t)return;const d=p.d;const ad=p.avansDoc||d;
   const fSt=F(t,'f_status','Status'),fDr=F(t,'f_drvo','Drvo'),fPl=F(t,'f_placanje','Plaćanje');
   const items=d.items||[];const tot=docTotals(d);const avT=p.avansDoc&&p.avansDoc!==d?docTotals(p.avansDoc):tot;
   const st={
     posao:(items.map(i=>((pnum(i.q)||1)>1?(pnum(i.q))+'× ':'')+String(i.d||'').split(' · ')[0].trim()).join(' + ')||'Posao').slice(0,90),
-    kupac:'',prod:matchProducts(d),status:'',rok:leadDate(ad),drvo:[],boja:[...new Set(items.map(i=>i.opt&&i.opt.boja).filter(Boolean))].join(', '),
+    kupac:'',prod:matchProducts(d),status:'',rok:leadDate(ad),drvo:[],boja:[...new Set(items.flatMap(i=>[i.opt&&i.opt.boja,mdfTxt(i.opt)]).filter(Boolean))].join(', '),
     mere:items.map(i=>((pnum(i.q)||1)+'× '+String(i.d||'').trim())+(i.opt&&i.opt.drvo?' — '+i.opt.drvo:'')+(i.opt&&i.opt.note?' — '+i.opt.note:'')).join('\n'),
     cena:Math.round(tot.totE),avans:avT.avE==null?'':Math.round(avT.avE),plac:'',
     nap:[d.note||'',(DOCN[d.type]||'Dokument')+' '+(d.num||'')+': '+fmtN(tot.tot,0)+' '+(tot.cur==='EUR'?'€':'din')+(tot.cur!=='EUR'?' (≈ '+fmtN(tot.totE,0)+' €)':'')].filter(Boolean).join('\n')};
@@ -3078,7 +3079,7 @@ function renderJob(){
   const s3=jsec('Novac');const t3=el('div','three');for(const [f,l] of [[fCe,'Cena (€)'],[fAv,'Avans (€)'],[fOs,'Ostatak']])if(f)t3.appendChild(jf(t,f,rid,l));s3.appendChild(t3);if(fPl)s3.appendChild(jf(t,fPl,rid,'Plaćanje'));body.appendChild(s3);
   /* sa fakture */
   const d=jobDoc(r);if(d){const s=jsec('Sa fakture: '+(DOCN[d.type]||'Dokument')+' '+(d.num||''));const tb=el('table','itab');const hr=el('tr');for(const h of ['Stavka','Kol.','Detalji'])hr.appendChild(el('th',null,h));tb.appendChild(hr);
-    for(const i of d.items||[]){const tr=el('tr');const op=i.opt||{};tr.append(el('td',null,String(i.d||'')),el('td','n',fmtN(pnum(i.q)||1,'a')+' '+(i.u||'')),el('td','mute',[op.drvo,op.boja,op.note].filter(Boolean).join(' · ')));tb.appendChild(tr)}
+    for(const i of d.items||[]){const tr=el('tr');const op=i.opt||{};tr.append(el('td',null,String(i.d||'')),el('td','n',fmtN(pnum(i.q)||1,'a')+' '+(i.u||'')),el('td','mute',[op.drvo,op.boja,mdfTxt(op),op.note].filter(Boolean).join(' · ')));tb.appendChild(tr)}
     s.appendChild(tb);if(d.note)s.appendChild(el('div','mnote',d.note));const o=el('button','chip plain','Otvori fakturu');o.type='button';o.addEventListener('click',()=>openInvoice(r.c._doc));s.appendChild(o);body.appendChild(s)}
   /* slike i crteži */
   if(fSl){const s=jsec('Slike i tehnički crteži');s.dataset.sec='att';s.appendChild(fieldInput(t,fSl,rid,false));
@@ -3186,7 +3187,7 @@ async function makeJobPdf(rid,o){
   blocks.push({html:`<div class="rngrid${photo?' wph':''}"><div class="rnl">${cell('Proizvod',prodH,'pr')}<div class="rn2">${cell('Drvo',E(g('f_drvo','Drvo')))}${cell('Boja',E(g('f_boja','Boja')))}</div><div class="rn2">${cell('Kupac',kupH)}${cell('Faktura',E(g('f_faktura','Faktura')||(d?(DOCN[d.type]||'')+' '+(d.num||''):'')))}</div>${money?cell('Novac',money):''}</div>${photo?`<div class="rnph"><img src="${photo.url}" alt=""></div>`:''}</div>`});
   const me=g('f_mere','Mere i opis');if(me)blocks.push({html:`<div class="rnbox"><h3>Mere i opis</h3><div class="pre">${E(me)}</div></div>`});
   if(o.inv&&d&&(d.items||[]).length){const rows=(d.items||[]).map((i,ix)=>{const op=i.opt||{};const q=pnum(i.q)||1,p=pnum(i.p),ds=pnum(i.disc)||0;
-      return`<tr><td class="c">${ix+1}</td><td><b>${E(i.d||'')}</b>${[op.drvo,op.boja,op.note].filter(Boolean).length?'<small>'+E([op.drvo,op.boja,op.note].filter(Boolean).join(' · '))+'</small>':''}</td><td class="n">${fmtN(q,'a')} ${E(i.u||'')}</td>${o.hide?'':`<td class="n">${p==null?'':fmtN(p,0)}</td><td class="n">${p==null?'':fmtN(q*p*(1-ds/100),0)}</td>`}</tr>`});
+      return`<tr><td class="c">${ix+1}</td><td><b>${E(i.d||'')}</b>${[op.drvo,op.boja,mdfTxt(op),op.note].filter(Boolean).length?'<small>'+E([op.drvo,op.boja,mdfTxt(op),op.note].filter(Boolean).join(' · '))+'</small>':''}</td><td class="n">${fmtN(q,'a')} ${E(i.u||'')}</td>${o.hide?'':`<td class="n">${p==null?'':fmtN(p,0)}</td><td class="n">${p==null?'':fmtN(q*p*(1-ds/100),0)}</td>`}</tr>`});
     if(!o.hide){const tt=docTotals(d);rows.push(`<tr class="tot"><td></td><td>Ukupno${tt.cur==='EUR'?'':' (din)'}</td><td></td><td></td><td class="n">${fmtN(tt.tot,0)}</td></tr>`)}
     blocks.push({title:(DOCN[d.type]||'Faktura')+' '+(d.num||'')+' — stavke',head:`<tr><th class="c">#</th><th>Stavka</th><th class="n">Kol.</th>${o.hide?'':'<th class="n">Cena</th><th class="n">Iznos</th>'}</tr>`,rows,cls:'rnt'});
     if(d.note)blocks.push({html:`<div class="rnbox sm"><div class="pre">${E(d.note)}</div></div>`})}
@@ -4259,7 +4260,7 @@ render();
   if(typeof subKurs==='function')subKurs();
 })();
 })();
-</script><script type="module" src="fb.js?v=1.7.0"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
+</script><script type="module" src="fb.js?v=1.7.1"></script><script>(function(){if(!('serviceWorker' in navigator))return;var reg=null,had=!!navigator.serviceWorker.controller,shown=false;
 function bar(w){if(shown)return;shown=true;var b=document.createElement('div');b.className='upbar';b.innerHTML='<span>Nova verzija aplikacije je spremna.</span><button type="button">Učitaj</button>';
   b.querySelector('button').onclick=function(){this.disabled=true;this.textContent='Učitavam…';w.postMessage({type:'skip'})};document.body.appendChild(b)}
 function watch(r){if(r.waiting&&navigator.serviceWorker.controller)bar(r.waiting);r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)bar(w)})})}
