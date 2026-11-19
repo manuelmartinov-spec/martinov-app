@@ -1,7 +1,12 @@
 {
- "v": "1.8.2",
+ "v": "1.8.3",
  "date": "19.11.2026.",
  "log": [
+  {
+   "v": "1.8.3",
+   "date": "19.11.2026.",
+   "t": "Duh iz lampe kao tečnost (kao na macOS-u): prozor se savija – deo bliži dugmetu se suzi u vrat koji ulazi u dugme, a dalji deo se raširi i izdigne; na početku je kao dim. Ivice su glatke krive, sadržaj prozora se vidi dok se savija. Isto pri zatvaranju, unazad."
+  },
   {
    "v": "1.8.2",
    "date": "19.11.2026.",

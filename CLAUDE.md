@@ -70,6 +70,7 @@ Gotov rezultat se kopira ovde BEZ brisanja foldera `prijem/` i `.git` (ne kopira
   Dole Dodaj (`#newT`, `#impBtn` se premeštaju u listu) i Aplikacija. Na telefonu je traka + lista u fioci.
 - „Traži ili skoči na…“ (`#qk`, Ctrl K i iz ugrađenih delova preko BRIDGE → `parent.__mtQuick`): stranice, `X.docs` (→ `openInvoice`), zapisi svih tabela (→ `openRec`).
 - `lib/genie.js` (u index.html i u svakom ugrađenom delu preko BRIDGE): prozor preko celog ekrana koji se pojavi posle klika izlazi iz kliknutog elementa
-  (od 1.8.2: kutija se „naduva“ iz ikone za 1 s – dim, izdizanje, preko mere, smiri se; bez kutije: levak `clip-path`); pri zatvaranju se kopija uvuče nazad (0,56 s).
+  (od 1.8.3 `warp`: prozor/kutija se iseče na 16–72 vodoravne trake-kopije; svaka traka 60×/s dobije položaj, visinu, širinu i kose ivice (clip-path)
+  po glatkoj krivoj – vrat ulazi u ikonu kao macOS genie; sticky u kopijama → relative; iframe/video ili >3000 elemenata → stari efekat `play`). 1 s otvaranje, 0,56 s zatvaranje (kopija).
   Namerno NE poštuje „manje pokreta“ iz sistema (Manuel ga želi). Preskače `data-no-genie` i prozore koji već imaju animaciju. Fakture zovu `__mtGenieOpen`.
 - Oblačić (`lib/genie.js`, drugi deo): polje čiji tekst ne staje → posle 0,3 s zadržavanja mišem oblačić sa celim tekstom (animacija 1 s).
