@@ -104,6 +104,8 @@ td.r,th.r,table.list th.r{text-align:right}
 .msg{font-size:12px;color:var(--muted)}.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
 .pvw{background:var(--line);border-radius:12px;padding:14px;overflow:auto;position:sticky;top:70px;max-height:calc(100vh - 90px)}
 .pvw .scale{transform-origin:top left}
+label.f.xpl{position:relative}
+input.xp{position:absolute;z-index:8;box-shadow:0 8px 26px rgba(0,0,0,.18);background:var(--panel)}
 .zbtn{position:sticky;top:0;float:right;z-index:2;margin:-6px -6px 4px 8px;background:var(--panel);font-size:12px;padding:6px 10px;box-shadow:0 1px 6px rgba(0,0,0,.12)}
 .zov{position:fixed;inset:0;z-index:60;background:#20252c;display:flex;flex-direction:column}
 .zbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--line);padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px))}
@@ -718,20 +720,55 @@ function refresh(){
 function growTa(t){t.style.height='auto';t.style.height=Math.min(Math.max(t.scrollHeight+2,58),320)+'px'}
 function fitDesc(){document.querySelectorAll('#itemsBody textarea[data-f="d"]').forEach(growTa)}
 function fitPreview(){const w=$('#pvw').clientWidth-28,s=Math.min(1,w/794);$('#scale').style.transform=`scale(${s})`;$('#scale').style.width=794*s+'px';$('#scale').style.height=$('#doc').offsetHeight*s+'px'}
+/* ---------- „duh iz lampe“: prozor preko celog ekrana izlazi iz dugmeta koje ga je otvorilo i vraća se u njega ---------- */
+let lastBtn=null;addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button,a,.chip,[role=button]');if(b&&!b.closest('.zov,.modal'))lastBtn=b},true);
+const noMotion=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}};
+function geniePolys(el,b){const W=el.clientWidth||innerWidth,H=el.clientHeight||innerHeight;
+  const r=b.getBoundingClientRect(),up=r.top+r.height/2<H/2;/* dugme gore → vrat levka je gore */
+  const by=up?H-r.bottom:r.top,bh=r.height,bcx=r.left+r.width/2,bw=Math.max(r.width,24);
+  const lerp=(a,c,t)=>a+(c-a)*t;
+  const lv=(yk,cx,hw)=>[0,1,2,3].map(k=>({y:yk(k),cx:cx(k),hw:hw(k)}));
+  const S=lv(k=>by+bh*k/3,()=>bcx,()=>bw/2),E=lv(k=>H*k/3,()=>W/2,()=>W/2),
+    M=lv(k=>lerp(H*.03,by+bh,k/3),k=>lerp(W/2,bcx,Math.pow(k/3,1.4)),k=>lerp(W*.47,bw/2,Math.pow(k/3,1.7)));
+  const poly=L=>{const pts=[[L[0].cx-L[0].hw,L[0].y],[L[0].cx+L[0].hw,L[0].y],[L[1].cx+L[1].hw,L[1].y],[L[2].cx+L[2].hw,L[2].y],[L[3].cx+L[3].hw,L[3].y],[L[3].cx-L[3].hw,L[3].y],[L[2].cx-L[2].hw,L[2].y],[L[1].cx-L[1].hw,L[1].y]];
+    return 'polygon('+pts.map(([x,y])=>`${x.toFixed(1)}px ${(up?H-y:y).toFixed(1)}px`).join(',')+')'};
+  return[poly(S),poly(M),poly(E)]}
+function genieIn(el){const b=lastBtn;el._gb=b;if(noMotion()||!b||!b.isConnected||!el.animate)return;
+  const [s,m,e]=geniePolys(el,b);el.animate([{clipPath:s,opacity:.5},{clipPath:m,opacity:1,offset:.45},{clipPath:e}],{duration:480,easing:'cubic-bezier(.3,.7,.2,1)'})}
+function genieOut(el,done){const b=el._gb;if(noMotion()||!b||!b.isConnected||!el.animate||!b.getClientRects().length){done();return}
+  const [s,m,e]=geniePolys(el,b);const a=el.animate([{clipPath:e},{clipPath:m,offset:.55},{clipPath:s,opacity:.4}],{duration:360,easing:'cubic-bezier(.5,0,.75,.4)'});a.onfinish=a.oncancel=done}
+
 /* ---------- uvećana faktura (pregled pre čuvanja) ---------- */
 let zS=0;document.body.appendChild($('#zov'));/* preko svega (i trake sa karticama) */
-function zFit(){const w=$('#zsc').clientWidth-32;return Math.max(.3,Math.min(w/794,1.6))}
-function zApply(){const d=$('#zdoc');d.style.transform=`scale(${zS})`;$('#zsz').style.width=794*zS+'px';$('#zsz').style.height=d.offsetHeight*zS+'px';$('#zPct').textContent=Math.round(zS*100)+'%'}
+function zFit(){const w=$('#zsc').clientWidth-32;return Math.max(.3,Math.min(w/794,3))}
+function zApply(){const d=$('#zdoc');d.style.transform=`scale(${zS})`;$('#zsz').style.width=794*zS+'px';$('#zsz').style.height=d.offsetHeight*zS+'px';$('#zPct').textContent=Math.round(zS*100)+'%';
+  const atFit=Math.abs(zS-zFit())<.01,b=$('#zov [data-z="fit"]');b.dataset.mode=atFit?'one':'fit';b.innerHTML=atFit?'100%<span class="wide"> (prava veličina)</span>':'↔<span class="wide"> Cela širina</span>';b.title=atFit?'Prava veličina (100 %)':'Cela širina'}
 function zoomOpen(){const d=viewSnap||cur;$('#zdoc').innerHTML=renderDoc(d);$('#zTitle').textContent=TYPES[d.type].label+' '+(d.num||'')+(d.client?.name?' · '+d.client.name:'');
-  $('#zSave').hidden=!!viewSnap;$('#zov').hidden=false;document.body.style.overflow='hidden';zS=zFit();if(innerWidth<700)zS=Math.max(zS,1);zApply();$('#zsc').scrollTop=0;$('#zsc').scrollLeft=0;$('#zClose').focus()}
-function zoomClose(){$('#zov').hidden=true;document.body.style.overflow=''}
+  $('#zSave').hidden=!!viewSnap;$('#zov').hidden=false;document.body.style.overflow='hidden';zS=1;zApply();$('#zsc').scrollTop=0;$('#zsc').scrollLeft=0;genieIn($('#zov'));$('#zClose').focus()}
+function zoomClose(){const z=$('#zov');if(z.hidden||z._closing)return;z._closing=true;genieOut(z,()=>{z._closing=false;z.hidden=true;document.body.style.overflow=''})}
 $('#zoom').onclick=zoomOpen;$('#zoom2').onclick=zoomOpen;$('#zClose').onclick=zoomClose;
 $('#zSave').onclick=async()=>{const b=$('#zSave');b.disabled=true;b.textContent='Čuvam…';const ok=await saveCur();b.disabled=false;b.textContent=ok?'✓ Sačuvano':'Sačuvaj';if(ok)setTimeout(()=>{b.textContent='Sačuvaj'},1800)};
 $('#zov').addEventListener('click',e=>{const b=e.target.closest('[data-z]');if(!b)return;const z=b.dataset.z;const sc=$('#zsc');const cx=(sc.scrollLeft+sc.clientWidth/2)/zS,cy=(sc.scrollTop+sc.clientHeight/2)/zS;
-  zS=z==='fit'?zFit():Math.max(.3,Math.min(3,Math.round((zS+(z==='+'?.25:-.25))*4)/4));zApply();sc.scrollLeft=cx*zS-sc.clientWidth/2;sc.scrollTop=cy*zS-sc.clientHeight/2});
+  zS=z==='fit'?(b.dataset.mode==='one'?1:zFit()):Math.max(.3,Math.min(3,Math.round((zS+(z==='+'?.25:-.25))*4)/4));zApply();sc.scrollLeft=cx*zS-sc.clientWidth/2;sc.scrollTop=cy*zS-sc.clientHeight/2});
 $('#zsc').addEventListener('dblclick',e=>{const one=Math.abs(zS-1)<.01;zS=one?zFit():1;zApply()});
 addEventListener('keydown',e=>{if($('#zov').hidden)return;if(e.key==='Escape')zoomClose();else if(e.key==='+'||e.key==='=')$('#zov [data-z="+"]').click();else if(e.key==='-')$('#zov [data-z="-"]').click()});
 addEventListener('resize',()=>{if(!$('#zov').hidden)zApply()});
+/* ---------- dugačak tekst u malom polju (npr. Rok izrade): dok pišeš, polje se raširi da se vidi ceo tekst ---------- */
+const xpCtx=document.createElement('canvas').getContext('2d');
+function xpTextW(inp){const cs=getComputedStyle(inp);xpCtx.font=cs.font;return xpCtx.measureText(inp.value||inp.placeholder||'').width+parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight)+parseFloat(cs.borderLeftWidth)*2+6}
+const xpOk=t=>t&&t.tagName==='INPUT'&&!['date','checkbox','radio','number','color','file'].includes(t.type)&&t.closest('#v-edit .card .grid label.f');
+function xpFit(inp){const lab=inp.closest('label.f'),card=inp.closest('.card');if(!lab||!card)return;
+  const w0=+inp.dataset.w0||inp.getBoundingClientRect().width,need=xpTextW(inp);
+  if(need<=w0+1){xpOut(inp);return}
+  const cr=card.getBoundingClientRect(),lr=lab.getBoundingClientRect(),pad=14,maxW=cr.width-2*pad,w=Math.min(maxW,need+16);
+  if(!inp.classList.contains('xp')){const ir=inp.getBoundingClientRect();inp.dataset.w0=String(ir.width);inp.dataset.x0=String(ir.left-lr.left);inp.dataset.y0=String(ir.top-lr.top);lab.style.minHeight=lab.offsetHeight+'px';lab.classList.add('xpl')}
+  let left=+inp.dataset.x0;const absL=lr.left+left;if(absL+w>cr.right-pad)left-=absL+w-(cr.right-pad);if(lr.left+left<cr.left+pad)left=cr.left+pad-lr.left;
+  inp.classList.add('xp');inp.style.left=left+'px';inp.style.top=inp.dataset.y0+'px';inp.style.width=w+'px'}
+function xpOut(inp){if(!inp.classList.contains('xp'))return;inp.classList.remove('xp');inp.style.left=inp.style.top=inp.style.width='';delete inp.dataset.w0;const lab=inp.closest('label.f');if(lab){lab.style.minHeight='';lab.classList.remove('xpl')}}
+document.addEventListener('focusin',e=>{if(xpOk(e.target))xpFit(e.target)});
+document.addEventListener('input',e=>{if(xpOk(e.target)&&document.activeElement===e.target)xpFit(e.target)});
+document.addEventListener('focusout',e=>{if(xpOk(e.target))xpOut(e.target)});
+document.addEventListener('mouseover',e=>{const t=e.target;if(xpOk(t)&&!t.classList.contains('xp'))t.title=xpTextW(t)>t.clientWidth+2?t.value:''});
 function markDirty(){if(viewSnap){viewSnap=null;renderVers()}dirty=true;$('#saveMsg').textContent='Nesačuvane izmene';$('#saveMsg').className='msg'}
 
 /* ---------- čuvanje ---------- */
@@ -1014,8 +1051,8 @@ function renderOpt(){const it=cur.items[optI];const o=it.opt||{};
     const inner=(CHIPG.has(k)?`<div class="chips">${list.map(x=>`<button type="button" class="chipb" data-g="${k}" data-n="${esc(x.n)}" aria-pressed="${o[k]===x.n}">${esc(x.n)}</button>`).join('')}</div>`
       :`<div class="swg">${list.map(x=>`<button type="button" class="swb" data-g="${k}" data-n="${esc(x.n)}" aria-pressed="${o[k]===x.n}"><i style="${swBg(x)}"></i>${esc(x.n)}${x.c?`<small>${x.c}</small>`:''}</button>`).join('')}</div>`)+`<input class="own" data-own="${k}" value="${esc(own)}" placeholder="Ili upišite sami – ${OWNPH[k]||''}">`;
     return `<div class="msec"><h4>${title}<span>${o[k]?esc(o[k]):''}</span></h4>${inner}</div>`}).join('')}
-function openOpt(i){optI=i;cur.items[i].opt=cur.items[i].opt||{};renderOpt();$('#optModal').hidden=false;$('#optModal').scrollTop=0;document.body.style.overflow='hidden'}
-function closeOpt(){$('#optModal').hidden=true;document.body.style.overflow='';renderItems();refresh()}
+function openOpt(i){optI=i;cur.items[i].opt=cur.items[i].opt||{};renderOpt();$('#optModal').hidden=false;$('#optModal').scrollTop=0;document.body.style.overflow='hidden';genieIn($('#optModal'))}
+function closeOpt(){const m=$('#optModal');if(m.hidden||m._closing)return;m._closing=true;genieOut(m,()=>{m._closing=false;m.hidden=true;document.body.style.overflow='';renderItems();refresh()})}
 $('#itemsBody').addEventListener('click',e=>{const b=e.target.closest('[data-opt]');if(!b)return;openOpt(+b.closest('tr').dataset.i)});
 $('#optBody').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;const o=cur.items[optI].opt;const g=b.dataset.g,n=b.dataset.n;
   o[g]=o[g]===n?'':n;markDirty();const y=$('#optModal').scrollTop;renderOpt();$('#optModal').scrollTop=y;refresh()});

@@ -1,7 +1,12 @@
 {
- "v": "1.7.3",
+ "v": "1.7.4",
  "date": "19.11.2026.",
  "log": [
+  {
+   "v": "1.7.4",
+   "date": "19.11.2026.",
+   "t": "Fakture: „Uvećaj fakturu“ se uvek otvara na 100 %; „Cela širina“ sada radi i prebacuje između cele širine i 100 %. Prozori (Uvećaj, Boje i detalji) izlaze iz dugmeta kao duh iz lampe i vraćaju se u njega. Kad klikneš u malo polje sa dugačkim tekstom (npr. Rok izrade), polje se raširi da se vidi ceo tekst; kad pređeš mišem preko, pokaže ceo tekst."
+  },
   {
    "v": "1.7.3",
    "date": "19.11.2026.",
