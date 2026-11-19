@@ -733,10 +733,9 @@ function geniePolys(el,b){const W=el.clientWidth||innerWidth,H=el.clientHeight||
   const poly=L=>{const pts=[[L[0].cx-L[0].hw,L[0].y],[L[0].cx+L[0].hw,L[0].y],[L[1].cx+L[1].hw,L[1].y],[L[2].cx+L[2].hw,L[2].y],[L[3].cx+L[3].hw,L[3].y],[L[3].cx-L[3].hw,L[3].y],[L[2].cx-L[2].hw,L[2].y],[L[1].cx-L[1].hw,L[1].y]];
     return 'polygon('+pts.map(([x,y])=>`${x.toFixed(1)}px ${(up?H-y:y).toFixed(1)}px`).join(',')+')'};
   return[poly(S),poly(M),poly(E)]}
-function genieIn(el){const b=lastBtn;el._gb=b;if(noMotion()||!b||!b.isConnected||!el.animate)return;
-  const [s,m,e]=geniePolys(el,b);el.animate([{clipPath:s,opacity:.5},{clipPath:m,opacity:1,offset:.45},{clipPath:e}],{duration:480,easing:'cubic-bezier(.3,.7,.2,1)'})}
-function genieOut(el,done){const b=el._gb;if(noMotion()||!b||!b.isConnected||!el.animate||!b.getClientRects().length){done();return}
-  const [s,m,e]=geniePolys(el,b);const a=el.animate([{clipPath:e},{clipPath:m,offset:.55},{clipPath:s,opacity:.4}],{duration:360,easing:'cubic-bezier(.5,0,.75,.4)'});a.onfinish=a.oncancel=done}
+/* animaciju prozora radi zajednički lib/genie.js (isti „duh iz lampe“ u celoj aplikaciji): otvaranje sam primeti, a zatvaranje odmah sakrije prozor pa se kopija uvuče u dugme */
+function genieIn(el){if(window.__mtGenieOpen)window.__mtGenieOpen(el)}
+function genieOut(el,done){done()}
 
 /* ---------- uvećana faktura (pregled pre čuvanja) ---------- */
 let zS=0;document.body.appendChild($('#zov'));/* preko svega (i trake sa karticama) */

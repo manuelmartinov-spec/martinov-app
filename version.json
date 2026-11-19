@@ -1,7 +1,12 @@
 {
- "v": "1.8.1",
+ "v": "1.8.2",
  "date": "19.11.2026.",
  "log": [
+  {
+   "v": "1.8.2",
+   "date": "19.11.2026.",
+   "t": "Duh iz lampe, pravi: prozor (npr. događaj iz Pregleda, Novi događaj, Boje i detalji, Traži) izađe kao dim iz onoga na šta si kliknuo, izdigne se, naduva malo preko mere i smiri – za 1 sekundu; pri zatvaranju se uvuče nazad. Sada radi i kad su u Windows-u isključene animacije (zato ranije nije bilo efekta)."
+  },
   {
    "v": "1.8.1",
    "date": "19.11.2026.",
