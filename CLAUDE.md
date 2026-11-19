@@ -63,3 +63,12 @@ Gotov rezultat se kopira ovde BEZ brisanja foldera `prijem/` i `.git` (ne kopira
   (Manuelov Cloudflare nalog, token „Martinov alarmi robot“, samo Workers prava); `FIREBASE_SA` prepisuje u Cloudflare tajnu. Proba bez interneta: `node worker/proba.mjs`.
 - `sw.js`: alarm sa vidljivom aplikacijom → `postMessage mt-alarm-push` (aplikacija sama zvoni); inače obaveštenje sa dugmadima done/snooze →
   `?m=alarmi&a=<id>&do=done|snooze|open`.
+
+## Meni, pretraga, animacija (od 1.8.0)
+- Levi meni = traka (`#rail`, `renderSide`/`sideGroups`): Traži, Najčešće (`favKeys`, brojač u localStorage `mt.nav`, pola za 14 dana), Pregled/Kalendar/Alarmi,
+  pa kategorije (Poslovi, Novac, Kupci, Proizvodi, Nabavka, ostale, Ostalo); grupa sa 1 stavkom se otvara odmah, ostale otvaraju listu `#spanel` (`sideG`).
+  Dole Dodaj (`#newT`, `#impBtn` se premeštaju u listu) i Aplikacija. Na telefonu je traka + lista u fioci.
+- „Traži ili skoči na…“ (`#qk`, Ctrl K i iz ugrađenih delova preko BRIDGE → `parent.__mtQuick`): stranice, `X.docs` (→ `openInvoice`), zapisi svih tabela (→ `openRec`).
+- `lib/genie.js` (u index.html i u svakom ugrađenom delu preko BRIDGE): prozor preko celog ekrana koji se pojavi posle klika izlazi iz tog dugmeta;
+  pri zatvaranju se kopija uvuče nazad. Preskače `data-no-genie` i prozore koji već imaju svoju animaciju (Fakture: Uvećaj, Boje i detalji).
+

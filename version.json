@@ -1,7 +1,12 @@
 {
- "v": "1.7.4",
+ "v": "1.8.0",
  "date": "19.11.2026.",
  "log": [
+  {
+   "v": "1.8.0",
+   "date": "19.11.2026.",
+   "t": "Novi levi meni: uska traka sa velikim ikonicama (Traži, Najčešće, Pregled, Kalendar, Alarmi, Poslovi, Novac, Kupci, Proizvodi, Nabavka; dole Dodaj i Aplikacija) – klik na grupu otvori listu pored, klik na stavku je otvori; stranica dobija više mesta. „Najčešće“ se samo puni onim što na tom uređaju najviše otvaraš. Novo „Traži ili skoči na…“ (Ctrl K ili dugme Traži): kucaš deo imena stranice, broj fakture, kupca, posao ili proizvod i Enter. Svi prozori u aplikaciji sada izlaze iz dugmeta kao duh iz lampe i vraćaju se u njega. Popravljeno uputstvo za instalaciju na telefonu."
+  },
   {
    "v": "1.7.4",
    "date": "19.11.2026.",
