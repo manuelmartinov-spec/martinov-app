@@ -1,7 +1,12 @@
 {
- "v": "1.8.0",
+ "v": "1.8.1",
  "date": "19.11.2026.",
  "log": [
+  {
+   "v": "1.8.1",
+   "date": "19.11.2026.",
+   "t": "Oblačić sa celim tekstom: kad tekst ne staje u polje (npr. Rok izrade, Izdaje, naziv kupca), pređi mišem preko polja i ceo tekst iskoči u oblačiću iznad njega (animacija 1 sekunda). Radi u celoj aplikaciji."
+  },
   {
    "v": "1.8.0",
    "date": "19.11.2026.",

@@ -71,4 +71,4 @@ Gotov rezultat se kopira ovde BEZ brisanja foldera `prijem/` i `.git` (ne kopira
 - „Traži ili skoči na…“ (`#qk`, Ctrl K i iz ugrađenih delova preko BRIDGE → `parent.__mtQuick`): stranice, `X.docs` (→ `openInvoice`), zapisi svih tabela (→ `openRec`).
 - `lib/genie.js` (u index.html i u svakom ugrađenom delu preko BRIDGE): prozor preko celog ekrana koji se pojavi posle klika izlazi iz tog dugmeta;
   pri zatvaranju se kopija uvuče nazad. Preskače `data-no-genie` i prozore koji već imaju svoju animaciju (Fakture: Uvećaj, Boje i detalji).
-
+- Oblačić (`lib/genie.js`, drugi deo): polje čiji tekst ne staje → posle 0,3 s zadržavanja mišem oblačić sa celim tekstom (animacija 1 s).

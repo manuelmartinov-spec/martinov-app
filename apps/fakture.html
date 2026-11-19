@@ -768,7 +768,7 @@ function xpOut(inp){if(!inp.classList.contains('xp'))return;inp.classList.remove
 document.addEventListener('focusin',e=>{if(xpOk(e.target))xpFit(e.target)});
 document.addEventListener('input',e=>{if(xpOk(e.target)&&document.activeElement===e.target)xpFit(e.target)});
 document.addEventListener('focusout',e=>{if(xpOk(e.target))xpOut(e.target)});
-document.addEventListener('mouseover',e=>{const t=e.target;if(xpOk(t)&&!t.classList.contains('xp'))t.title=xpTextW(t)>t.clientWidth+2?t.value:''});
+/* oblačić sa celim tekstom pri prelasku mišem: lib/genie.js (cela aplikacija) */
 function markDirty(){if(viewSnap){viewSnap=null;renderVers()}dirty=true;$('#saveMsg').textContent='Nesačuvane izmene';$('#saveMsg').className='msg'}
 
 /* ---------- čuvanje ---------- */
